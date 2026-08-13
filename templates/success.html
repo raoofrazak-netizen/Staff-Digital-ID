@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital ID Issued — Middlesex University Dubai</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Student Digital Services</em>
+                </div>
+            </div>
+            <div class="nav__status" id="nav-status">
+                <span class="nav__status-dot" id="nav-status-dot"></span>
+                <span id="nav-status-text">Secure Student Portal</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="success-shell rise-in rise-in--2">
+        <div class="success-badge">✓</div>
+        <h1>Digital ID Created</h1>
+        <p class="success-sub">Your card is registered and ready. Save it to your wallet or download it below.</p>
+        <p class="success-sub" style="margin-top:-14px;">Your Track ID is <strong style="color:var(--mdx-indigo); font-family:var(--font-display); letter-spacing:0.04em;">{{ record['Track ID'] }}</strong> — save it to look up this Digital ID again later.</p>
+
+        <div class="idcard-tilt-wrap" id="idcard-tilt-wrap">
+            <div class="idcard glass" id="idcard">
+                <div class="idcard__sheen" id="idcard-sheen"></div>
+                <div class="idcard__top">
+                    <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
+                    <span class="idcard__uni">Middlesex University Dubai</span>
+                </div>
+
+                <div class="idcard__photo has-photo">
+                    <img src="{{ url_for('serve_photo', filename=record['Photo Filename']) }}" alt="{{ record['First Name'] }} {{ record['Last Name'] }}">
+                </div>
+
+                <div class="idcard__name">{{ record['First Name'] }} {{ record['Last Name'] }}</div>
+                <div class="idcard__title">{{ record['Job Title'] }}</div>
+
+                <div class="idcard__pills">
+                    <span class="idcard__pill idcard__pill--accent">Staff ID {{ record['Staff ID'] }}</span>
+                    <span class="idcard__pill">{{ record['Department'] }}</span>
+                    <span class="idcard__pill">{{ record['Employment Status'] }}</span>
+                    <span class="idcard__pill">{{ record['Gender'] }}</span>
+                </div>
+
+                <div class="idcard__footer">
+                    <div class="idcard__footer-text">
+                        <div class="idcard__scan-label">Scan to verify</div>
+                        <div class="idcard__secure"><span class="dot"></span>Secure Identity</div>
+                    </div>
+                    <div class="qr-panel">
+                        <img src="{{ url_for('serve_qr', filename=record['QR Filename']) }}" alt="Verification QR code">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wallet-area">
+            <h4>Take your ID everywhere</h4>
+            <div class="wallet-btn-row">
+                {% if wallet_configured and wallet_url %}
+                <a href="{{ wallet_url }}" class="wallet-btn wallet-btn--google" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="14.5" r="1"/></svg>
+                    Add to Google Wallet
+                </a>
+                {% else %}
+                <button type="button" class="wallet-btn wallet-btn--google disabled" title="Google Wallet is not configured yet">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="14.5" r="1"/></svg>
+                    Add to Google Wallet
+                </button>
+                {% endif %}
+                <button type="button" class="wallet-btn wallet-btn--apple disabled" title="Coming soon — requires Apple Developer signing certificates">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.4-.1 0-2.1-.8-2.2-3.1zM14.6 6.3c.6-.7 1-1.7.9-2.6-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.5 1 .1 1.9-.5 2.5-1.2z"/></svg>
+                    Add to Apple Wallet <span style="opacity:.7; font-weight:600; text-transform:none;">(Coming Soon)</span>
+                </button>
+                <a href="{{ url_for('download', token=token) }}" class="wallet-btn wallet-btn--download">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+                    Download Digital ID
+                </a>
+            </div>
+            {% if not (wallet_configured and wallet_url) %}
+            <p class="wallet-note">Google Wallet isn't configured on this server yet — add issuer credentials to <code>.env</code> to enable that button.</p>
+            {% endif %}
+        </div>
+
+        <a class="back-link" href="{{ url_for('index') }}">← Return to Portal</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
+    <script>
+        const tiltWrap = document.getElementById("idcard-tilt-wrap");
+        const idcard = document.getElementById("idcard");
+        const sheen = document.getElementById("idcard-sheen");
+        if (tiltWrap && window.matchMedia("(prefers-reduced-motion: reduce)").matches === false) {
+            tiltWrap.addEventListener("pointermove", (e) => {
+                const r = tiltWrap.getBoundingClientRect();
+                const px = (e.clientX - r.left) / r.width;
+                const py = (e.clientY - r.top) / r.height;
+                idcard.style.transform = `perspective(1000px) rotateX(${(0.5 - py) * 6}deg) rotateY(${(px - 0.5) * 6}deg)`;
+                sheen.style.setProperty("--gx", (px * 100) + "%");
+                sheen.style.setProperty("--gy", (py * 100) + "%");
+            });
+            tiltWrap.addEventListener("pointerleave", () => {
+                idcard.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
+            });
+        }
+
+        const qrPanel = document.querySelector(".qr-panel");
+        if (qrPanel) window.setTimeout(() => qrPanel.classList.add("pulse"), 300);
+    </script>
+</body>
+</html>

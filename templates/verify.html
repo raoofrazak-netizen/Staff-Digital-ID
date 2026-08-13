@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital ID Verification — Middlesex University Dubai</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Student Digital Services</em>
+                </div>
+            </div>
+            <div class="nav__status" id="nav-status">
+                <span class="nav__status-dot" id="nav-status-dot"></span>
+                <span id="nav-status-text">Secure Student Portal</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="verify-shell rise-in rise-in--2">
+        <div class="verify-card glass">
+            {% if status == "valid" %}
+                <div class="verify-icon valid">✓</div>
+                <h2>Valid Digital ID</h2>
+                <p class="verify-sub">Middlesex University Dubai — Staff Access</p>
+                <div class="verify-details">
+                    <p><strong>Name:</strong> {{ record['First Name'] }} {{ record['Last Name'] }}</p>
+                    <p><strong>Job Title:</strong> {{ record['Job Title'] }}</p>
+                    <p><strong>Department:</strong> {{ record['Department'] }}</p>
+                    <p><strong>Status:</strong> {{ record['Employment Status'] }}</p>
+                </div>
+            {% elif status == "revoked" %}
+                <div class="verify-icon revoked">✕</div>
+                <h2>Digital ID Revoked</h2>
+                <p class="verify-sub">This ID is no longer active.</p>
+            {% else %}
+                <div class="verify-icon invalid">✕</div>
+                <h2>Invalid ID</h2>
+                <p class="verify-sub">Record not found in the campus database.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
+</body>
+</html>
