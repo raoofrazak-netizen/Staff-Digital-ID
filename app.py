@@ -34,7 +34,7 @@ ALLOWED_PHOTO_FORMATS = {"JPEG", "PNG", "WEBP"}
 PHOTO_MAX_DIMENSION = 640
 
 DEPARTMENTS = [
-    "Information Technology",
+    "Information Technology, AI and Cybersecurity (ITAC)",
     "Administration",
     "Registry",
     "Library",
@@ -60,7 +60,7 @@ DIGITAL_ID_COLUMNS = [
 
 SAMPLE_DIRECTORY_ROWS = [
     ["MDX00001", "Sample", "Employee", "sample.employee@mdx.ac.ae",
-     "Information Technology", "IT Support Engineer", "Male", "Full-Time"],
+     "Information Technology, AI and Cybersecurity (ITAC)", "IT Support Engineer", "Male", "Full-Time"],
     ["MDX00002", "Sample", "Faculty", "sample.faculty@mdx.ac.ae",
      "Academic - Business School", "Senior Lecturer", "Female", "Full-Time"],
 ]
@@ -186,6 +186,26 @@ def generate_track_id():
             return candidate
 
 
+def build_vcard(first_name, last_name, job_title, department, email):
+    """vCard 3.0 payload for the staff-contact QR — a real, scannable
+    business card, not a security/verification link."""
+    lines = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        f"FN:{first_name} {last_name}".strip(),
+        "ORG:Middlesex University Dubai",
+    ]
+    if job_title:
+        lines.append(f"TITLE:{job_title}")
+    if email:
+        lines.append(f"EMAIL;TYPE=WORK:{email}")
+    lines.append("URL:https://www.mdx.ac.ae")
+    if department:
+        lines.append(f"NOTE:Department - {department}")
+    lines.append("END:VCARD")
+    return "\r\n".join(lines)
+
+
 def append_digital_id(record):
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb["Digital_IDs"]
@@ -263,11 +283,17 @@ def _handle_submission():
             form=form,
         ), 400
 
-    verify_url = f"{PORTAL_BASE_URL}/verify/{token}"
-    qr = qrcode.QRCode(version=1, box_size=8, border=2)
-    qr.add_data(verify_url)
+    vcard_payload = build_vcard(
+        first_name=values["first_name"], last_name=values["last_name"],
+        job_title=values["job_title"], department=values["department"],
+        email=values["email"],
+    )
+    qr = qrcode.QRCode(version=1, box_size=10, border=3)
+    qr.add_data(vcard_payload)
     qr.make(fit=True)
-    qr_img = qr.make_image(fill_color="#e30613", back_color="white")
+    # Black-on-white — every colour option gives lower contrast than this
+    # for camera scanning, and reliability matters more than branding here.
+    qr_img = qr.make_image(fill_color="#000000", back_color="#ffffff")
     qr_filename = f"qr_{token}.png"
     qr_img.save(os.path.join(QR_DIR, qr_filename))
 
@@ -399,5 +425,27 @@ def download(token):
     return send_file(buf, mimetype="image/png", as_attachment=True, download_name=filename)
 
 
+def _lan_ip():
+    """Best-effort LAN-facing IP for convenience — doesn't actually send
+    any traffic, just asks the OS which local interface would be used to
+    reach the internet."""
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except OSError:
+        return None
+    finally:
+        s.close()
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    lan_ip = _lan_ip()
+    print(" * Local:   http://127.0.0.1:5000")
+    if lan_ip:
+        print(f" * Network: http://{lan_ip}:5000  (open this on a phone/device on the same Wi-Fi/LAN)")
+    else:
+        print(" * Network: could not detect a LAN IP — check `ipconfig` for your adapter's IPv4 address")
+    print(" * If another device can't connect, allow inbound TCP port 5000 through Windows Firewall.")
+    app.run(host="0.0.0.0", debug=True, port=5000)

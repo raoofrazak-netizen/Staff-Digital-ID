@@ -116,7 +116,7 @@
         el.classList.add("text-pop");
     }
 
-    function syncCard(firstName, lastName, staffId, gender, department, jobTitle, employmentStatus) {
+    function syncCard(firstName, lastName, staffId, gender, department, jobTitle, employmentStatus, email) {
         const fullName = (firstName + " " + lastName).trim();
         setTextIfChanged(liveName, fullName || "Your Name");
         setTextIfChanged(liveTitle, jobTitle || "Job title");
@@ -125,7 +125,7 @@
         setTextIfChanged(liveStatus, employmentStatus || "Employment Status");
         setTextIfChanged(liveGender, gender || "—");
         bumpCard();
-        updateLivePreviewQR(firstName, lastName, staffId);
+        updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email || "");
         updateStepper();
     }
 
@@ -220,14 +220,29 @@
         });
     }
 
-    // --- Live QR preview: appears once the key identity fields are filled.
-    // This is a clearly-marked, client-side-only PREVIEW — the real,
-    // secure verification QR is still generated server-side after
-    // submission (it encodes an unguessable token, never raw staff data). ---
+    // --- Live QR preview: a real, scannable vCard for the staff member's
+    // contact details, appearing once name + Staff ID are filled. It's
+    // marked "Preview" only because the Digital ID record itself hasn't
+    // been created server-side yet — the vCard content is fully valid. ---
     const qrPanel = document.getElementById("qr-panel");
     const qrPlaceholder = document.getElementById("qr-placeholder");
     const qrLiveImg = document.getElementById("qr-live-img");
     let qrDebounceTimer = null;
+
+    function buildVCard(firstName, lastName, jobTitle, department, email) {
+        const lines = [
+            "BEGIN:VCARD",
+            "VERSION:3.0",
+            `FN:${(firstName + " " + lastName).trim()}`,
+            "ORG:Middlesex University Dubai",
+        ];
+        if (jobTitle) lines.push(`TITLE:${jobTitle}`);
+        if (email) lines.push(`EMAIL;TYPE=WORK:${email}`);
+        lines.push("URL:https://www.mdx.ac.ae");
+        if (department) lines.push(`NOTE:Department - ${department}`);
+        lines.push("END:VCARD");
+        return lines.join("\r\n");
+    }
 
     function showQrPlaceholder() {
         if (!qrPanel) return;
@@ -236,31 +251,27 @@
         qrLiveImg.style.display = "none";
     }
 
-    function renderLiveQR(firstName, lastName, staffId) {
+    function renderLiveQR(firstName, lastName, jobTitle, department, email) {
         if (!qrPanel || typeof qrcode === "undefined") return;
-        // URL-shaped payload matching the real /verify/<token> route, so a
-        // curious scan lands on our own graceful "Invalid ID" page rather
-        // than a bare 404 — but the token can never resolve to a real
-        // record, since the real one only exists after server submission.
-        const previewToken = "PREVIEW-" + staffId.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
-        const text = window.location.origin + "/verify/" + encodeURIComponent(previewToken);
+        const text = buildVCard(firstName, lastName, jobTitle, department, email);
         try {
             const qr = qrcode(0, "M");
             qr.addData(text);
             qr.make();
-            qrLiveImg.src = qr.createDataURL(6, 4);
+            qrLiveImg.src = qr.createDataURL(9, 4);
             qrPanel.classList.add("is-preview");
             qrPlaceholder.style.display = "none";
             qrLiveImg.style.display = "block";
             qrPanel.classList.remove("pulse");
             void qrPanel.offsetWidth;
             qrPanel.classList.add("pulse");
+            window.setTimeout(() => qrPanel.classList.remove("pulse"), 450);
         } catch (err) {
             showQrPlaceholder();
         }
     }
 
-    function updateLivePreviewQR(firstName, lastName, staffId) {
+    function updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email) {
         if (!qrPanel) return;
         const ready = firstName.trim() && lastName.trim() && staffId.trim();
         window.clearTimeout(qrDebounceTimer);
@@ -268,14 +279,14 @@
             showQrPlaceholder();
             return;
         }
-        qrDebounceTimer = window.setTimeout(() => renderLiveQR(firstName, lastName, staffId), 120);
+        qrDebounceTimer = window.setTimeout(() => renderLiveQR(firstName, lastName, jobTitle, department, email), 120);
     }
 
     function syncCardFromActiveForm() {
         syncCard(
             fieldValue("first_name"), fieldValue("last_name"), fieldValue("staff_id"),
             fieldValue("gender"), fieldValue("department"), fieldValue("job_title"),
-            fieldValue("employment_status")
+            fieldValue("employment_status"), fieldValue("email")
         );
     }
 
@@ -293,6 +304,7 @@
         const preview = document.getElementById(prefix + "-photo-preview");
         const frame = document.getElementById(prefix + "-photo-frame");
         const changeBtn = document.getElementById(prefix + "-photo-change");
+        const cropBtn = document.getElementById(prefix + "-photo-crop");
         const removeBtn = document.getElementById(prefix + "-photo-remove");
         const errorEl = document.getElementById(prefix + "-photo-error");
         const zoomRow = document.getElementById(prefix + "-photo-zoom");
@@ -356,6 +368,7 @@
                     resetTransform();
                     preview.src = e.target.result;
                     removeBtn.disabled = false;
+                    if (cropBtn) cropBtn.disabled = false;
                     zoomRow.classList.add("show");
                     zoomHint.style.display = "block";
                     spawnPhotoBurst(burst);
@@ -382,6 +395,7 @@
             drop.classList.remove("has-photo");
             preview.src = "";
             removeBtn.disabled = true;
+            if (cropBtn) cropBtn.disabled = true;
             zoomRow.classList.remove("show");
             zoomHint.style.display = "none";
             clearError();
@@ -433,6 +447,127 @@
         drop.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
         });
+
+        // --- Crop tool: a real rectangular crop step, distinct from the
+        // circular zoom/pan refinement above. Operates on the full
+        // original image and replaces it with the cropped result, which
+        // zoom/pan then continue to apply to as usual. ---
+        const cropModal = document.getElementById(prefix + "-crop-modal");
+        if (cropBtn && cropModal) {
+            const cropStage = document.getElementById(prefix + "-crop-stage");
+            const cropImg = document.getElementById(prefix + "-crop-img");
+            const cropBox = document.getElementById(prefix + "-crop-box");
+            const cropCancel = document.getElementById(prefix + "-crop-cancel");
+            const cropApply = document.getElementById(prefix + "-crop-apply");
+
+            const geo = { scale: 1, offsetX: 0, offsetY: 0, dispW: 0, dispH: 0 };
+            let box = { x: 0, y: 0, size: 0 };
+            let dragMode = null, startPointer = { x: 0, y: 0 }, startBox = null;
+
+            function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+            function renderBox() {
+                cropBox.style.left = box.x + "px";
+                cropBox.style.top = box.y + "px";
+                cropBox.style.width = box.size + "px";
+                cropBox.style.height = box.size + "px";
+            }
+
+            function setupStage() {
+                const stageW = cropStage.clientWidth, stageH = cropStage.clientHeight;
+                const scale = Math.min(stageW / cropImg.naturalWidth, stageH / cropImg.naturalHeight);
+                geo.scale = scale;
+                geo.dispW = cropImg.naturalWidth * scale;
+                geo.dispH = cropImg.naturalHeight * scale;
+                geo.offsetX = (stageW - geo.dispW) / 2;
+                geo.offsetY = (stageH - geo.dispH) / 2;
+                cropImg.style.width = geo.dispW + "px";
+                cropImg.style.height = geo.dispH + "px";
+                cropImg.style.left = geo.offsetX + "px";
+                cropImg.style.top = geo.offsetY + "px";
+
+                const size = Math.min(geo.dispW, geo.dispH);
+                box = { x: geo.offsetX + (geo.dispW - size) / 2, y: geo.offsetY + (geo.dispH - size) / 2, size };
+                renderBox();
+            }
+
+            cropBtn.addEventListener("click", () => {
+                if (!preview.src) return;
+                cropImg.onload = setupStage;
+                cropImg.src = preview.src;
+                if (cropImg.complete && cropImg.naturalWidth) setupStage();
+                cropModal.classList.add("show");
+            });
+
+            cropCancel.addEventListener("click", () => cropModal.classList.remove("show"));
+
+            cropBox.addEventListener("pointerdown", (e) => {
+                if (e.target.classList.contains("crop-box__handle")) return;
+                dragMode = "move";
+                startPointer = { x: e.clientX, y: e.clientY };
+                startBox = { ...box };
+                cropBox.setPointerCapture(e.pointerId);
+            });
+            cropBox.querySelectorAll(".crop-box__handle").forEach((handle) => {
+                handle.addEventListener("pointerdown", (e) => {
+                    e.stopPropagation();
+                    dragMode = handle.dataset.handle;
+                    startPointer = { x: e.clientX, y: e.clientY };
+                    startBox = { ...box };
+                    cropBox.setPointerCapture(e.pointerId);
+                });
+            });
+            cropBox.addEventListener("pointermove", (e) => {
+                if (!dragMode) return;
+                const dx = e.clientX - startPointer.x, dy = e.clientY - startPointer.y;
+                const right = geo.offsetX + geo.dispW, bottom = geo.offsetY + geo.dispH;
+
+                if (dragMode === "move") {
+                    box = {
+                        x: clamp(startBox.x + dx, geo.offsetX, right - startBox.size),
+                        y: clamp(startBox.y + dy, geo.offsetY, bottom - startBox.size),
+                        size: startBox.size,
+                    };
+                } else {
+                    let anchorX, anchorY, delta;
+                    if (dragMode === "se") { anchorX = startBox.x; anchorY = startBox.y; delta = Math.max(dx, dy); }
+                    else if (dragMode === "nw") { anchorX = startBox.x + startBox.size; anchorY = startBox.y + startBox.size; delta = Math.max(-dx, -dy); }
+                    else if (dragMode === "ne") { anchorX = startBox.x; anchorY = startBox.y + startBox.size; delta = Math.max(dx, -dy); }
+                    else { anchorX = startBox.x + startBox.size; anchorY = startBox.y; delta = Math.max(-dx, dy); }
+
+                    const maxSize = dragMode === "se" ? Math.min(right - anchorX, bottom - anchorY)
+                        : dragMode === "nw" ? Math.min(anchorX - geo.offsetX, anchorY - geo.offsetY)
+                        : dragMode === "ne" ? Math.min(right - anchorX, anchorY - geo.offsetY)
+                        : Math.min(anchorX - geo.offsetX, bottom - anchorY);
+                    const size = clamp(startBox.size + delta, 30, maxSize);
+
+                    if (dragMode === "se") box = { x: anchorX, y: anchorY, size };
+                    else if (dragMode === "nw") box = { x: anchorX - size, y: anchorY - size, size };
+                    else if (dragMode === "ne") box = { x: anchorX, y: anchorY - size, size };
+                    else box = { x: anchorX - size, y: anchorY, size };
+                }
+                renderBox();
+            });
+            cropBox.addEventListener("pointerup", () => { dragMode = null; });
+            cropBox.addEventListener("pointercancel", () => { dragMode = null; });
+
+            cropApply.addEventListener("click", () => {
+                const sx = (box.x - geo.offsetX) / geo.scale;
+                const sy = (box.y - geo.offsetY) / geo.scale;
+                const ssize = box.size / geo.scale;
+                const outSize = 480;
+                const canvas = document.createElement("canvas");
+                canvas.width = outSize; canvas.height = outSize;
+                canvas.getContext("2d").drawImage(cropImg, sx, sy, ssize, ssize, 0, 0, outSize, outSize);
+                const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+
+                preview.src = dataUrl;
+                resetTransform();
+                cropModal.classList.remove("show");
+                if (onPreview) onPreview(dataUrl);
+                bumpCard();
+            });
+        }
     }
 
     setupPhotoField("r", (dataUrl) => {
@@ -500,7 +635,7 @@
 
                 if (data.type === "digital_id") {
                     setBadge("success", "Digital ID found for " + r["First Name"] + " " + r["Last Name"] + ".");
-                    syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"]);
+                    syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"]);
                     if (data.photo_url) {
                         livePhoto.src = data.photo_url;
                         livePhotoBox.classList.add("has-photo");
@@ -525,7 +660,7 @@
                 document.getElementById("act-gender").value = r["Gender"];
                 document.getElementById("act-employment-status").value = r["Employment Status"];
 
-                syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"]);
+                syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"]);
 
                 actForm.style.display = "block";
             } catch (err) {

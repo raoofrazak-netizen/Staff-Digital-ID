@@ -66,11 +66,14 @@
     ];
 
     // --- Performance tiers ---
+    // Text now sits on glass panels (heavy blur shields it from whatever's
+    // behind), so the field can read as a genuine live feature again
+    // without the earlier legibility fight — just not back to the extreme.
     function tierCounts() {
         const w = window.innerWidth;
-        if (w < 640) return { dust: 90, nodes: 26 };
-        if (w < 1100) return { dust: 220, nodes: 46 };
-        return { dust: 380, nodes: 70 };
+        if (w < 640) return { dust: 80, nodes: 20 };
+        if (w < 1100) return { dust: 150, nodes: 38 };
+        return { dust: 220, nodes: 55 };
     }
 
     let W = 0, H = 0, DPR = 1;
@@ -108,8 +111,8 @@
         dust = Array.from({ length: counts.dust }, () => ({
             x: Math.random() * W,
             y: Math.random() * H,
-            speed: 0.25 + Math.random() * 0.5,
-            size: 0.8 + Math.random() * 1.6,
+            speed: 0.28 + Math.random() * 0.5,
+            size: 1.2 + Math.random() * 1.8,
             colorPhase: Math.random() * Math.PI * 2,
             colorSpeed: 0.1 + Math.random() * 0.15,
             alphaPhase: Math.random() * Math.PI * 2,
@@ -174,7 +177,7 @@
             const idx = colorT * (DUST_COLORS.length - 1);
             const i0 = Math.floor(idx), i1 = Math.min(i0 + 1, DUST_COLORS.length - 1);
             const [r, g, bC] = lerpColor(DUST_COLORS[i0], DUST_COLORS[i1], idx - i0);
-            const alpha = 0.18 + 0.22 * ((Math.sin(t * 0.4 + p.alphaPhase) + 1) / 2);
+            const alpha = 0.2 + 0.24 * ((Math.sin(t * 0.4 + p.alphaPhase) + 1) / 2);
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -239,14 +242,14 @@
     }
 
     function drawNodes() {
-        ctx.strokeStyle = "rgba(47,37,82,0.12)";
         ctx.lineWidth = 1;
         for (let i = 0; i < nodes.length; i++) {
             for (let j = i + 1; j < nodes.length; j++) {
                 const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
                 const dist = Math.hypot(dx, dy);
                 if (dist < LINK_DIST) {
-                    ctx.globalAlpha = 1 - dist / LINK_DIST;
+                    const t = 1 - dist / LINK_DIST;
+                    ctx.strokeStyle = `rgba(227,6,19,${(t * 0.3).toFixed(2)})`;
                     ctx.beginPath();
                     ctx.moveTo(nodes[i].x, nodes[i].y);
                     ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -254,14 +257,13 @@
                 }
             }
         }
-        ctx.globalAlpha = 1;
 
         nodes.forEach((p) => {
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(227,6,19,0.55)";
-            ctx.shadowColor = "rgba(255,107,0,0.5)";
-            ctx.shadowBlur = 5;
+            ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(227,6,19,0.6)";
+            ctx.shadowColor = "rgba(255,107,0,0.6)";
+            ctx.shadowBlur = 4;
             ctx.fill();
             ctx.shadowBlur = 0;
         });

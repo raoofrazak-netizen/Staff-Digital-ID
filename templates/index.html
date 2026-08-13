@@ -19,20 +19,20 @@
                 <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
                 <div class="nav__brandtext">
                     <strong>Middlesex University Dubai</strong>
-                    <em>Student Digital Services</em>
+                    <em>Staff Digital ID Service</em>
                 </div>
             </div>
             <div class="nav__status" id="nav-status">
                 <span class="nav__status-dot" id="nav-status-dot"></span>
-                <span id="nav-status-text">Secure Student Portal</span>
+                <span id="nav-status-text">Secure Staff Digital ID Portal</span>
             </div>
         </nav>
     </header>
 
-    <section class="hero-lite rise-in rise-in--2">
-        <p class="hero-lite__eyebrow"><span></span>Welcome to MDX Digital Services<span></span></p>
-        <h1>Your staff identity, reimagined.</h1>
-        <p>Create and manage your official Middlesex University Dubai Digital ID. Your card updates securely and instantly as you complete your details.</p>
+    <section class="hero-lite glass rise-in rise-in--2">
+        <p class="hero-lite__eyebrow"><span></span>Welcome to MDX Digital ID Service<span></span></p>
+        <h1>Your identity. Digitally elevated. Instantly connected.</h1>
+        <p>Securely access, verify, and carry your Middlesex University Dubai staff identity in one intelligent digital credential.</p>
         <span class="status-pill"><span class="dot"></span>Secure Digital Identity</span>
     </section>
 
@@ -105,7 +105,7 @@
                     <div class="field">
                         <label for="r-email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>University Email</label>
                         <div class="field-input-wrap">
-                            <input type="email" id="r-email" name="email" placeholder="staff@mdx.ac.ae"
+                            <input type="email" id="r-email" name="email" data-live="email" placeholder="staff@mdx.ac.ae"
                                    value="{{ form.get('email', '') if form else '' }}" required>
                         </div>
                         <p class="field-hint" id="r-email-hint">Heads up — this doesn't look like an @mdx.ac.ae address.</p>
@@ -176,6 +176,7 @@
                                 <p>Drag &amp; drop or browse — JPG, PNG, WebP, max 5MB.</p>
                                 <div class="photo-btn-row">
                                     <button type="button" class="photo-btn" id="r-photo-change">Upload Photo</button>
+                                    <button type="button" class="photo-btn" id="r-photo-crop" disabled>Crop Photo</button>
                                     <button type="button" class="photo-btn" id="r-photo-remove" disabled>Remove</button>
                                 </div>
                                 <div class="photo-zoom" id="r-photo-zoom">
@@ -184,6 +185,25 @@
                                 </div>
                                 <p class="photo-zoom__hint" id="r-photo-zoom-hint" style="display:none;">Drag photo to reposition · slide to zoom</p>
                                 <p class="photo-error" id="r-photo-error"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crop-modal" id="r-crop-modal" role="dialog" aria-modal="true" aria-label="Crop staff photo">
+                        <div class="crop-modal__panel">
+                            <p class="crop-modal__title">Crop Photo</p>
+                            <div class="crop-modal__stage" id="r-crop-stage">
+                                <img id="r-crop-img" alt="" draggable="false">
+                                <div class="crop-box" id="r-crop-box">
+                                    <span class="crop-box__handle" data-handle="nw"></span>
+                                    <span class="crop-box__handle" data-handle="ne"></span>
+                                    <span class="crop-box__handle" data-handle="sw"></span>
+                                    <span class="crop-box__handle" data-handle="se"></span>
+                                </div>
+                            </div>
+                            <div class="crop-modal__actions">
+                                <button type="button" class="btn btn-secondary" id="r-crop-cancel"><span>Cancel</span></button>
+                                <button type="button" class="btn btn-primary" id="r-crop-apply"><span>Apply Crop</span></button>
                             </div>
                         </div>
                     </div>
@@ -215,7 +235,7 @@
                     <input type="hidden" name="first_name" id="act-first-name">
                     <input type="hidden" name="last_name" id="act-last-name">
                     <input type="hidden" name="staff_id" id="act-staff-id">
-                    <input type="hidden" name="email" id="act-email">
+                    <input type="hidden" name="email" id="act-email" data-live="email">
                     <input type="hidden" name="department" id="act-department">
                     <input type="hidden" name="job_title" id="act-job-title">
                     <input type="hidden" name="gender" id="act-gender">
@@ -238,6 +258,7 @@
                                 <p>Drag &amp; drop or browse — JPG, PNG, WebP, max 5MB.</p>
                                 <div class="photo-btn-row">
                                     <button type="button" class="photo-btn" id="a-photo-change">Upload Photo</button>
+                                    <button type="button" class="photo-btn" id="a-photo-crop" disabled>Crop Photo</button>
                                     <button type="button" class="photo-btn" id="a-photo-remove" disabled>Remove</button>
                                 </div>
                                 <div class="photo-zoom" id="a-photo-zoom">
@@ -246,6 +267,25 @@
                                 </div>
                                 <p class="photo-zoom__hint" id="a-photo-zoom-hint" style="display:none;">Drag photo to reposition · slide to zoom</p>
                                 <p class="photo-error" id="a-photo-error"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="crop-modal" id="a-crop-modal" role="dialog" aria-modal="true" aria-label="Crop staff photo">
+                        <div class="crop-modal__panel">
+                            <p class="crop-modal__title">Crop Photo</p>
+                            <div class="crop-modal__stage" id="a-crop-stage">
+                                <img id="a-crop-img" alt="" draggable="false">
+                                <div class="crop-box" id="a-crop-box">
+                                    <span class="crop-box__handle" data-handle="nw"></span>
+                                    <span class="crop-box__handle" data-handle="ne"></span>
+                                    <span class="crop-box__handle" data-handle="sw"></span>
+                                    <span class="crop-box__handle" data-handle="se"></span>
+                                </div>
+                            </div>
+                            <div class="crop-modal__actions">
+                                <button type="button" class="btn btn-secondary" id="a-crop-cancel"><span>Cancel</span></button>
+                                <button type="button" class="btn btn-primary" id="a-crop-apply"><span>Apply Crop</span></button>
                             </div>
                         </div>
                     </div>
@@ -266,6 +306,7 @@
                             <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
                             <span class="idcard__uni">Middlesex University Dubai</span>
                         </div>
+                        <div class="idcard__subtitle">Staff Digital ID</div>
 
                         <div class="idcard__photo" id="live-photo-box">
                             <img id="live-photo" alt="">
@@ -282,15 +323,13 @@
                         </div>
 
                         <div class="idcard__footer">
-                            <div class="idcard__footer-text">
-                                <div class="idcard__scan-label">Scan to verify</div>
-                                <div class="idcard__secure"><span class="dot"></span>Secure Identity</div>
-                            </div>
+                            <div class="idcard__scan-label">Scan to Save Staff Contact</div>
                             <div class="qr-panel" id="qr-panel">
                                 <span class="qr-badge">Preview</span>
                                 <div class="qr-placeholder" id="qr-placeholder">Fill in your name &amp; ID</div>
-                                <img class="qr-live-img" id="qr-live-img" alt="Live preview QR code" style="display:none;">
+                                <img class="qr-live-img" id="qr-live-img" alt="Staff contact QR code" style="display:none;">
                             </div>
+                            <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
                         </div>
                     </div>
                 </div>

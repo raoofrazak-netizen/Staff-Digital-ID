@@ -19,21 +19,23 @@
                 <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
                 <div class="nav__brandtext">
                     <strong>Middlesex University Dubai</strong>
-                    <em>Student Digital Services</em>
+                    <em>Staff Digital ID Service</em>
                 </div>
             </div>
             <div class="nav__status" id="nav-status">
                 <span class="nav__status-dot" id="nav-status-dot"></span>
-                <span id="nav-status-text">Secure Student Portal</span>
+                <span id="nav-status-text">Secure Staff Digital ID Portal</span>
             </div>
         </nav>
     </header>
 
     <div class="success-shell rise-in rise-in--2">
-        <div class="success-badge">✓</div>
-        <h1>Digital ID Created</h1>
-        <p class="success-sub">Your card is registered and ready. Save it to your wallet or download it below.</p>
-        <p class="success-sub" style="margin-top:-14px;">Your Track ID is <strong style="color:var(--mdx-indigo); font-family:var(--font-display); letter-spacing:0.04em;">{{ record['Track ID'] }}</strong> — save it to look up this Digital ID again later.</p>
+        <div class="success-intro glass">
+            <div class="success-badge">✓</div>
+            <h1>Digital ID Created</h1>
+            <p class="success-sub">Your card is registered and ready. Save it to your wallet or download it below.</p>
+            <p class="success-sub" style="margin-top:-14px;">Your Track ID is <strong style="color:var(--mdx-indigo); font-family:var(--font-display); letter-spacing:0.04em;">{{ record['Track ID'] }}</strong> — save it to look up this Digital ID again later.</p>
+        </div>
 
         <div class="idcard-tilt-wrap" id="idcard-tilt-wrap">
             <div class="idcard glass" id="idcard">
@@ -42,6 +44,7 @@
                     <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
                     <span class="idcard__uni">Middlesex University Dubai</span>
                 </div>
+                <div class="idcard__subtitle">Staff Digital ID</div>
 
                 <div class="idcard__photo has-photo">
                     <img src="{{ url_for('serve_photo', filename=record['Photo Filename']) }}" alt="{{ record['First Name'] }} {{ record['Last Name'] }}">
@@ -58,13 +61,11 @@
                 </div>
 
                 <div class="idcard__footer">
-                    <div class="idcard__footer-text">
-                        <div class="idcard__scan-label">Scan to verify</div>
-                        <div class="idcard__secure"><span class="dot"></span>Secure Identity</div>
-                    </div>
+                    <div class="idcard__scan-label">Scan to Save Staff Contact</div>
                     <div class="qr-panel">
-                        <img src="{{ url_for('serve_qr', filename=record['QR Filename']) }}" alt="Verification QR code">
+                        <img src="{{ url_for('serve_qr', filename=record['QR Filename']) }}" alt="Staff contact QR code">
                     </div>
+                    <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
                 </div>
             </div>
         </div>
@@ -121,7 +122,10 @@
         }
 
         const qrPanel = document.querySelector(".qr-panel");
-        if (qrPanel) window.setTimeout(() => qrPanel.classList.add("pulse"), 300);
+        if (qrPanel) {
+            window.setTimeout(() => qrPanel.classList.add("pulse"), 300);
+            window.setTimeout(() => qrPanel.classList.remove("pulse"), 750);
+        }
     </script>
 </body>
 </html>
