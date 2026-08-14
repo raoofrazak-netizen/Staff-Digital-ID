@@ -21,11 +21,15 @@ PORTAL_BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://127.0.0.1:5000").rst
 
 # All generated data (Excel + QR codes + photos) lives outside the project
 # folder so it survives redeploys and can be pointed at a shared location later.
-# Vercel's filesystem is read-only except /tmp, so default there when running
-# on Vercel (it sets VERCEL=1) — note /tmp is wiped between invocations, so
-# the Excel "database" and uploaded photos will NOT persist on Vercel.
-_default_data_root = "/tmp" if os.environ.get("VERCEL") else r"C:\MDX-Digital-ID\Test"
-DATA_ROOT = os.environ.get("DATA_ROOT", _default_data_root)
+# Vercel's filesystem is read-only except /tmp, so always use that there (it
+# sets VERCEL=1) regardless of DATA_ROOT — note /tmp is wiped between
+# invocations, so the Excel "database" and uploaded photos will NOT persist
+# on Vercel. Elsewhere, honor DATA_ROOT only if it's actually set to
+# something (os.environ.get's default doesn't apply to a blank env var).
+if os.environ.get("VERCEL"):
+    DATA_ROOT = "/tmp"
+else:
+    DATA_ROOT = os.environ.get("DATA_ROOT") or r"C:\MDX-Digital-ID\Test"
 QR_DIR = os.path.join(DATA_ROOT, "qrcodes")
 PHOTO_DIR = os.path.join(DATA_ROOT, "photos")
 EXCEL_PATH = os.path.join(DATA_ROOT, "Staff_Digital_ID.xlsx")
