@@ -13,7 +13,15 @@ back to the original openpyxl + local-file behavior untouched.
 import os
 
 import psycopg2
-import vercel_blob
+import requests
+
+# The `vercel_blob` PyPI package hardcodes the upload `access` header to
+# "public" (its own source says private isn't supported), but this
+# project's Blob store is Private -- so we speak the upload API directly
+# instead. Contract confirmed from vercel_blob's own source: PUT to
+# BLOB_API_BASE + "/?pathname=<path>" with these headers, body is raw bytes.
+_BLOB_API_BASE = "https://blob.vercel-storage.com"
+_BLOB_API_VERSION = "10"
 
 _DB_ENV_VARS = ("POSTGRES_URL", "DATABASE_URL", "POSTGRES_PRISMA_URL", "POSTGRES_URL_NON_POOLING")
 
@@ -161,11 +169,22 @@ def append_digital_id(record):
         conn.close()
 
 
+def _blob_put(pathname, data, content_type):
+    headers = {
+        "access": "private",
+        "authorization": f"Bearer {os.environ.get('BLOB_READ_WRITE_TOKEN')}",
+        "x-api-version": _BLOB_API_VERSION,
+        "x-content-type": content_type,
+        "x-cache-control-max-age": "31536000",
+    }
+    resp = requests.put(f"{_BLOB_API_BASE}/?pathname={pathname}", headers=headers, data=data, timeout=15)
+    resp.raise_for_status()
+    return resp.json()["url"]
+
+
 def upload_photo(data, token):
-    resp = vercel_blob.put(f"photos/{token}.jpg", data)
-    return resp["url"]
+    return _blob_put(f"photos/{token}.jpg", data, "image/jpeg")
 
 
 def upload_qr(data, token):
-    resp = vercel_blob.put(f"qrcodes/qr_{token}.png", data)
-    return resp["url"]
+    return _blob_put(f"qrcodes/qr_{token}.png", data, "image/png")
