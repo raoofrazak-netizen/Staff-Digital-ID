@@ -86,6 +86,7 @@
     const liveStaffId = document.getElementById("live-staff-id");
     const liveStatus = document.getElementById("live-status");
     const liveGender = document.getElementById("live-gender");
+    const liveMobile = document.getElementById("live-mobile");
     const livePhoto = document.getElementById("live-photo");
     const livePhotoBox = document.getElementById("live-photo-box");
 
@@ -116,7 +117,7 @@
         el.classList.add("text-pop");
     }
 
-    function syncCard(firstName, lastName, staffId, gender, department, jobTitle, employmentStatus, email) {
+    function syncCard(firstName, lastName, staffId, gender, department, jobTitle, employmentStatus, email, mobile) {
         const fullName = (firstName + " " + lastName).trim();
         setTextIfChanged(liveName, fullName || "Your Name");
         setTextIfChanged(liveTitle, jobTitle || "Job title");
@@ -124,8 +125,12 @@
         setTextIfChanged(liveStaffId, staffId ? "Staff ID " + staffId : "Staff ID —");
         setTextIfChanged(liveStatus, employmentStatus || "Employment Status");
         setTextIfChanged(liveGender, gender || "—");
+        if (liveMobile) {
+            liveMobile.style.display = mobile ? "" : "none";
+            if (mobile) setTextIfChanged(liveMobile, mobile);
+        }
         bumpCard();
-        updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email || "");
+        updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email || "", mobile || "");
         updateStepper();
     }
 
@@ -229,7 +234,7 @@
     const qrLiveImg = document.getElementById("qr-live-img");
     let qrDebounceTimer = null;
 
-    function buildVCard(firstName, lastName, jobTitle, department, email) {
+    function buildVCard(firstName, lastName, jobTitle, department, email, mobile) {
         const lines = [
             "BEGIN:VCARD",
             "VERSION:3.0",
@@ -238,6 +243,7 @@
         ];
         if (jobTitle) lines.push(`TITLE:${jobTitle}`);
         if (email) lines.push(`EMAIL;TYPE=WORK:${email}`);
+        if (mobile) lines.push(`TEL;TYPE=CELL:${mobile}`);
         lines.push("URL:https://www.mdx.ac.ae");
         if (department) lines.push(`NOTE:Department - ${department}`);
         lines.push("END:VCARD");
@@ -251,9 +257,9 @@
         qrLiveImg.style.display = "none";
     }
 
-    function renderLiveQR(firstName, lastName, jobTitle, department, email) {
+    function renderLiveQR(firstName, lastName, jobTitle, department, email, mobile) {
         if (!qrPanel || typeof qrcode === "undefined") return;
-        const text = buildVCard(firstName, lastName, jobTitle, department, email);
+        const text = buildVCard(firstName, lastName, jobTitle, department, email, mobile);
         try {
             const qr = qrcode(0, "M");
             qr.addData(text);
@@ -271,7 +277,7 @@
         }
     }
 
-    function updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email) {
+    function updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email, mobile) {
         if (!qrPanel) return;
         const ready = firstName.trim() && lastName.trim() && staffId.trim();
         window.clearTimeout(qrDebounceTimer);
@@ -279,14 +285,14 @@
             showQrPlaceholder();
             return;
         }
-        qrDebounceTimer = window.setTimeout(() => renderLiveQR(firstName, lastName, jobTitle, department, email), 120);
+        qrDebounceTimer = window.setTimeout(() => renderLiveQR(firstName, lastName, jobTitle, department, email, mobile), 120);
     }
 
     function syncCardFromActiveForm() {
         syncCard(
             fieldValue("first_name"), fieldValue("last_name"), fieldValue("staff_id"),
             fieldValue("gender"), fieldValue("department"), fieldValue("job_title"),
-            fieldValue("employment_status"), fieldValue("email")
+            fieldValue("employment_status"), fieldValue("email"), fieldValue("mobile_number")
         );
     }
 
@@ -635,7 +641,7 @@
 
                 if (data.type === "digital_id") {
                     setBadge("success", "Digital ID found for " + r["First Name"] + " " + r["Last Name"] + ".");
-                    syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"]);
+                    syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"], r["Mobile Number"]);
                     if (data.photo_url) {
                         livePhoto.src = data.photo_url;
                         livePhotoBox.classList.add("has-photo");

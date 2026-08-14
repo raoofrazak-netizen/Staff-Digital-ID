@@ -61,6 +61,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 img, svg { max-width: 100%; display: block; }
@@ -287,9 +288,10 @@ main, .site-header { position: relative; z-index: 1; }
   background: rgba(255,255,255,0.45); border: 1px solid var(--glass-border);
 }
 .tab-btn {
-  border: none; background: none; padding: 10px 18px; border-radius: var(--radius-pill);
+  border: none; background: none; padding: 13px 18px; min-height: 44px; border-radius: var(--radius-pill);
   font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.01em;
   color: var(--text-secondary); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
   transition: color var(--dur-fast) ease, background var(--dur-fast) ease, transform var(--dur-fast) var(--ease-spring);
 }
 .tab-btn:hover { color: var(--mdx-indigo); transform: translateY(-1px); }
@@ -307,7 +309,7 @@ main, .site-header { position: relative; z-index: 1; }
 @keyframes slideFadeOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(-12px); } }
 
 /* ============ Fields ============ */
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .field { margin-bottom: 18px; }
 .field label {
   display: flex; align-items: center; gap: 7px;
@@ -332,7 +334,7 @@ main, .site-header { position: relative; z-index: 1; }
   100% { background-position: 200% 50%; }
 }
 
-.field input[type="text"], .field input[type="email"], .field select {
+.field input[type="text"], .field input[type="email"], .field input[type="tel"], .field select {
   position: relative; z-index: 1; width: 100%; padding: 17px 20px; min-height: 58px;
   border-radius: var(--radius-sm);
   color: var(--text-primary); font-family: var(--font-body); font-size: 0.94rem; letter-spacing: 0.01em;
@@ -482,8 +484,9 @@ main, .site-header { position: relative; z-index: 1; }
 .photo-btn-row { display: flex; gap: 8px; }
 .photo-btn {
   font-family: var(--font-body); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em;
-  padding: 9px 15px; border-radius: var(--radius-pill); cursor: pointer; color: var(--mdx-indigo);
+  padding: 12px 16px; min-height: 44px; border-radius: var(--radius-pill); cursor: pointer; color: var(--mdx-indigo);
   background: rgba(255,255,255,0.55); border: 1px solid var(--glass-border);
+  display: inline-flex; align-items: center; justify-content: center;
   transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast) ease;
 }
 .photo-btn:hover { transform: translateY(-2px); background: #fff; }
@@ -536,6 +539,12 @@ main, .site-header { position: relative; z-index: 1; }
 .crop-box__handle {
   position: absolute; width: 16px; height: 16px; background: #fff;
   border: 2px solid var(--mdx-red); border-radius: 50%;
+}
+.crop-box__handle::before {
+  /* Invisible touch-target expansion: keeps the 16px visual dot but gives
+     touch input a ~44px hit area, since this is the only way to resize the
+     crop box on a touchscreen. */
+  content: ""; position: absolute; inset: -14px;
 }
 .crop-box__handle[data-handle="nw"] { top: -9px; left: -9px; cursor: nwse-resize; }
 .crop-box__handle[data-handle="ne"] { top: -9px; right: -9px; cursor: nesw-resize; }
