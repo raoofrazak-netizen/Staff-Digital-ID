@@ -5,10 +5,12 @@ from datetime import datetime
 
 import openpyxl
 import qrcode
+import requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, jsonify, send_file
 from PIL import Image, UnidentifiedImageError
 
+import storage
 import wallet
 from card_render import render_card_png
 
@@ -134,7 +136,13 @@ def init_excel():
         wb.save(EXCEL_PATH)
 
 
-init_excel()
+# Postgres + Vercel Blob when a database is configured (required on Vercel,
+# since /tmp isn't shared or persistent across invocations); otherwise the
+# original Excel + local-file storage below (used for the LAN deployment).
+if storage.db_configured():
+    storage.init_db(SAMPLE_DIRECTORY_ROWS)
+else:
+    init_excel()
 
 
 def _rows_as_dicts(ws, columns):
@@ -145,6 +153,8 @@ def _rows_as_dicts(ws, columns):
 
 
 def find_directory_record_by_staff_id(staff_id):
+    if storage.db_configured():
+        return storage.find_directory_record_by_staff_id(staff_id)
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb["Staff_Directory"]
     staff_id = (staff_id or "").strip().lower()
@@ -155,6 +165,8 @@ def find_directory_record_by_staff_id(staff_id):
 
 
 def find_active_digital_id_by_staff(staff_id):
+    if storage.db_configured():
+        return storage.find_active_digital_id_by_staff(staff_id)
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb["Digital_IDs"]
     staff_id = (staff_id or "").strip().lower()
@@ -165,6 +177,8 @@ def find_active_digital_id_by_staff(staff_id):
 
 
 def find_digital_id_by_token(token):
+    if storage.db_configured():
+        return storage.find_digital_id_by_token(token)
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb["Digital_IDs"]
     for record in _rows_as_dicts(ws, DIGITAL_ID_COLUMNS):
@@ -177,6 +191,8 @@ def find_digital_id_by_track(track_id):
     track_id = (track_id or "").strip().lower()
     if not track_id:
         return None
+    if storage.db_configured():
+        return storage.find_digital_id_by_track(track_id)
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb["Digital_IDs"]
     for record in _rows_as_dicts(ws, DIGITAL_ID_COLUMNS):
@@ -217,10 +233,24 @@ def build_vcard(first_name, last_name, job_title, department, email, mobile=None
 
 
 def append_digital_id(record):
+    if storage.db_configured():
+        storage.append_digital_id(record)
+        return
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb["Digital_IDs"]
     ws.append([record[col] for col in DIGITAL_ID_COLUMNS])
     wb.save(EXCEL_PATH)
+
+
+def _resolve_photo_url(filename_or_url):
+    """Photo Filename holds a bare local filename in Excel/local-file mode,
+    or a full Vercel Blob URL in Postgres/Blob mode -- resolve either into
+    something directly usable as an <img src>."""
+    if not filename_or_url:
+        return None
+    if filename_or_url.startswith("http://") or filename_or_url.startswith("https://"):
+        return filename_or_url
+    return url_for("serve_photo", filename=filename_or_url)
 
 
 REQUIRED_FIELDS = [
@@ -251,8 +281,16 @@ def _validate_and_save_photo(file_storage, token):
 
     image = image.convert("RGB")
     image.thumbnail((PHOTO_MAX_DIMENSION, PHOTO_MAX_DIMENSION))
+    buf = io.BytesIO()
+    image.save(buf, format="JPEG", quality=88)
+    photo_bytes = buf.getvalue()
+
+    if storage.blob_configured():
+        return storage.upload_photo(photo_bytes, token), None
+
     filename = f"{token}.jpg"
-    image.save(os.path.join(PHOTO_DIR, filename), format="JPEG", quality=88)
+    with open(os.path.join(PHOTO_DIR, filename), "wb") as f:
+        f.write(photo_bytes)
     return filename, None
 
 
@@ -305,8 +343,17 @@ def _handle_submission():
     # Black-on-white — every colour option gives lower contrast than this
     # for camera scanning, and reliability matters more than branding here.
     qr_img = qr.make_image(fill_color="#000000", back_color="#ffffff")
-    qr_filename = f"qr_{token}.png"
-    qr_img.save(os.path.join(QR_DIR, qr_filename))
+    qr_buf = io.BytesIO()
+    qr_img.save(qr_buf, format="PNG")
+    qr_bytes = qr_buf.getvalue()
+
+    if storage.blob_configured():
+        qr_value = storage.upload_qr(qr_bytes, token)
+    else:
+        qr_filename = f"qr_{token}.png"
+        with open(os.path.join(QR_DIR, qr_filename), "wb") as f:
+            f.write(qr_bytes)
+        qr_value = qr_filename
 
     record = {
         "Token": token,
@@ -321,7 +368,7 @@ def _handle_submission():
         "Gender": values["gender"],
         "Employment Status": values["employment_status"],
         "Photo Filename": photo_filename,
-        "QR Filename": qr_filename,
+        "QR Filename": qr_value,
         "Created At": datetime.now().isoformat(timespec="seconds"),
         "Status": "Active",
     }
@@ -367,7 +414,7 @@ def api_track():
             "found": True,
             "type": "digital_id",
             "record": digital,
-            "photo_url": url_for("serve_photo", filename=digital["Photo Filename"]) if digital.get("Photo Filename") else None,
+            "photo_url": _resolve_photo_url(digital.get("Photo Filename")),
             "success_url": url_for("success", token=digital["Token"]),
         })
 
@@ -420,15 +467,29 @@ def serve_photo(filename):
     return send_from_directory(PHOTO_DIR, filename)
 
 
+def _load_media_bytes(filename_or_url, local_dir):
+    """Photo/QR Filename holds either a bare local filename (Excel/local-file
+    mode) or a full Vercel Blob URL (Postgres/Blob mode) -- fetch whichever
+    it is into an in-memory file-like object for card_render.py."""
+    if not filename_or_url:
+        return None
+    if filename_or_url.startswith("http://") or filename_or_url.startswith("https://"):
+        resp = requests.get(filename_or_url, timeout=10)
+        resp.raise_for_status()
+        return io.BytesIO(resp.content)
+    path = os.path.join(local_dir, filename_or_url)
+    return open(path, "rb") if os.path.exists(path) else None
+
+
 @app.route("/download/<token>")
 def download(token):
     record = find_digital_id_by_token(token)
     if not record:
         abort(404)
 
-    photo_path = os.path.join(PHOTO_DIR, record["Photo Filename"]) if record.get("Photo Filename") else None
-    qr_path = os.path.join(QR_DIR, record["QR Filename"]) if record.get("QR Filename") else None
-    card = render_card_png(record, photo_path, qr_path)
+    photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
+    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
+    card = render_card_png(record, photo_file, qr_file)
 
     buf = io.BytesIO()
     card.save(buf, format="PNG")

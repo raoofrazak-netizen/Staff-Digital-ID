@@ -47,7 +47,7 @@
                 <div class="idcard__subtitle">Staff Digital ID</div>
 
                 <div class="idcard__photo has-photo">
-                    <img src="{{ url_for('serve_photo', filename=record['Photo Filename']) }}" alt="{{ record['First Name'] }} {{ record['Last Name'] }}">
+                    <img src="{{ record['Photo Filename'] if record['Photo Filename'].startswith('http') else url_for('serve_photo', filename=record['Photo Filename']) }}" alt="{{ record['First Name'] }} {{ record['Last Name'] }}">
                 </div>
 
                 <div class="idcard__name">{{ record['First Name'] }} {{ record['Last Name'] }}</div>
@@ -63,7 +63,7 @@
                 <div class="idcard__footer">
                     <div class="idcard__scan-label">Scan to Save Staff Contact</div>
                     <div class="qr-panel">
-                        <img src="{{ url_for('serve_qr', filename=record['QR Filename']) }}" alt="Staff contact QR code">
+                        <img src="{{ record['QR Filename'] if record['QR Filename'].startswith('http') else url_for('serve_qr', filename=record['QR Filename']) }}" alt="Staff contact QR code">
                     </div>
                     <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
                 </div>
