@@ -82,24 +82,15 @@ def render_card_png(record, photo_file, qr_file):
 
     margin = 55
 
-    # --- Header: crest + official 3-line wordmark ("Middlesex" / "University"
-    # / "Dubai"), matching the physical card's exact lockup — the crest is
-    # sized to span the full height of the stacked text, not just one line. ---
-    crest_path = os.path.join(_ASSETS_DIR, "mdx-shield.png")
-    crest_h = 96
-    if os.path.exists(crest_path):
-        crest = Image.open(crest_path).convert("RGBA")
-        ratio = crest_h / crest.height
-        crest = crest.resize((max(1, int(crest.width * ratio)), crest_h), Image.LANCZOS)
-        card.paste(crest, (margin, 36), crest)
-        wordmark_x = margin + crest.width + 24
-    else:
-        wordmark_x = margin
-
-    uni_font = _dax("Black", 26)
-    line_h = 31
-    for i, word in enumerate(("Middlesex", "University", "Dubai")):
-        draw.text((wordmark_x, 36 + i * line_h), word, font=uni_font, fill=BLACK)
+    # --- Header: official MDX logo lockup (crest + wordmark as one asset,
+    # supplied directly rather than recreated with a font approximation). ---
+    logo_path = os.path.join(_ASSETS_DIR, "mdx-logo.jpg")
+    logo_h = 96
+    if os.path.exists(logo_path):
+        logo = Image.open(logo_path).convert("RGB")
+        ratio = logo_h / logo.height
+        logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
+        card.paste(logo, (margin, 36))
 
     tag_font = _monument(14)
     tag_text = "STAFF DIGITAL ID"
