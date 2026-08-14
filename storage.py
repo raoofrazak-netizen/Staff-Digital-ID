@@ -178,7 +178,8 @@ def _blob_put(pathname, data, content_type):
         "x-cache-control-max-age": "31536000",
     }
     resp = requests.put(f"{_BLOB_API_BASE}/?pathname={pathname}", headers=headers, data=data, timeout=15)
-    resp.raise_for_status()
+    if resp.status_code != 200:
+        raise RuntimeError(f"Blob upload failed (status {resp.status_code}): {resp.text}")
     return resp.json()["url"]
 
 
