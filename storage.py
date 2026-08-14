@@ -13,15 +13,13 @@ back to the original openpyxl + local-file behavior untouched.
 import os
 
 import psycopg2
-import requests
+from vercel.blob import get as blob_get, put as blob_put
 
-# The `vercel_blob` PyPI package hardcodes the upload `access` header to
-# "public" (its own source says private isn't supported), but this
-# project's Blob store is Private -- so we speak the upload API directly
-# instead. Contract confirmed from vercel_blob's own source: PUT to
-# BLOB_API_BASE + "/?pathname=<path>" with these headers, body is raw bytes.
-_BLOB_API_BASE = "https://blob.vercel-storage.com"
-_BLOB_API_VERSION = "10"
+# The third-party `vercel_blob` PyPI package hardcodes the upload `access`
+# header to "public" (its own source even says private isn't supported) and
+# rejected every upload to this project's Private store. Using Vercel's own
+# official `vercel` package instead (pip: "vercel", import: "vercel.blob"),
+# which has first-class access="private" support.
 
 _DB_ENV_VARS = ("POSTGRES_URL", "DATABASE_URL", "POSTGRES_PRISMA_URL", "POSTGRES_URL_NON_POOLING")
 
@@ -169,23 +167,18 @@ def append_digital_id(record):
         conn.close()
 
 
-def _blob_put(pathname, data, content_type):
-    headers = {
-        "access": "private",
-        "authorization": f"Bearer {os.environ.get('BLOB_READ_WRITE_TOKEN')}",
-        "x-api-version": _BLOB_API_VERSION,
-        "x-content-type": content_type,
-        "x-cache-control-max-age": "31536000",
-    }
-    resp = requests.put(f"{_BLOB_API_BASE}/?pathname={pathname}", headers=headers, data=data, timeout=15)
-    if resp.status_code != 200:
-        raise RuntimeError(f"Blob upload failed (status {resp.status_code}): {resp.text}")
-    return resp.json()["url"]
-
-
 def upload_photo(data, token):
-    return _blob_put(f"photos/{token}.jpg", data, "image/jpeg")
+    result = blob_put(f"photos/{token}.jpg", data, access="private", content_type="image/jpeg")
+    return result.url
 
 
 def upload_qr(data, token):
-    return _blob_put(f"qrcodes/qr_{token}.png", data, "image/png")
+    result = blob_put(f"qrcodes/qr_{token}.png", data, access="private", content_type="image/png")
+    return result.url
+
+
+def download_blob(url):
+    """Fetches a private blob's bytes -- token is read from
+    BLOB_READ_WRITE_TOKEN automatically, same as the upload side."""
+    result = blob_get(url, access="private")
+    return result.content

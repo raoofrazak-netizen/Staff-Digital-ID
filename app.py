@@ -5,7 +5,6 @@ from datetime import datetime
 
 import openpyxl
 import qrcode
-import requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_file
 from PIL import Image, UnidentifiedImageError
@@ -245,19 +244,11 @@ def append_digital_id(record):
 def _load_media_bytes(filename_or_url, local_dir):
     """Photo/QR Filename holds either a bare local filename (Excel/local-file
     mode) or a full Vercel Blob URL (Postgres/Blob mode) -- fetch whichever
-    it is into an in-memory file-like object. The Blob store here is
-    private, so the Blob fetch needs the same read-write token as a bearer
-    credential -- a plain unauthenticated request gets rejected."""
+    it is into an in-memory file-like object."""
     if not filename_or_url:
         return None
     if filename_or_url.startswith("http://") or filename_or_url.startswith("https://"):
-        headers = {}
-        blob_token = os.environ.get("BLOB_READ_WRITE_TOKEN")
-        if blob_token:
-            headers["Authorization"] = f"Bearer {blob_token}"
-        resp = requests.get(filename_or_url, headers=headers, timeout=10)
-        resp.raise_for_status()
-        return io.BytesIO(resp.content)
+        return io.BytesIO(storage.download_blob(filename_or_url))
     path = os.path.join(local_dir, filename_or_url)
     return open(path, "rb") if os.path.exists(path) else None
 

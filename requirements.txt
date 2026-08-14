@@ -6,4 +6,4 @@ python-dotenv==1.0.1
 PyJWT==2.9.0
 cryptography==42.0.5
 psycopg2-binary==2.9.9
-requests==2.32.3
+vercel==0.10.0
