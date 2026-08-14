@@ -379,7 +379,23 @@ def _handle_submission():
 
 @app.route("/healthz")
 def healthz():
-    return jsonify({"status": "ok"})
+    info = {
+        "status": "ok",
+        "db_configured": storage.db_configured(),
+        "blob_configured": storage.blob_configured(),
+    }
+    if storage.db_configured():
+        try:
+            conn = storage.get_connection()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT COUNT(*) FROM digital_ids")
+                    info["digital_ids_row_count"] = cur.fetchone()[0]
+            finally:
+                conn.close()
+        except Exception as exc:
+            info["db_error"] = str(exc)
+    return jsonify(info)
 
 
 @app.route("/")
