@@ -22,7 +22,7 @@ PORTAL_BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://127.0.0.1:5000").rst
 # All generated data (Excel + QR codes + photos) lives outside the project
 # folder so it survives redeploys and can be pointed at a shared location later.
 DATA_ROOT = os.environ.get("DATA_ROOT", r"C:\MDX-Digital-ID\Test")
-QR_DIR = os.path.join(DATA_ROOT, "qrcodes")
+QR_DIR = os.path.join(DATA_ROOT, "/tmp/qrcodes")
 PHOTO_DIR = os.path.join(DATA_ROOT, "photos")
 EXCEL_PATH = os.path.join(DATA_ROOT, "Staff_Digital_ID.xlsx")
 
