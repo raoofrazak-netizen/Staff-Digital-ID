@@ -21,9 +21,13 @@ PORTAL_BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://127.0.0.1:5000").rst
 
 # All generated data (Excel + QR codes + photos) lives outside the project
 # folder so it survives redeploys and can be pointed at a shared location later.
-DATA_ROOT = os.environ.get("DATA_ROOT", r"C:\MDX-Digital-ID\Test")
-QR_DIR = os.path.join(DATA_ROOT, "/tmp/qrcodes")
-PHOTO_DIR = os.path.join(DATA_ROOT, "/tmp/photos")
+# Vercel's filesystem is read-only except /tmp, so default there when running
+# on Vercel (it sets VERCEL=1) — note /tmp is wiped between invocations, so
+# the Excel "database" and uploaded photos will NOT persist on Vercel.
+_default_data_root = "/tmp" if os.environ.get("VERCEL") else r"C:\MDX-Digital-ID\Test"
+DATA_ROOT = os.environ.get("DATA_ROOT", _default_data_root)
+QR_DIR = os.path.join(DATA_ROOT, "qrcodes")
+PHOTO_DIR = os.path.join(DATA_ROOT, "photos")
 EXCEL_PATH = os.path.join(DATA_ROOT, "Staff_Digital_ID.xlsx")
 
 os.makedirs(QR_DIR, exist_ok=True)
@@ -53,7 +57,7 @@ DIRECTORY_COLUMNS = [
     "Department", "Job Title", "Gender", "Employment Status",
 ]
 DIGITAL_ID_COLUMNS = [
-    "Token", "Track ID", "Staff ID", "First Name", "Last Name", "Email",
+    "Token", "Track ID", "Staff ID", "First Name", "Last Name", "Email", "Mobile Number",
     "Department", "Job Title", "Gender", "Employment Status",
     "Photo Filename", "QR Filename", "Created At", "Status",
 ]
@@ -186,7 +190,7 @@ def generate_track_id():
             return candidate
 
 
-def build_vcard(first_name, last_name, job_title, department, email):
+def build_vcard(first_name, last_name, job_title, department, email, mobile=None):
     """vCard 3.0 payload for the staff-contact QR — a real, scannable
     business card, not a security/verification link."""
     lines = [
@@ -199,6 +203,8 @@ def build_vcard(first_name, last_name, job_title, department, email):
         lines.append(f"TITLE:{job_title}")
     if email:
         lines.append(f"EMAIL;TYPE=WORK:{email}")
+    if mobile:
+        lines.append(f"TEL;TYPE=CELL:{mobile}")
     lines.append("URL:https://www.mdx.ac.ae")
     if department:
         lines.append(f"NOTE:Department - {department}")
@@ -249,6 +255,7 @@ def _validate_and_save_photo(file_storage, token):
 def _handle_submission():
     form = request.form
     values = {field: (form.get(field) or "").strip() for field in REQUIRED_FIELDS}
+    mobile_number = (form.get("mobile_number") or "").strip()
 
     missing = [f for f in REQUIRED_FIELDS if not values[f]]
     photo_file = request.files.get("photo")
@@ -286,7 +293,7 @@ def _handle_submission():
     vcard_payload = build_vcard(
         first_name=values["first_name"], last_name=values["last_name"],
         job_title=values["job_title"], department=values["department"],
-        email=values["email"],
+        email=values["email"], mobile=mobile_number,
     )
     qr = qrcode.QRCode(version=1, box_size=10, border=3)
     qr.add_data(vcard_payload)
@@ -304,6 +311,7 @@ def _handle_submission():
         "First Name": values["first_name"],
         "Last Name": values["last_name"],
         "Email": values["email"],
+        "Mobile Number": mobile_number,
         "Department": values["department"],
         "Job Title": values["job_title"],
         "Gender": values["gender"],
