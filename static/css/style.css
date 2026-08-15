@@ -223,10 +223,22 @@ main, .site-header { position: relative; z-index: 1; }
 
 /* ============ Login (landing) / Admin Portal auth page ============ */
 .login-shell { max-width: 440px; margin: 60px auto; padding: 0 20px; }
-.login-card {
-  padding: clamp(30px, 5vw, 42px) clamp(24px, 4vw, 34px); border-radius: 22px; text-align: center;
-  border: 1px solid rgba(255,255,255,0.65);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 24px 48px rgba(47,37,82,0.14);
+/* Liquid Glass: an intensified, more refractive variant of the shared
+   .glass material used just for this card -- heavier blur/saturation so
+   the particle background genuinely diffuses through it, a brighter
+   specular top-edge, and deeper ambient elevation. Scoped to
+   .login-card.glass (two classes = higher specificity than .glass alone)
+   so the shared component everywhere else is untouched. */
+.login-card.glass {
+  padding: clamp(30px, 5vw, 42px) clamp(24px, 4vw, 34px); border-radius: 24px; text-align: center;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.75),
+    0 2px 8px rgba(47,37,82,0.06),
+    0 24px 64px rgba(47,37,82,0.22);
 }
 .login-card__head { margin-bottom: 22px; }
 .login-card h1 {
@@ -257,13 +269,14 @@ main, .site-header { position: relative; z-index: 1; }
   border-radius: 12px; transition: box-shadow var(--dur-fast) ease;
 }
 .admin-inline-form .field-input-wrap:focus-within {
-  box-shadow: 0 0 0 4px rgba(227,6,19,0.1);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.5), 0 0 0 5px rgba(227,6,19,0.12);
   border-radius: 12px;
 }
 .admin-inline-form .field input {
-  border-radius: 12px !important; background: rgba(248,248,250,0.8) !important;
+  border-radius: 12px !important; background: rgba(255,255,255,0.35) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
 }
-.admin-inline-form .field input:focus { border-color: var(--mdx-red) !important; }
+.admin-inline-form .field input:focus { border-color: rgba(227,6,19,0.5) !important; }
 .field-input-wrap--password { position: relative; }
 .field-input-wrap--password input { padding-right: 46px !important; }
 .field-toggle {
@@ -282,8 +295,8 @@ main, .site-header { position: relative; z-index: 1; }
   box-shadow: 0 10px 22px rgba(227,6,19,0.28);
   transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) ease, filter var(--dur-fast) ease;
 }
-.btn-admin-signin:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(227,6,19,0.34); filter: brightness(1.04); }
-.btn-admin-signin:active { transform: translateY(1px); box-shadow: 0 6px 14px rgba(227,6,19,0.24); }
+.btn-admin-signin:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 14px 28px rgba(227,6,19,0.34); filter: brightness(1.04); }
+.btn-admin-signin:active { transform: translateY(1px) scale(0.98); box-shadow: 0 6px 14px rgba(227,6,19,0.24); }
 .btn-admin-signin__spinner { display: none; }
 .btn-admin-signin.is-loading { cursor: default; opacity: 0.9; }
 .btn-admin-signin.is-loading .btn-admin-signin__spinner {
