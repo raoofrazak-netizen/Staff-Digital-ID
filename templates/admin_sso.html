@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft SSO Settings — Middlesex University Dubai</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Admin Portal</em>
+                </div>
+            </div>
+            <a href="{{ url_for('admin.logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
+        </nav>
+    </header>
+
+    <div class="admin-shell rise-in rise-in--2">
+        <div class="admin-topbar">
+            <div>
+                <h1>Microsoft SSO Configuration</h1>
+                <p class="panel-sub" style="margin:0;">Entra ID (Azure AD) App Registration details for staff Microsoft sign-in.</p>
+            </div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">← Dashboard</a>
+        </div>
+
+        {% if saved %}
+        <div class="form-success">SSO settings saved.</div>
+        {% endif %}
+        {% if test_result %}
+        <div class="{{ 'form-success' if test_result.ok else 'form-error' }}">{{ test_result.message }}</div>
+        {% endif %}
+
+        <section class="admin-panel glass">
+            <h2>App Registration Credentials</h2>
+            <p class="panel-sub">From your Microsoft Entra ID / Azure AD App Registration.</p>
+
+            <form method="POST">
+                <div class="field">
+                    <label for="tenant_id">Tenant ID</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="tenant_id" name="tenant_id" value="{{ cfg.tenant_id }}" placeholder="00000000-0000-0000-0000-000000000000" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="client_id">Client ID (Application ID)</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="client_id" name="client_id" value="{{ cfg.client_id }}" placeholder="00000000-0000-0000-0000-000000000000" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="client_secret">Client Secret</label>
+                    <div class="field-input-wrap">
+                        <input type="password" id="client_secret" name="client_secret" placeholder="{{ masked_secret if masked_secret else 'Enter Client Secret value' }}" autocomplete="new-password">
+                    </div>
+                    {% if masked_secret %}
+                    <p class="field-hint show" style="color:var(--text-muted); font-weight:600;">A secret is already saved ({{ masked_secret }}). Leave blank to keep it, or enter a new value to replace it.</p>
+                    {% endif %}
+                </div>
+                <div class="field">
+                    <label for="redirect_uri">Redirect URI</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="redirect_uri" name="redirect_uri" value="{{ cfg.redirect_uri or suggested_redirect_uri }}" required>
+                    </div>
+                </div>
+
+                <div class="toggle-row">
+                    <input type="checkbox" id="enabled" name="enabled" {% if cfg.enabled %}checked{% endif %} style="width:18px; height:18px;">
+                    <label for="enabled">Enable Microsoft Sign-In on the staff portal</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary"><span>Save SSO Settings</span></button>
+            </form>
+
+            <form method="POST" style="margin-top:10px;">
+                <input type="hidden" name="action" value="test">
+                <button type="submit" class="btn btn-secondary"><span>Test Connection</span></button>
+            </form>
+        </section>
+
+        <section class="admin-panel glass">
+            <h2>Setup Instructions</h2>
+            <p class="panel-sub">Create an App Registration in Microsoft Entra ID / Azure AD.</p>
+            <div class="admin-note">
+                1. In the Azure Portal, go to <strong>Microsoft Entra ID → App registrations → New registration</strong>.<br>
+                2. Name it (e.g. "MDX Staff Digital ID"), and under <strong>Redirect URI</strong> select <code>Web</code> and paste the value below.<br>
+                3. After creating it, copy the <strong>Application (client) ID</strong> and <strong>Directory (tenant) ID</strong> from the Overview page into the fields above.<br>
+                4. Go to <strong>Certificates &amp; secrets → New client secret</strong>, copy its <em>value</em> (not the Secret ID) into the Client Secret field above — it's only shown once by Microsoft.<br>
+                5. Under <strong>API permissions</strong>, add Microsoft Graph delegated permission <code>User.Read</code> (usually granted by default).
+            </div>
+            <p style="font-size:0.8rem; font-weight:700; color:var(--mdx-indigo); margin:16px 0 8px;">Redirect URI to register in Azure:</p>
+            <div class="copy-row">
+                <input type="text" readonly value="{{ suggested_redirect_uri }}" id="redirect-uri-display">
+                <button type="button" class="copy-btn" id="copy-redirect-btn">Copy</button>
+            </div>
+        </section>
+
+        <a class="back-link" href="{{ url_for('admin.dashboard') }}">← Back to Dashboard</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script>
+        const copyBtn = document.getElementById("copy-redirect-btn");
+        if (copyBtn) {
+            copyBtn.addEventListener("click", () => {
+                const input = document.getElementById("redirect-uri-display");
+                input.select();
+                navigator.clipboard.writeText(input.value).then(() => {
+                    copyBtn.textContent = "Copied!";
+                    window.setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
+                }).catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>

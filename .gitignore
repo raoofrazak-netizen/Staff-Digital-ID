@@ -9,6 +9,7 @@ venv/
 
 # IDE
 .idea/
+.claude/
 
 # Runtime data (Excel DB, uploaded photos, generated QR codes) — the app
 # stores these outside the repo by default (DATA_ROOT in .env), this local

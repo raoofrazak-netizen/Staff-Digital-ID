@@ -72,29 +72,54 @@
 
         <div class="wallet-area">
             <h4>Take your ID everywhere</h4>
-            <div class="wallet-btn-row">
+            <div class="wallet-btn-row" id="wallet-btn-row">
+                {% if apple_configured %}
+                <a href="{{ url_for('wallet_apple_pass', token=token) }}" class="wallet-btn wallet-btn--apple" id="apple-wallet-btn" data-platform="apple">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.4-.1 0-2.1-.8-2.2-3.1zM14.6 6.3c.6-.7 1-1.7.9-2.6-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.5 1 .1 1.9-.5 2.5-1.2z"/></svg>
+                    Add to Apple Wallet
+                </a>
+                {% else %}
+                <button type="button" class="wallet-btn wallet-btn--apple disabled" id="apple-wallet-btn" data-platform="apple" title="Apple Wallet is not configured yet">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.4-.1 0-2.1-.8-2.2-3.1zM14.6 6.3c.6-.7 1-1.7.9-2.6-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.5 1 .1 1.9-.5 2.5-1.2z"/></svg>
+                    Add to Apple Wallet
+                </button>
+                {% endif %}
+
                 {% if wallet_configured and wallet_url %}
-                <a href="{{ wallet_url }}" class="wallet-btn wallet-btn--google" target="_blank" rel="noopener">
+                <a href="{{ wallet_url }}" class="wallet-btn wallet-btn--google" target="_blank" rel="noopener" id="google-wallet-btn" data-platform="google">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="14.5" r="1"/></svg>
                     Add to Google Wallet
                 </a>
                 {% else %}
-                <button type="button" class="wallet-btn wallet-btn--google disabled" title="Google Wallet is not configured yet">
+                <button type="button" class="wallet-btn wallet-btn--google disabled" id="google-wallet-btn" data-platform="google" title="Google Wallet is not configured yet">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="7" cy="14.5" r="1"/></svg>
                     Add to Google Wallet
                 </button>
                 {% endif %}
-                <button type="button" class="wallet-btn wallet-btn--apple disabled" title="Coming soon — requires Apple Developer signing certificates">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.4-.1 0-2.1-.8-2.2-3.1zM14.6 6.3c.6-.7 1-1.7.9-2.6-.9 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.5 1 .1 1.9-.5 2.5-1.2z"/></svg>
-                    Add to Apple Wallet <span style="opacity:.7; font-weight:600; text-transform:none;">(Coming Soon)</span>
-                </button>
+
                 <a href="{{ url_for('download', token=token) }}" class="wallet-btn wallet-btn--download">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-                    Download Digital ID
+                    Download PNG
                 </a>
+                <a href="{{ url_for('download_pdf', token=token) }}" class="wallet-btn wallet-btn--download">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+                    Download PDF
+                </a>
+                <button type="button" class="wallet-btn wallet-btn--download" id="print-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 01-1-1v-4a1 1 0 011-1h16a1 1 0 011 1v4a1 1 0 01-1 1h-2"/></svg>
+                    Print Digital ID
+                </button>
             </div>
-            {% if not (wallet_configured and wallet_url) %}
-            <p class="wallet-note">Google Wallet isn't configured on this server yet — add issuer credentials to <code>.env</code> to enable that button.</p>
+            {% if not apple_configured or not (wallet_configured and wallet_url) %}
+            <p class="wallet-note">
+                {% if not apple_configured and not (wallet_configured and wallet_url) %}
+                Apple Wallet and Google Wallet aren't configured on this server yet.
+                {% elif not apple_configured %}
+                Apple Wallet isn't configured on this server yet.
+                {% else %}
+                Google Wallet isn't configured on this server yet.
+                {% endif %}
+            </p>
             {% endif %}
         </div>
 
@@ -125,6 +150,29 @@
         if (qrPanel) {
             window.setTimeout(() => qrPanel.classList.add("pulse"), 300);
             window.setTimeout(() => qrPanel.classList.remove("pulse"), 750);
+        }
+
+        // --- Device-aware wallet button priority: on iOS/iPadOS the Apple
+        // Wallet button leads, on Android the Google Wallet button leads,
+        // and on desktop both show side by side in their default order so
+        // the visitor can pick (or continue on their phone via the QR). ---
+        const ua = navigator.userAgent || "";
+        const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes("Macintosh") && "ontouchend" in document);
+        const isAndroid = /Android/.test(ua);
+        const walletRow = document.getElementById("wallet-btn-row");
+        if (walletRow) {
+            const appleBtn = document.getElementById("apple-wallet-btn");
+            const googleBtn = document.getElementById("google-wallet-btn");
+            if (isIOS && appleBtn) {
+                walletRow.insertBefore(appleBtn, walletRow.firstChild);
+            } else if (isAndroid && googleBtn) {
+                walletRow.insertBefore(googleBtn, walletRow.firstChild);
+            }
+        }
+
+        const printBtn = document.getElementById("print-btn");
+        if (printBtn) {
+            printBtn.addEventListener("click", () => window.print());
         }
     </script>
 </body>

@@ -674,4 +674,60 @@
             }
         });
     }
+
+    // --- Microsoft SSO prefill: populates the New Registration form from a
+    // signed-in staff member's Graph profile (see sso_routes.py's session
+    // hand-off) and, if Graph returned a profile photo, loads it into the
+    // same photo-upload pipeline a manual upload would use. ---
+    const ssoDataEl = document.getElementById("sso-prefill-data");
+    if (ssoDataEl) {
+        let ssoPayload = null;
+        try {
+            ssoPayload = JSON.parse(ssoDataEl.textContent);
+        } catch (err) {
+            ssoPayload = null;
+        }
+
+        if (ssoPayload) {
+            const profile = ssoPayload.profile || {};
+            const setVal = (id, value) => {
+                const el = document.getElementById(id);
+                if (el && value) el.value = value;
+            };
+
+            setVal("r-first-name", profile.first_name);
+            setVal("r-last-name", profile.last_name);
+            setVal("r-staff-id", profile.staff_id);
+            setVal("r-email", profile.email);
+            setVal("r-mobile", profile.mobile_number);
+            setVal("r-job-title", profile.job_title);
+
+            const deptSelect = document.getElementById("r-department");
+            if (deptSelect && profile.department) {
+                const match = Array.from(deptSelect.options).find(
+                    (o) => o.value.toLowerCase() === profile.department.toLowerCase()
+                );
+                if (match) deptSelect.value = match.value;
+            }
+
+            if (ssoPayload.photo) {
+                fetch(ssoPayload.photo)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                        const file = new File([blob], "microsoft-profile-photo.jpg", { type: blob.type || "image/jpeg" });
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        const input = document.getElementById("r-photo");
+                        if (input) {
+                            input.files = dt.files;
+                            input.dispatchEvent(new Event("change"));
+                        }
+                    })
+                    .catch(() => {});
+            }
+
+            syncCardFromActiveForm();
+            updateStepper();
+        }
+    }
 })();

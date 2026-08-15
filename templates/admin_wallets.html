@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Integration Status — Middlesex University Dubai</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Admin Portal</em>
+                </div>
+            </div>
+            <a href="{{ url_for('admin.logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
+        </nav>
+    </header>
+
+    <div class="admin-shell rise-in rise-in--2">
+        <div class="admin-topbar">
+            <div>
+                <h1>Wallet Integration Status</h1>
+                <p class="panel-sub" style="margin:0;">Apple Wallet and Google Wallet credential health.</p>
+            </div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">← Dashboard</a>
+        </div>
+
+        <div class="admin-grid">
+            <div class="admin-card glass">
+                <span class="status-chip {{ 'ok' if google_ok else ('off' if not google_configured else 'bad') }}">
+                    {{ 'Connected' if google_ok else ('Not Configured' if not google_configured else 'Error') }}
+                </span>
+                <h3>Google Wallet</h3>
+                <p>{{ google_msg or 'Configure GOOGLE_WALLET_ISSUER_ID and a service account key in .env.' }}</p>
+            </div>
+
+            <div class="admin-card glass">
+                <span class="status-chip {{ 'ok' if apple_ok else ('off' if not apple_configured else 'bad') }}">
+                    {{ 'Connected' if apple_ok else ('Not Configured' if not apple_configured else 'Error') }}
+                </span>
+                <h3>Apple Wallet</h3>
+                <p>{{ apple_msg or 'Configure APPLE_TEAM_IDENTIFIER, APPLE_PASS_TYPE_IDENTIFIER, and certificate files in .env.' }}</p>
+            </div>
+        </div>
+
+        <a class="back-link" href="{{ url_for('admin.dashboard') }}">← Back to Dashboard</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+</body>
+</html>

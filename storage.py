@@ -29,12 +29,12 @@ DIRECTORY_DISPLAY = ["Staff ID", "First Name", "Last Name", "Email", "Department
 DIGITAL_ID_COLUMNS_SQL = [
     "token", "track_id", "staff_id", "first_name", "last_name", "email", "mobile_number",
     "department", "job_title", "gender", "employment_status",
-    "photo_url", "qr_url", "created_at", "status",
+    "photo_url", "qr_url", "created_at", "status", "ms_user_id",
 ]
 DIGITAL_ID_DISPLAY = [
     "Token", "Track ID", "Staff ID", "First Name", "Last Name", "Email", "Mobile Number",
     "Department", "Job Title", "Gender", "Employment Status",
-    "Photo Filename", "QR Filename", "Created At", "Status",
+    "Photo Filename", "QR Filename", "Created At", "Status", "Microsoft User ID",
 ]
 
 
@@ -76,7 +76,18 @@ def init_db(sample_directory_rows):
                     staff_id TEXT NOT NULL,
                     first_name TEXT, last_name TEXT, email TEXT, mobile_number TEXT,
                     department TEXT, job_title TEXT, gender TEXT, employment_status TEXT,
-                    photo_url TEXT, qr_url TEXT, created_at TEXT, status TEXT
+                    photo_url TEXT, qr_url TEXT, created_at TEXT, status TEXT,
+                    ms_user_id TEXT
+                )
+            """)
+            # Additive, idempotent -- safe to run against a table created
+            # before the Microsoft SSO column existed.
+            cur.execute("ALTER TABLE digital_ids ADD COLUMN IF NOT EXISTS ms_user_id TEXT")
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS sso_settings (
+                    id INTEGER PRIMARY KEY,
+                    tenant_id TEXT, client_id TEXT, client_secret_encrypted TEXT,
+                    redirect_uri TEXT, enabled BOOLEAN DEFAULT FALSE
                 )
             """)
             cur.execute("SELECT COUNT(*) FROM staff_directory")
@@ -151,6 +162,37 @@ def find_digital_id_by_track(track_id):
         conn.close()
 
 
+def list_digital_ids(search=None):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            if search:
+                needle = f"%{search.strip().lower()}%"
+                cur.execute(
+                    "SELECT {} FROM digital_ids WHERE lower(staff_id) LIKE %s "
+                    "OR lower(first_name || ' ' || last_name) LIKE %s "
+                    "OR lower(email) LIKE %s ORDER BY created_at DESC".format(", ".join(DIGITAL_ID_COLUMNS_SQL)),
+                    (needle, needle, needle),
+                )
+            else:
+                cur.execute(
+                    "SELECT {} FROM digital_ids ORDER BY created_at DESC".format(", ".join(DIGITAL_ID_COLUMNS_SQL))
+                )
+            return [dict(zip(DIGITAL_ID_DISPLAY, row)) for row in cur.fetchall()]
+    finally:
+        conn.close()
+
+
+def update_digital_id_status(token, status):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE digital_ids SET status = %s WHERE token = %s", (status, token))
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def append_digital_id(record):
     conn = get_connection()
     try:
@@ -162,6 +204,60 @@ def append_digital_id(record):
                 ),
                 values,
             )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def find_digital_id_by_ms_user_id(ms_user_id):
+    if not ms_user_id:
+        return None
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT {} FROM digital_ids WHERE ms_user_id = %s LIMIT 1".format(", ".join(DIGITAL_ID_COLUMNS_SQL)),
+                (ms_user_id,),
+            )
+            return _row_to_dict(cur.fetchone(), DIGITAL_ID_DISPLAY)
+    finally:
+        conn.close()
+
+
+def get_sso_settings():
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT tenant_id, client_id, client_secret_encrypted, redirect_uri, enabled "
+                "FROM sso_settings WHERE id = 1"
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            return {
+                "tenant_id": row[0], "client_id": row[1],
+                "client_secret_encrypted": row[2], "redirect_uri": row[3],
+                "enabled": row[4],
+            }
+    finally:
+        conn.close()
+
+
+def save_sso_settings(tenant_id, client_id, client_secret_encrypted, redirect_uri, enabled):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO sso_settings (id, tenant_id, client_id, client_secret_encrypted, redirect_uri, enabled)
+                VALUES (1, %s, %s, %s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET
+                    tenant_id = EXCLUDED.tenant_id,
+                    client_id = EXCLUDED.client_id,
+                    client_secret_encrypted = EXCLUDED.client_secret_encrypted,
+                    redirect_uri = EXCLUDED.redirect_uri,
+                    enabled = EXCLUDED.enabled
+            """, (tenant_id, client_id, client_secret_encrypted, redirect_uri, enabled))
         conn.commit()
     finally:
         conn.close()

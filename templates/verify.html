@@ -31,7 +31,7 @@
 
     <div class="verify-shell rise-in rise-in--2">
         <div class="verify-card glass">
-            {% if status == "valid" %}
+            {% if status == "active" %}
                 <div class="verify-icon valid">✓</div>
                 <h2>Valid Digital ID</h2>
                 <p class="verify-sub">Middlesex University Dubai — Staff Access</p>
@@ -41,9 +41,17 @@
                     <p><strong>Department:</strong> {{ record['Department'] }}</p>
                     <p><strong>Status:</strong> {{ record['Employment Status'] }}</p>
                 </div>
-            {% elif status == "revoked" %}
+            {% elif status == "suspended" %}
+                <div class="verify-icon revoked">!</div>
+                <h2>Digital ID Suspended</h2>
+                <p class="verify-sub">This ID has been temporarily suspended by an administrator.</p>
+            {% elif status == "expired" %}
                 <div class="verify-icon revoked">✕</div>
-                <h2>Digital ID Revoked</h2>
+                <h2>Digital ID Expired</h2>
+                <p class="verify-sub">This ID's validity period has ended.</p>
+            {% elif status == "deactivated" %}
+                <div class="verify-icon revoked">✕</div>
+                <h2>Digital ID Deactivated</h2>
                 <p class="verify-sub">This ID is no longer active.</p>
             {% else %}
                 <div class="verify-icon invalid">✕</div>

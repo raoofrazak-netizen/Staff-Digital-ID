@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Middlesex University Dubai</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Admin Portal</em>
+                </div>
+            </div>
+            <a href="{{ url_for('admin.logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
+        </nav>
+    </header>
+
+    <div class="admin-shell rise-in rise-in--2">
+        <h1>Admin Dashboard</h1>
+        <p class="panel-sub">Configure Microsoft SSO and manage Staff Digital IDs.</p>
+
+        <div class="admin-grid">
+            <div class="admin-card glass">
+                <span class="status-chip {{ 'ok' if sso_enabled else ('off' if not sso_configured else 'bad') }}">
+                    {{ 'Enabled' if sso_enabled else ('Not Configured' if not sso_configured else 'Configured, Disabled') }}
+                </span>
+                <h3>Microsoft SSO</h3>
+                <p>Tenant ID, Client ID, Client Secret, and Redirect URI for staff Microsoft sign-in.</p>
+                <a href="{{ url_for('admin.sso_settings') }}" class="btn btn-secondary"><span>Configure SSO</span></a>
+            </div>
+
+            <div class="admin-card glass">
+                <span class="status-chip {{ 'ok' if (google_configured or apple_configured) else 'off' }}">
+                    {{ 'Configured' if (google_configured or apple_configured) else 'Not Configured' }}
+                </span>
+                <h3>Digital Wallets</h3>
+                <p>Apple Wallet and Google Wallet pass-issuing status and connectivity checks.</p>
+                <a href="{{ url_for('admin.wallets') }}" class="btn btn-secondary"><span>View Wallet Status</span></a>
+            </div>
+
+            <div class="admin-card glass">
+                <span class="status-chip ok">Management</span>
+                <h3>Staff Digital IDs</h3>
+                <p>Search staff records, activate/deactivate IDs, and regenerate QR codes.</p>
+                <a href="{{ url_for('admin.staff') }}" class="btn btn-secondary"><span>Manage Staff IDs</span></a>
+            </div>
+        </div>
+
+        <a class="back-link" href="{{ url_for('index') }}">← Return to Portal</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+</body>
+</html>

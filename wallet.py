@@ -12,6 +12,7 @@ import os
 import time
 
 import jwt
+import requests
 
 
 def _env(name, default=None):
@@ -104,3 +105,37 @@ def build_save_url(*, staff_id, full_name, job_title, department,
 
     token = jwt.encode(claims, service_account["private_key"], algorithm="RS256")
     return f"https://pay.google.com/gp/v/save/{token}"
+
+
+def test_connection():
+    """Used by the admin 'Test Connection' button -- confirms the service
+    account key is valid and Google actually accepts it, without needing a
+    real staff member's save flow."""
+    if not is_configured():
+        return False, "Issuer ID and a valid service account key file must be set first."
+    try:
+        service_account = _load_service_account()
+    except Exception as exc:
+        return False, f"Could not load service account file: {exc}"
+
+    now = int(time.time())
+    claims = {
+        "iss": service_account["client_email"],
+        "scope": "https://www.googleapis.com/auth/wallet_object.issuer",
+        "aud": "https://oauth2.googleapis.com/token",
+        "iat": now,
+        "exp": now + 3600,
+    }
+    assertion = jwt.encode(claims, service_account["private_key"], algorithm="RS256")
+    try:
+        resp = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={"grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer", "assertion": assertion},
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        return False, f"Could not reach Google's token endpoint: {exc}"
+
+    if resp.status_code == 200 and "access_token" in resp.json():
+        return True, "Service account credentials accepted by Google Wallet."
+    return False, f"Google rejected the service account credentials (status {resp.status_code})."

@@ -6,17 +6,23 @@ from datetime import datetime
 import openpyxl
 import qrcode
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_file, session
 from PIL import Image, UnidentifiedImageError
 
 import storage
 import wallet
+import wallet_apple
+import sso_config
 from card_render import render_card_png
+from admin import admin_bp
+from sso_routes import sso_bp
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+app.register_blueprint(admin_bp)
+app.register_blueprint(sso_bp)
 
 PORTAL_BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://127.0.0.1:5000").rstrip("/")
 
@@ -64,8 +70,9 @@ DIRECTORY_COLUMNS = [
 DIGITAL_ID_COLUMNS = [
     "Token", "Track ID", "Staff ID", "First Name", "Last Name", "Email", "Mobile Number",
     "Department", "Job Title", "Gender", "Employment Status",
-    "Photo Filename", "QR Filename", "Created At", "Status",
+    "Photo Filename", "QR Filename", "Created At", "Status", "Microsoft User ID",
 ]
+DIGITAL_ID_STATUSES = ("Active", "Suspended", "Deactivated", "Expired")
 
 SAMPLE_DIRECTORY_ROWS = [
     ["MDX00001", "Sample", "Employee", "sample.employee@mdx.ac.ae",
@@ -200,6 +207,104 @@ def find_digital_id_by_track(track_id):
     return None
 
 
+def find_digital_id_by_ms_user_id(ms_user_id):
+    if not ms_user_id:
+        return None
+    if storage.db_configured():
+        return storage.find_digital_id_by_ms_user_id(ms_user_id)
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Digital_IDs"]
+    for record in _rows_as_dicts(ws, DIGITAL_ID_COLUMNS):
+        if str(record.get("Microsoft User ID") or "").strip() == str(ms_user_id).strip():
+            return record
+    return None
+
+
+def list_digital_ids(search=None):
+    if storage.db_configured():
+        return storage.list_digital_ids(search)
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Digital_IDs"]
+    records = list(_rows_as_dicts(ws, DIGITAL_ID_COLUMNS))
+    records.sort(key=lambda r: r.get("Created At") or "", reverse=True)
+    if search:
+        needle = search.strip().lower()
+        records = [
+            r for r in records
+            if needle in str(r.get("Staff ID", "")).lower()
+            or needle in f'{r.get("First Name", "")} {r.get("Last Name", "")}'.lower()
+            or needle in str(r.get("Email", "")).lower()
+        ]
+    return records
+
+
+def update_digital_id_status(token, status):
+    if status not in DIGITAL_ID_STATUSES:
+        return
+    if storage.db_configured():
+        storage.update_digital_id_status(token, status)
+        return
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Digital_IDs"]
+    token_idx = DIGITAL_ID_COLUMNS.index("Token")
+    status_idx = DIGITAL_ID_COLUMNS.index("Status")
+    for row in ws.iter_rows(min_row=2):
+        if row[token_idx].value == token:
+            row[status_idx].value = status
+            break
+    wb.save(EXCEL_PATH)
+
+
+def regenerate_digital_id_qr(token):
+    """Rebuilds the vCard QR for an existing Digital ID from its current
+    record fields -- used by the admin 'Regenerate QR Code' action, e.g.
+    after a staff member's job title or department changes."""
+    record = find_digital_id_by_token(token)
+    if not record:
+        return
+
+    vcard_payload = build_vcard(
+        first_name=record["First Name"], last_name=record["Last Name"],
+        job_title=record["Job Title"], department=record["Department"],
+        email=record["Email"], mobile=record.get("Mobile Number"),
+    )
+    qr = qrcode.QRCode(version=1, box_size=10, border=3)
+    qr.add_data(vcard_payload)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#000000", back_color="#ffffff")
+    qr_buf = io.BytesIO()
+    qr_img.save(qr_buf, format="PNG")
+    qr_bytes = qr_buf.getvalue()
+
+    if storage.blob_configured():
+        qr_value = storage.upload_qr(qr_bytes, token)
+    else:
+        qr_filename = f"qr_{token}.png"
+        with open(os.path.join(QR_DIR, qr_filename), "wb") as f:
+            f.write(qr_bytes)
+        qr_value = qr_filename
+
+    if storage.db_configured():
+        conn = storage.get_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE digital_ids SET qr_url = %s WHERE token = %s", (qr_value, token))
+            conn.commit()
+        finally:
+            conn.close()
+        return
+
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Digital_IDs"]
+    token_idx = DIGITAL_ID_COLUMNS.index("Token")
+    qr_idx = DIGITAL_ID_COLUMNS.index("QR Filename")
+    for row in ws.iter_rows(min_row=2):
+        if row[token_idx].value == token:
+            row[qr_idx].value = qr_value
+            break
+    wb.save(EXCEL_PATH)
+
+
 def generate_track_id():
     """Short, memorable reference code shown to the staff member — distinct
     from the long secure Token used inside the QR/verify URL."""
@@ -312,7 +417,9 @@ def _handle_submission():
             form=form,
         ), 400
 
-    if find_active_digital_id_by_staff(values["staff_id"]):
+    ms_user_id = (session.get("ms_user_id") or "").strip()
+
+    if find_active_digital_id_by_staff(values["staff_id"]) or find_digital_id_by_ms_user_id(ms_user_id):
         return render_template(
             "index.html",
             departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
@@ -371,8 +478,11 @@ def _handle_submission():
         "QR Filename": qr_value,
         "Created At": datetime.now().isoformat(timespec="seconds"),
         "Status": "Active",
+        "Microsoft User ID": ms_user_id,
     }
     append_digital_id(record)
+    session.pop("sso_prefill", None)
+    session.pop("sso_photo", None)
 
     return redirect(url_for("success", token=token))
 
@@ -400,9 +510,15 @@ def healthz():
 
 @app.route("/")
 def index():
+    sso_prefill = session.pop("sso_prefill", None)
+    sso_photo = session.pop("sso_photo", None)
     return render_template(
         "index.html",
         departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
+        sso_configured=sso_config.is_enabled(),
+        sso_error=session.pop("sso_error", None),
+        sso_prefill=sso_prefill,
+        sso_photo=sso_photo,
     )
 
 
@@ -460,6 +576,7 @@ def success(token):
         "success.html",
         record=record, token=token,
         wallet_url=wallet_url, wallet_configured=wallet.is_configured(),
+        apple_configured=wallet_apple.is_configured(),
     )
 
 
@@ -469,7 +586,8 @@ def verify(token):
     if not record:
         return render_template("verify.html", status="invalid")
 
-    status = "valid" if record["Status"] == "Active" else "revoked"
+    record_status = record.get("Status") or "Active"
+    status = record_status.lower() if record_status in DIGITAL_ID_STATUSES else "invalid"
     return render_template("verify.html", status=status, record=record)
 
 
@@ -509,6 +627,49 @@ def download(token):
     buf.seek(0)
     filename = f"MDX-Digital-ID-{record['Staff ID']}.png"
     return send_file(buf, mimetype="image/png", as_attachment=True, download_name=filename)
+
+
+@app.route("/download/<token>/pdf")
+def download_pdf(token):
+    record = find_digital_id_by_token(token)
+    if not record:
+        abort(404)
+
+    photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
+    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
+    card = render_card_png(record, photo_file, qr_file).convert("RGB")
+
+    buf = io.BytesIO()
+    card.save(buf, format="PDF")
+    buf.seek(0)
+    filename = f"MDX-Digital-ID-{record['Staff ID']}.pdf"
+    return send_file(buf, mimetype="application/pdf", as_attachment=True, download_name=filename)
+
+
+@app.route("/api/wallet/apple/<token>")
+def wallet_apple_pass(token):
+    record = find_digital_id_by_token(token)
+    if not record:
+        abort(404)
+    if not wallet_apple.is_configured():
+        abort(404)
+
+    verify_url = f"{PORTAL_BASE_URL}/verify/{token}"
+    pkpass_bytes = wallet_apple.build_pkpass_bytes(
+        staff_id=record["Staff ID"],
+        full_name=f"{record['First Name']} {record['Last Name']}",
+        job_title=record["Job Title"],
+        department=record["Department"],
+        employment_status=record["Employment Status"],
+        verify_url=verify_url,
+        status=record.get("Status", "Active"),
+    )
+    if not pkpass_bytes:
+        abort(404)
+
+    buf = io.BytesIO(pkpass_bytes)
+    filename = f"MDX-Digital-ID-{record['Staff ID']}.pkpass"
+    return send_file(buf, mimetype="application/vnd.apple.pkpass", as_attachment=True, download_name=filename)
 
 
 def _lan_ip():
