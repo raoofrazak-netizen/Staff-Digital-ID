@@ -20,11 +20,11 @@ from sso_routes import sso_bp
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+app.secret_key = os.environ.get("SECRET_KEY") or "dev-only-change-me"
 app.register_blueprint(admin_bp)
 app.register_blueprint(sso_bp)
 
-PORTAL_BASE_URL = os.environ.get("PORTAL_BASE_URL", "http://127.0.0.1:5000").rstrip("/")
+PORTAL_BASE_URL = (os.environ.get("PORTAL_BASE_URL") or "http://127.0.0.1:5000").rstrip("/")
 
 # All generated data (Excel + QR codes + photos) lives outside the project
 # folder so it survives redeploys and can be pointed at a shared location later.

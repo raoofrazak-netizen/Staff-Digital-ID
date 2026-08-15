@@ -23,7 +23,7 @@ import storage
 
 
 def _fernet():
-    secret = os.environ.get("SECRET_KEY", "dev-only-change-me").encode("utf-8")
+    secret = (os.environ.get("SECRET_KEY") or "dev-only-change-me").encode("utf-8")
     key = base64.urlsafe_b64encode(hashlib.sha256(secret).digest())
     return Fernet(key)
 

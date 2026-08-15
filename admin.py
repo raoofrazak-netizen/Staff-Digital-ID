@@ -92,7 +92,7 @@ def sso_settings():
             return redirect(url_for("admin.sso_settings", saved=1))
 
     cfg = sso_config.get_effective_config()
-    portal_url = os.environ.get("PORTAL_BASE_URL", "http://127.0.0.1:5000").rstrip("/")
+    portal_url = (os.environ.get("PORTAL_BASE_URL") or "http://127.0.0.1:5000").rstrip("/")
     return render_template(
         "admin_sso.html",
         cfg=cfg,
