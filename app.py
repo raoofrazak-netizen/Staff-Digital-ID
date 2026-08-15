@@ -721,9 +721,10 @@ def success(token):
         employment_status=record["Employment Status"],
         verify_url=verify_url,
     )
+    can_edit = bool(record.get("Microsoft User ID") and record.get("Microsoft User ID") == session.get("ms_user_id"))
     return render_template(
         "success.html",
-        record=record, token=token,
+        record=record, token=token, verify_url=verify_url, can_edit=can_edit,
         wallet_url=wallet_url, wallet_configured=wallet.is_configured(),
         apple_configured=wallet_apple.is_configured(),
     )
