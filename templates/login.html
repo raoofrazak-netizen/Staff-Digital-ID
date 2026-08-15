@@ -13,23 +13,7 @@
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="grain" aria-hidden="true"></div>
 
-    <header class="site-header">
-        <nav class="nav glass rise-in rise-in--1">
-            <div class="nav__brand">
-                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
-                <div class="nav__brandtext">
-                    <strong>Middlesex University Dubai</strong>
-                    <em>Staff Digital ID Service</em>
-                </div>
-            </div>
-            <div class="nav__status" id="nav-status">
-                <span class="nav__status-dot" id="nav-status-dot"></span>
-                <span id="nav-status-text">Secure Staff Digital ID Portal</span>
-            </div>
-        </nav>
-    </header>
-
-    <div class="login-shell">
+    <div class="login-shell login-shell--no-header">
         <section class="login-card glass" id="login-card">
             <div class="login-card__head rise-in rise-in--2">
                 <h1>Admin Sign In</h1>
@@ -77,7 +61,6 @@
                 </button>
             </form>
 
-            {% if sso_configured %}
             <div class="login-divider rise-in rise-in--4"><span>or continue with</span></div>
 
             {% if sso_error %}
@@ -89,10 +72,17 @@
             </div>
             {% endif %}
 
+            {% if sso_configured %}
             <a href="{{ url_for('sso.microsoft_login') }}" class="btn-microsoft btn-microsoft--lg rise-in rise-in--4">
                 <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
                 Sign in with Microsoft
             </a>
+            {% else %}
+            <button type="button" class="btn-microsoft btn-microsoft--lg disabled rise-in rise-in--4" title="Microsoft Sign-In isn't configured yet">
+                <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+                Sign in with Microsoft
+            </button>
+            <p class="login-card__hint">Microsoft Sign-In isn't set up on this portal yet.</p>
             {% endif %}
 
             <p class="login-card__trust rise-in rise-in--5"><span aria-hidden="true">🔒</span> Protected Administrative Access</p>
@@ -104,7 +94,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
     <script>
         const adminUser = document.getElementById("admin-username");
         const adminPass = document.getElementById("admin-password");

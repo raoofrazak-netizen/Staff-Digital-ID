@@ -223,6 +223,9 @@ main, .site-header { position: relative; z-index: 1; }
 
 /* ============ Login (landing) / Admin Portal auth page ============ */
 .login-shell { max-width: 440px; margin: 60px auto; padding: 0 20px; }
+.login-shell--no-header {
+  min-height: 100vh; margin: 0 auto; display: flex; align-items: center; justify-content: center;
+}
 /* Liquid Glass: an intensified, more refractive variant of the shared
    .glass material used just for this card -- heavier blur/saturation so
    the particle background genuinely diffuses through it, a brighter
@@ -308,6 +311,8 @@ main, .site-header { position: relative; z-index: 1; }
 
 .btn-microsoft--lg { width: 100%; justify-content: center; padding: 15px 24px; font-size: 0.92rem; }
 .btn-microsoft:hover { background: #fafafa; border-color: #6b6b6b; }
+.btn-microsoft.disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+.login-card__hint { font-size: 0.76rem; color: var(--text-muted); margin: 10px 0 0; }
 
 .login-divider {
   display: flex; align-items: center; gap: 12px; margin: 22px 0;
