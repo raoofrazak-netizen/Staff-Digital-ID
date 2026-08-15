@@ -37,7 +37,8 @@
             <div class="field">
                 <label for="username">Username</label>
                 <div class="field-input-wrap">
-                    <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+                    <input type="text" id="username" name="username" autocomplete="username"
+                           value="{{ request.form.get('username', '') }}" required autofocus>
                 </div>
             </div>
             <div class="field">
@@ -53,5 +54,19 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script>
+        // Enter in the Username field moves to Password instead of
+        // submitting early; Enter in Password submits as normal.
+        const usernameField = document.getElementById("username");
+        const passwordField = document.getElementById("password");
+        if (usernameField && passwordField) {
+            usernameField.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    passwordField.focus();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

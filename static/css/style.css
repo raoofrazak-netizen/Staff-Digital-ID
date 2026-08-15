@@ -398,7 +398,7 @@ main, .site-header { position: relative; z-index: 1; }
   100% { background-position: 200% 50%; }
 }
 
-.field input[type="text"], .field input[type="email"], .field input[type="tel"], .field select {
+.field input[type="text"], .field input[type="email"], .field input[type="tel"], .field input[type="password"], .field select {
   position: relative; z-index: 1; width: 100%; padding: 17px 20px; min-height: 58px;
   border-radius: var(--radius-sm);
   color: var(--text-primary); font-family: var(--font-body); font-size: 0.94rem; letter-spacing: 0.01em;
