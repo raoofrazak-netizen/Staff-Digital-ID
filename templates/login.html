@@ -29,53 +29,77 @@
         </nav>
     </header>
 
-    <div class="login-shell rise-in rise-in--2">
-        <section class="login-card glass">
-            <img class="login-card__logo" src="{{ url_for('static', filename='images/mdx-logo.jpg') }}" alt="Middlesex University Dubai">
-            <p class="login-card__tagline">Staff Digital ID — Sign In</p>
+    <div class="login-shell">
+        <section class="login-card glass" id="login-card">
+            <div class="login-card__head rise-in rise-in--2">
+                <h1>Admin Portal</h1>
+                <p class="login-card__subtitle">Sign in to securely manage Microsoft SSO configuration and Staff Digital IDs.</p>
+                <p class="login-card__badge"><span aria-hidden="true">🔒</span> Secure Administrative Access</p>
+            </div>
 
             {% if admin_error %}
-            <div class="form-error">{{ admin_error }}</div>
+            <div class="auth-alert rise-in rise-in--2" role="alert">
+                <span class="auth-alert__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                </span>
+                <span>{{ admin_error }}</span>
+            </div>
             {% endif %}
 
-            <form method="POST" action="{{ url_for('admin.login') }}" class="admin-inline-form">
+            <form method="POST" action="{{ url_for('admin.login') }}" class="admin-inline-form rise-in rise-in--3" id="admin-form">
                 <input type="hidden" name="source" value="main">
                 <div class="field">
-                    <label for="admin-username">Username</label>
+                    <label for="admin-username">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+                        Username
+                    </label>
                     <div class="field-input-wrap">
                         <input type="text" id="admin-username" name="username" autocomplete="username"
                                value="{{ request.form.get('username', '') if admin_error else '' }}">
                     </div>
                 </div>
                 <div class="field">
-                    <label for="admin-password">Password</label>
-                    <div class="field-input-wrap">
+                    <label for="admin-password">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                        Password
+                    </label>
+                    <div class="field-input-wrap field-input-wrap--password">
                         <input type="password" id="admin-password" name="password" autocomplete="current-password">
+                        <button type="button" class="field-toggle" id="toggle-password" aria-label="Show password" aria-pressed="false">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.9 10.9 0 0112 19.5C5 19.5 1.5 12 1.5 12a17.6 17.6 0 014.22-5.06M9.9 4.24A10.6 10.6 0 0112 4.5c7 0 10.5 7.5 10.5 7.5a17.7 17.7 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                        </button>
                     </div>
                 </div>
-                <button type="submit" class="btn-admin-signin">Sign In</button>
+                <button type="submit" class="btn-admin-signin" id="admin-submit">
+                    <span class="btn-admin-signin__label">Sign In</span>
+                    <span class="btn-admin-signin__spinner" aria-hidden="true"></span>
+                </button>
             </form>
 
-            <div class="login-divider"><span>or</span></div>
+            {% if sso_configured %}
+            <div class="login-divider rise-in rise-in--4"><span>or continue with</span></div>
 
             {% if sso_error %}
-            <div class="form-error">{{ sso_error }}</div>
+            <div class="auth-alert" role="alert">
+                <span class="auth-alert__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                </span>
+                <span>{{ sso_error }}</span>
+            </div>
             {% endif %}
 
-            {% if sso_configured %}
-            <a href="{{ url_for('sso.microsoft_login') }}" class="btn-microsoft btn-microsoft--lg">
+            <a href="{{ url_for('sso.microsoft_login') }}" class="btn-microsoft btn-microsoft--lg rise-in rise-in--4">
                 <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
                 Sign in with Microsoft
             </a>
-            {% else %}
-            <button type="button" class="btn-microsoft btn-microsoft--lg disabled" title="Microsoft Sign-In isn't configured yet">
-                <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
-                Sign in with Microsoft
-            </button>
-            <p class="login-card__hint">Microsoft Sign-In isn't set up on this portal yet.</p>
             {% endif %}
 
-            <a href="{{ url_for('portal') }}" class="login-manual-link">Continue to Registration Portal →</a>
+            <p class="login-card__trust rise-in rise-in--5"><span aria-hidden="true">🔒</span> Protected Administrative Access</p>
+
+            <a href="{{ url_for('portal') }}" class="login-manual-link rise-in rise-in--5">
+                Continue to Registration Portal <span class="login-manual-link__arrow">→</span>
+            </a>
         </section>
     </div>
 
@@ -90,6 +114,31 @@
                     e.preventDefault();
                     adminPass.focus();
                 }
+            });
+        }
+
+        // --- Password visibility toggle ---
+        const toggleBtn = document.getElementById("toggle-password");
+        if (toggleBtn && adminPass) {
+            toggleBtn.addEventListener("click", () => {
+                const showing = adminPass.type === "text";
+                adminPass.type = showing ? "password" : "text";
+                toggleBtn.setAttribute("aria-pressed", String(!showing));
+                toggleBtn.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+                toggleBtn.querySelector(".icon-eye").style.display = showing ? "" : "none";
+                toggleBtn.querySelector(".icon-eye-off").style.display = showing ? "none" : "";
+            });
+        }
+
+        // --- Loading state on submit (the form still submits normally --
+        // this just gives immediate feedback and prevents double-submits) ---
+        const adminForm = document.getElementById("admin-form");
+        const adminSubmit = document.getElementById("admin-submit");
+        if (adminForm && adminSubmit) {
+            adminForm.addEventListener("submit", () => {
+                if (adminSubmit.classList.contains("is-loading")) return;
+                adminSubmit.classList.add("is-loading");
+                adminSubmit.querySelector(".btn-admin-signin__label").textContent = "Signing you in…";
             });
         }
     </script>
