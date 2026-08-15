@@ -37,13 +37,23 @@
             <p class="success-sub" style="margin-top:-14px;">Your Track ID is <strong style="color:var(--mdx-indigo); font-family:var(--font-display); letter-spacing:0.04em;">{{ record['Track ID'] }}</strong> — save it to look up this Digital ID again later.</p>
         </div>
 
+        <div class="idcard-glow"></div>
         <div class="idcard-tilt-wrap" id="idcard-tilt-wrap">
             <div class="idcard-preview glass" id="idcard">
                 <div class="idcard__sheen" id="idcard-sheen"></div>
+                <div class="idcard-preview__shine" id="idcard-shine"></div>
+                <span class="idcard-preview__ribbon"><span class="dot"></span>Verified</span>
                 <img class="idcard-preview__img" src="{{ url_for('preview_card', token=token) }}" alt="Your Middlesex University Dubai Staff Digital ID">
             </div>
         </div>
-        <p class="idcard-preview__note">This is your actual Digital ID — exactly what downloads, prints, and gets added to your wallet.</p>
+
+        <div class="idcard__pills idcard__pills--summary">
+            <span class="idcard__pill idcard__pill--accent">Staff ID {{ record['Staff ID'] }}</span>
+            <span class="idcard__pill">{{ record['Department'] }}</span>
+            <span class="idcard__pill">{{ record['Employment Status'] }}</span>
+            <span class="idcard__pill">{{ record['Gender'] }}</span>
+        </div>
+        <p class="idcard-preview__note"><span class="idcard__secure"><span class="dot"></span>Secure Digital Identity</span> — this is your actual card, exactly what downloads, prints, and gets added to your wallet.</p>
 
         <div class="wallet-area">
             <h4>Take your ID everywhere</h4>

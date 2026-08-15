@@ -68,7 +68,8 @@ def login():
 @admin_bp.route("/logout")
 def logout():
     session.pop("is_admin", None)
-    return redirect(url_for("admin.login"))
+    session.pop("admin_username", None)
+    return redirect(url_for("index"))
 
 
 @admin_bp.route("/")
