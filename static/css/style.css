@@ -244,6 +244,7 @@ main, .site-header { position: relative; z-index: 1; }
     0 24px 64px rgba(47,37,82,0.22);
 }
 .login-card__head { margin-bottom: 22px; }
+.login-card__logo { display: block; max-width: 190px; width: 100%; height: auto; margin: 0 auto 18px; }
 .login-card h1 {
   font-family: var(--font-display); font-weight: 400; letter-spacing: 0.01em;
   font-size: clamp(1.3rem, 2.6vw, 1.55rem); margin: 0 0 8px; color: var(--mdx-indigo);
