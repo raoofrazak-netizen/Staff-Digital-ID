@@ -38,37 +38,12 @@
         </div>
 
         <div class="idcard-tilt-wrap" id="idcard-tilt-wrap">
-            <div class="idcard glass" id="idcard">
+            <div class="idcard-preview glass" id="idcard">
                 <div class="idcard__sheen" id="idcard-sheen"></div>
-                <div class="idcard__top">
-                    <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
-                    <span class="idcard__uni">Middlesex University Dubai</span>
-                </div>
-                <div class="idcard__subtitle">Staff Digital ID</div>
-
-                <div class="idcard__photo has-photo">
-                    <img src="{{ url_for('serve_photo', token=token) }}" alt="{{ record['First Name'] }} {{ record['Last Name'] }}">
-                </div>
-
-                <div class="idcard__name">{{ record['First Name'] }} {{ record['Last Name'] }}</div>
-                <div class="idcard__title">{{ record['Job Title'] }}</div>
-
-                <div class="idcard__pills">
-                    <span class="idcard__pill idcard__pill--accent">Staff ID {{ record['Staff ID'] }}</span>
-                    <span class="idcard__pill">{{ record['Department'] }}</span>
-                    <span class="idcard__pill">{{ record['Employment Status'] }}</span>
-                    <span class="idcard__pill">{{ record['Gender'] }}</span>
-                </div>
-
-                <div class="idcard__footer">
-                    <div class="idcard__scan-label">Scan to Save Staff Contact</div>
-                    <div class="qr-panel">
-                        <img src="{{ url_for('serve_qr', token=token) }}" alt="Staff contact QR code">
-                    </div>
-                    <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
-                </div>
+                <img class="idcard-preview__img" src="{{ url_for('preview_card', token=token) }}" alt="Your Middlesex University Dubai Staff Digital ID">
             </div>
         </div>
+        <p class="idcard-preview__note">This is your actual Digital ID — exactly what downloads, prints, and gets added to your wallet.</p>
 
         <div class="wallet-area">
             <h4>Take your ID everywhere</h4>
@@ -144,12 +119,6 @@
             tiltWrap.addEventListener("pointerleave", () => {
                 idcard.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
             });
-        }
-
-        const qrPanel = document.querySelector(".qr-panel");
-        if (qrPanel) {
-            window.setTimeout(() => qrPanel.classList.add("pulse"), 300);
-            window.setTimeout(() => qrPanel.classList.remove("pulse"), 750);
         }
 
         // --- Device-aware wallet button priority: on iOS/iPadOS the Apple

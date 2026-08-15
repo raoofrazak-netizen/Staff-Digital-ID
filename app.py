@@ -720,6 +720,26 @@ def serve_qr(token):
     return send_file(data, mimetype="image/png")
 
 
+@app.route("/preview/<token>")
+def preview_card(token):
+    """Serves the exact same rendered card image used by /download, inline
+    (not as an attachment) so the success page can show staff the real
+    final Digital ID -- not just a CSS approximation of it -- before they
+    download or add it to a wallet."""
+    record = find_digital_id_by_token(token)
+    if not record:
+        abort(404)
+
+    photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
+    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
+    card = render_card_png(record, photo_file, qr_file)
+
+    buf = io.BytesIO()
+    card.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(buf, mimetype="image/png", as_attachment=False)
+
+
 @app.route("/download/<token>")
 def download(token):
     record = find_digital_id_by_token(token)
