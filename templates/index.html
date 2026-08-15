@@ -36,7 +36,7 @@
         <span class="status-pill"><span class="dot"></span>Secure Digital Identity</span>
     </section>
 
-    {% if sso_configured %}
+    {% if show_sso_banner %}
     <section class="sso-banner glass-light rise-in rise-in--2">
         <div class="sso-banner__text">
             <strong>Staff of Middlesex University Dubai?</strong>
@@ -47,6 +47,12 @@
             Sign in with Microsoft
         </a>
     </section>
+    {% endif %}
+
+    {% if edit_record %}
+    <div class="sso-imported-note" style="max-width:1100px; margin:16px auto 0; text-align:center;">
+        Updating your existing Digital ID for {{ edit_record['First Name'] }} {{ edit_record['Last Name'] }}. Saving will update your current card — it won't create a new one.
+    </div>
     {% endif %}
 
     {% if sso_error %}
@@ -88,15 +94,16 @@
 
             <!-- New Registration -->
             <div class="tab-panel active" id="tab-register">
-                <h2>Create Your Digital ID</h2>
+                <h2>{{ 'Update Your Digital ID' if edit_record else 'Create Your Digital ID' }}</h2>
                 <p class="panel-sub">Fill in your details — the card (and QR) on the right update as you type.</p>
-                {% if sso_prefill %}
+                {% if sso_prefill and not edit_record %}
                 <p class="sso-imported-note" id="sso-imported-note">
                     Information imported from your Microsoft account. Please review and update your details before creating your Staff Digital ID.
                 </p>
                 {% endif %}
 
                 <form id="reg-form" action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="edit_token" value="{{ edit_record['Token'] if edit_record else '' }}">
                     <p class="form-section__title">Personal Information</p>
                     <div class="field-row">
                         <div class="field">
@@ -121,7 +128,8 @@
                             <div class="field-input-wrap">
                                 <input type="text" id="r-staff-id" name="staff_id" data-live="staff_id"
                                        placeholder="MDX00125"
-                                       value="{{ form.get('staff_id', '') if form else '' }}" required>
+                                       value="{{ form.get('staff_id', '') if form else '' }}" required
+                                       {% if edit_record %}readonly title="Staff ID can't be changed here"{% endif %}>
                             </div>
                         </div>
                         <div class="field">
@@ -203,7 +211,7 @@
                                 </div>
                                 <div class="photo-drop__progress"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"></circle></svg></div>
                                 <div class="photo-drop__burst" id="r-photo-burst"></div>
-                                <input type="file" id="r-photo" name="photo" accept="image/jpeg,image/png,image/webp" capture="user" aria-describedby="r-photo-error" required>
+                                <input type="file" id="r-photo" name="photo" accept="image/jpeg,image/png,image/webp" capture="user" aria-describedby="r-photo-error" {% if not edit_record %}required{% endif %}>
                             </div>
                             <div class="photo-field__actions">
                                 <p>Drag &amp; drop or browse — JPG, PNG, WebP, max 5MB.</p>
@@ -241,7 +249,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary"><span>Create Digital ID</span></button>
+                    <button type="submit" class="btn btn-primary"><span>{{ 'Save Changes' if edit_record else 'Create Digital ID' }}</span></button>
                 </form>
             </div>
 

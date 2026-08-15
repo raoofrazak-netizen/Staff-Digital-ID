@@ -80,20 +80,21 @@ def microsoft_callback():
     except Exception:
         photo_data_url = None
 
-    # Returning staff member: an Active Digital ID already linked to this
-    # Microsoft account (or, failing that, to the same Staff ID) means
-    # there's nothing to fill in -- send them straight to it.
-    existing = app_module.find_digital_id_by_ms_user_id(profile["ms_user_id"])
-    if not existing and profile.get("staff_id"):
-        existing = app_module.find_active_digital_id_by_staff(profile["staff_id"])
-    if existing and existing.get("Status") == "Active":
-        session["ms_user_id"] = profile["ms_user_id"]
-        return redirect(url_for("success", token=existing["Token"]))
-
-    # New (or not-yet-active) staff member: hand their known fields to the
-    # registration form. Kept in the session (not the URL) since it may
-    # contain a data: URL photo that's too large for a query string.
+    # Every sign-in lands on the welcome hub -- it looks up whether this
+    # Microsoft account (or, failing that, matching Staff ID) already has
+    # an active Digital ID and adapts what it shows accordingly. The
+    # profile/photo are kept in the session (not the URL) since the photo
+    # may be a data: URL too large for a query string, and /portal reads
+    # them back out if the visitor continues into registration from there.
     session["ms_user_id"] = profile["ms_user_id"]
     session["sso_prefill"] = profile
     session["sso_photo"] = photo_data_url
+    return redirect(url_for("account"))
+
+
+@sso_bp.route("/auth/logout")
+def microsoft_logout():
+    session.pop("ms_user_id", None)
+    session.pop("sso_prefill", None)
+    session.pop("sso_photo", None)
     return redirect(url_for("index"))

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Middlesex University Dubai Staff Digital ID</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Staff Digital ID Service</em>
+                </div>
+            </div>
+            <div class="nav__status" id="nav-status">
+                <span class="nav__status-dot" id="nav-status-dot"></span>
+                <span id="nav-status-text">Secure Staff Digital ID Portal</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-shell rise-in rise-in--2">
+        <section class="login-card glass">
+            <p class="hero-lite__eyebrow"><span></span>Welcome<span></span></p>
+            <h1>Your identity. Digitally elevated.</h1>
+            <p class="login-card__sub">Sign in with your Middlesex University Dubai Microsoft account to access your Staff Digital ID.</p>
+
+            {% if sso_error %}
+            <div class="form-error">{{ sso_error }}</div>
+            {% endif %}
+
+            {% if sso_configured %}
+            <a href="{{ url_for('sso.microsoft_login') }}" class="btn-microsoft btn-microsoft--lg">
+                <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+                Sign in with Microsoft
+            </a>
+            <div class="login-divider"><span>or</span></div>
+            <a href="{{ url_for('portal') }}" class="login-manual-link">Continue without Microsoft →</a>
+            {% else %}
+            <p class="wallet-note" style="margin:0 0 20px;">Microsoft Sign-In isn't set up on this portal yet — use the registration portal directly.</p>
+            <a href="{{ url_for('portal') }}" class="btn btn-primary" style="width:100%; justify-content:center;"><span>Continue to Registration Portal</span></a>
+            {% endif %}
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
+</body>
+</html>

@@ -183,6 +183,20 @@ def list_digital_ids(search=None):
         conn.close()
 
 
+def update_digital_id_fields(token, fields):
+    """fields: dict of SQL column names (from DIGITAL_ID_COLUMNS_SQL) -> new values."""
+    if not fields:
+        return
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            set_clause = ", ".join(f"{col} = %s" for col in fields)
+            cur.execute(f"UPDATE digital_ids SET {set_clause} WHERE token = %s", (*fields.values(), token))
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def update_digital_id_status(token, status):
     conn = get_connection()
     try:

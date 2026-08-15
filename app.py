@@ -255,6 +255,23 @@ def update_digital_id_status(token, status):
     wb.save(EXCEL_PATH)
 
 
+def update_digital_id_record(token, updates):
+    """updates: dict of DIGITAL_ID_COLUMNS display names -> new values."""
+    if storage.db_configured():
+        sql_by_display = dict(zip(storage.DIGITAL_ID_DISPLAY, storage.DIGITAL_ID_COLUMNS_SQL))
+        storage.update_digital_id_fields(token, {sql_by_display[k]: v for k, v in updates.items()})
+        return
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Digital_IDs"]
+    token_idx = DIGITAL_ID_COLUMNS.index("Token")
+    for row in ws.iter_rows(min_row=2):
+        if row[token_idx].value == token:
+            for key, value in updates.items():
+                row[DIGITAL_ID_COLUMNS.index(key)].value = value
+            break
+    wb.save(EXCEL_PATH)
+
+
 def regenerate_digital_id_qr(token):
     """Rebuilds the vCard QR for an existing Digital ID from its current
     record fields -- used by the admin 'Regenerate QR Code' action, e.g.
@@ -404,9 +421,20 @@ def _handle_submission():
     values = {field: (form.get(field) or "").strip() for field in REQUIRED_FIELDS}
     mobile_number = (form.get("mobile_number") or "").strip()
 
+    edit_token = (form.get("edit_token") or "").strip()
+    edit_record = None
+    if edit_token:
+        edit_record = find_digital_id_by_token(edit_token)
+        ms_session_id = session.get("ms_user_id")
+        if not edit_record or not ms_session_id or edit_record.get("Microsoft User ID") != ms_session_id:
+            abort(403)
+
     missing = [f for f in REQUIRED_FIELDS if not values[f]]
     photo_file = request.files.get("photo")
-    if not photo_file or not photo_file.filename:
+    photo_provided = bool(photo_file and photo_file.filename)
+    # A photo is required to create a new Digital ID, but editing an
+    # existing one can keep the photo already on file.
+    if not photo_provided and not edit_record:
         missing.append("photo")
 
     if missing:
@@ -414,12 +442,12 @@ def _handle_submission():
             "index.html",
             departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
             error=f"Missing required field(s): {', '.join(missing)}",
-            form=form,
+            form=form, edit_record=edit_record,
         ), 400
 
     ms_user_id = (session.get("ms_user_id") or "").strip()
 
-    if find_active_digital_id_by_staff(values["staff_id"]) or find_digital_id_by_ms_user_id(ms_user_id):
+    if not edit_record and (find_active_digital_id_by_staff(values["staff_id"]) or find_digital_id_by_ms_user_id(ms_user_id)):
         return render_template(
             "index.html",
             departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
@@ -427,17 +455,33 @@ def _handle_submission():
             form=form,
         ), 409
 
-    token = secrets.token_urlsafe(24)
-    track_id = generate_track_id()
+    token = edit_record["Token"] if edit_record else secrets.token_urlsafe(24)
 
-    photo_filename, photo_error = _validate_and_save_photo(photo_file, token)
-    if photo_error:
-        return render_template(
-            "index.html",
-            departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
-            error=photo_error,
-            form=form,
-        ), 400
+    photo_filename = edit_record.get("Photo Filename") if edit_record else None
+    if photo_provided:
+        photo_filename, photo_error = _validate_and_save_photo(photo_file, token)
+        if photo_error:
+            return render_template(
+                "index.html",
+                departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
+                error=photo_error,
+                form=form, edit_record=edit_record,
+            ), 400
+
+    if edit_record:
+        update_digital_id_record(token, {
+            "First Name": values["first_name"], "Last Name": values["last_name"],
+            "Email": values["email"], "Mobile Number": mobile_number,
+            "Department": values["department"], "Job Title": values["job_title"],
+            "Gender": values["gender"], "Employment Status": values["employment_status"],
+            "Photo Filename": photo_filename,
+        })
+        regenerate_digital_id_qr(token)
+        session.pop("sso_prefill", None)
+        session.pop("sso_photo", None)
+        return redirect(url_for("success", token=token))
+
+    track_id = generate_track_id()
 
     vcard_payload = build_vcard(
         first_name=values["first_name"], last_name=values["last_name"],
@@ -510,15 +554,79 @@ def healthz():
 
 @app.route("/")
 def index():
-    sso_prefill = session.pop("sso_prefill", None)
-    sso_photo = session.pop("sso_photo", None)
+    """Landing page: Microsoft sign-in first. Staff who'd rather not use
+    Microsoft (or whose account isn't in Entra ID yet) can still reach the
+    manual registration/Track ID lookup page directly via /portal."""
+    return render_template(
+        "login.html",
+        sso_configured=sso_config.is_enabled(),
+        sso_error=session.pop("sso_error", None),
+    )
+
+
+def _edit_prefill_profile(record):
+    return {
+        "first_name": record["First Name"], "last_name": record["Last Name"],
+        "staff_id": record["Staff ID"], "email": record["Email"],
+        "mobile_number": record.get("Mobile Number") or "",
+        "department": record["Department"], "job_title": record["Job Title"],
+        "gender": record.get("Gender") or "", "employment_status": record.get("Employment Status") or "",
+    }
+
+
+@app.route("/portal")
+def portal():
+    edit_token = request.args.get("edit")
+    edit_record = None
+    sso_prefill = None
+    sso_photo = None
+
+    if edit_token:
+        edit_record = find_digital_id_by_token(edit_token)
+        if not edit_record or edit_record.get("Microsoft User ID") != session.get("ms_user_id"):
+            abort(403)
+        sso_prefill = _edit_prefill_profile(edit_record)
+        if edit_record.get("Photo Filename"):
+            sso_photo = url_for("serve_photo", token=edit_token)
+    else:
+        sso_prefill = session.pop("sso_prefill", None)
+        sso_photo = session.pop("sso_photo", None)
+
     return render_template(
         "index.html",
         departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
-        sso_configured=sso_config.is_enabled(),
+        show_sso_banner=sso_config.is_enabled() and not session.get("ms_user_id") and not edit_record,
         sso_error=session.pop("sso_error", None),
         sso_prefill=sso_prefill,
         sso_photo=sso_photo,
+        edit_record=edit_record,
+    )
+
+
+@app.route("/account")
+def account():
+    """Post-sign-in welcome hub: greets the staff member and routes them to
+    either their existing Digital ID or into a prefilled registration form,
+    depending on whether one already exists."""
+    ms_user_id = session.get("ms_user_id")
+    if not ms_user_id:
+        return redirect(url_for("index"))
+
+    profile = session.get("sso_prefill") or {}
+    existing = find_digital_id_by_ms_user_id(ms_user_id)
+    if not existing and profile.get("staff_id"):
+        existing = find_active_digital_id_by_staff(profile["staff_id"])
+
+    display_name = profile.get("full_name") or profile.get("first_name") or ""
+    if existing and not display_name:
+        display_name = f"{existing['First Name']} {existing['Last Name']}".strip()
+
+    return render_template(
+        "account.html",
+        display_name=display_name or "there",
+        profile=profile,
+        photo=session.get("sso_photo"),
+        existing=existing if existing and existing.get("Status") == "Active" else None,
     )
 
 

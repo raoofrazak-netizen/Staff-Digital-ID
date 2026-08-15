@@ -702,13 +702,17 @@
             setVal("r-mobile", profile.mobile_number);
             setVal("r-job-title", profile.job_title);
 
-            const deptSelect = document.getElementById("r-department");
-            if (deptSelect && profile.department) {
-                const match = Array.from(deptSelect.options).find(
-                    (o) => o.value.toLowerCase() === profile.department.toLowerCase()
+            const selectByText = (id, value) => {
+                const el = document.getElementById(id);
+                if (!el || !value) return;
+                const match = Array.from(el.options).find(
+                    (o) => o.value.toLowerCase() === value.toLowerCase()
                 );
-                if (match) deptSelect.value = match.value;
-            }
+                if (match) el.value = match.value;
+            };
+            selectByText("r-department", profile.department);
+            selectByText("r-gender", profile.gender);
+            selectByText("r-employment-status", profile.employment_status);
 
             if (ssoPayload.photo) {
                 fetch(ssoPayload.photo)
