@@ -90,6 +90,12 @@ def init_db(sample_directory_rows):
                     redirect_uri TEXT, enabled BOOLEAN DEFAULT FALSE
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS activity_log (
+                    id SERIAL PRIMARY KEY,
+                    event_type TEXT NOT NULL, actor TEXT, detail TEXT, created_at TEXT
+                )
+            """)
             cur.execute("SELECT COUNT(*) FROM staff_directory")
             if cur.fetchone()[0] == 0:
                 for row in sample_directory_rows:
@@ -273,6 +279,35 @@ def save_sso_settings(tenant_id, client_id, client_secret_encrypted, redirect_ur
                     enabled = EXCLUDED.enabled
             """, (tenant_id, client_id, client_secret_encrypted, redirect_uri, enabled))
         conn.commit()
+    finally:
+        conn.close()
+
+
+def log_event(event_type, actor, detail, created_at):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO activity_log (event_type, actor, detail, created_at) VALUES (%s, %s, %s, %s)",
+                (event_type, actor, detail, created_at),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_activity_log(limit=200):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT event_type, actor, detail, created_at FROM activity_log ORDER BY id DESC LIMIT %s",
+                (limit,),
+            )
+            return [
+                {"Event": row[0], "Actor": row[1], "Detail": row[2], "Created At": row[3]}
+                for row in cur.fetchall()
+            ]
     finally:
         conn.close()
 

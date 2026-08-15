@@ -43,15 +43,25 @@ def admin_required(view):
 
 @admin_bp.route("/login", methods=["GET", "POST"])
 def login():
+    import app as app_module  # local import avoids a circular import with app.py
+
     error = None
+    source = request.form.get("source")
+
     if request.method == "POST":
+        username = request.form.get("username", "")
         if not (os.environ.get("ADMIN_USERNAME") and os.environ.get("ADMIN_PASSWORD")):
             error = "Admin login isn't configured yet -- set ADMIN_USERNAME and ADMIN_PASSWORD in .env."
-        elif _check_credentials(request.form.get("username", ""), request.form.get("password", "")):
+        elif _check_credentials(username, request.form.get("password", "")):
             session["is_admin"] = True
+            session["admin_username"] = username
+            app_module.log_event("admin_login", username, "Admin signed in")
             return redirect(request.args.get("next") or url_for("admin.dashboard"))
         else:
             error = "Invalid administrator username or password."
+
+    if source == "main":
+        return render_template("login.html", sso_configured=sso_config.is_enabled(), sso_error=None, admin_error=error)
     return render_template("admin_login.html", error=error)
 
 
@@ -117,6 +127,15 @@ def wallets():
     )
 
 
+@admin_bp.route("/activity")
+@admin_required
+def activity():
+    import app as app_module
+
+    entries = app_module.list_activity_log(300)
+    return render_template("admin_activity.html", entries=entries)
+
+
 @admin_bp.route("/staff")
 @admin_required
 def staff():
@@ -135,6 +154,11 @@ def set_status(token):
     new_status = request.form.get("status")
     if new_status in ("Active", "Suspended", "Deactivated", "Expired"):
         app_module.update_digital_id_status(token, new_status)
+        app_module.log_event(
+            "digital_id_status_changed",
+            session.get("admin_username", "admin"),
+            f"Status changed to {new_status} for token {token}",
+        )
     return redirect(request.referrer or url_for("admin.staff"))
 
 
@@ -144,4 +168,9 @@ def regenerate_qr(token):
     import app as app_module
 
     app_module.regenerate_digital_id_qr(token)
+    app_module.log_event(
+        "digital_id_qr_regenerated",
+        session.get("admin_username", "admin"),
+        f"QR code regenerated for token {token}",
+    )
     return redirect(request.referrer or url_for("admin.staff"))

@@ -55,6 +55,13 @@
                 <p>Search staff records, activate/deactivate IDs, and regenerate QR codes.</p>
                 <a href="{{ url_for('admin.staff') }}" class="btn btn-secondary"><span>Manage Staff IDs</span></a>
             </div>
+
+            <div class="admin-card glass">
+                <span class="status-chip ok">Audit Trail</span>
+                <h3>Activity Log</h3>
+                <p>Admin logins, staff Microsoft sign-ins, and Digital ID create/update history.</p>
+                <a href="{{ url_for('admin.activity') }}" class="btn btn-secondary"><span>View Activity Log</span></a>
+            </div>
         </div>
 
         <a class="back-link" href="{{ url_for('portal') }}">← Return to Portal</a>

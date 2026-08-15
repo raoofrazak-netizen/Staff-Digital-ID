@@ -50,11 +50,46 @@
             <p class="wallet-note" style="margin:0 0 20px;">Microsoft Sign-In isn't set up on this portal yet — use the registration portal directly.</p>
             <a href="{{ url_for('portal') }}" class="btn btn-primary" style="width:100%; justify-content:center;"><span>Continue to Registration Portal</span></a>
             {% endif %}
+
+            <div class="login-divider login-divider--admin"><span>Admin Sign In</span></div>
+
+            {% if admin_error %}
+            <div class="form-error">{{ admin_error }}</div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('admin.login') }}" class="admin-inline-form">
+                <input type="hidden" name="source" value="main">
+                <div class="field">
+                    <label for="admin-username">Username</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="admin-username" name="username" autocomplete="username"
+                               value="{{ request.form.get('username', '') if admin_error else '' }}">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="admin-password">Password</label>
+                    <div class="field-input-wrap">
+                        <input type="password" id="admin-password" name="password" autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn-admin-signin">Sign In</button>
+            </form>
         </section>
-        <a href="{{ url_for('admin.dashboard') }}" class="admin-entry-link">Admin</a>
     </div>
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
     <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
+    <script>
+        const adminUser = document.getElementById("admin-username");
+        const adminPass = document.getElementById("admin-password");
+        if (adminUser && adminPass) {
+            adminUser.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    adminPass.focus();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

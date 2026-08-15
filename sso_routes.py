@@ -80,6 +80,12 @@ def microsoft_callback():
     except Exception:
         photo_data_url = None
 
+    app_module.log_event(
+        "staff_sso_login",
+        profile.get("email") or profile.get("username") or profile.get("ms_user_id"),
+        f"Signed in via Microsoft ({profile.get('full_name') or profile.get('first_name') or ''})".strip(),
+    )
+
     # Every sign-in lands on the welcome hub -- it looks up whether this
     # Microsoft account (or, failing that, matching Staff ID) already has
     # an active Digital ID and adapts what it shows accordingly. The

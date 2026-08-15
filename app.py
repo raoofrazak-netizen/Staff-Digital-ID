@@ -73,6 +73,7 @@ DIGITAL_ID_COLUMNS = [
     "Photo Filename", "QR Filename", "Created At", "Status", "Microsoft User ID",
 ]
 DIGITAL_ID_STATUSES = ("Active", "Suspended", "Deactivated", "Expired")
+ACTIVITY_LOG_COLUMNS = ["Event", "Actor", "Detail", "Created At"]
 
 SAMPLE_DIRECTORY_ROWS = [
     ["MDX00001", "Sample", "Employee", "sample.employee@mdx.ac.ae",
@@ -98,6 +99,8 @@ def init_excel():
             ws_dir.append(row)
         ws_ids = wb.create_sheet("Digital_IDs")
         ws_ids.append(DIGITAL_ID_COLUMNS)
+        ws_log = wb.create_sheet("Activity_Log")
+        ws_log.append(ACTIVITY_LOG_COLUMNS)
         wb.save(EXCEL_PATH)
         return
 
@@ -133,6 +136,11 @@ def init_excel():
             ws = wb.create_sheet("Digital_IDs")
             ws.append(DIGITAL_ID_COLUMNS)
             changed = True
+
+    if "Activity_Log" not in wb.sheetnames:
+        ws = wb.create_sheet("Activity_Log")
+        ws.append(ACTIVITY_LOG_COLUMNS)
+        changed = True
 
     if "Sheet" in wb.sheetnames and not _sheet_has_data_rows(wb["Sheet"]) and wb["Sheet"]["A1"].value is None:
         wb.remove(wb["Sheet"])
@@ -253,6 +261,29 @@ def update_digital_id_status(token, status):
             row[status_idx].value = status
             break
     wb.save(EXCEL_PATH)
+
+
+def log_event(event_type, actor, detail):
+    """Append-only activity trail: admin logins, staff Microsoft sign-ins,
+    and Digital ID create/update events, surfaced on /admin/activity."""
+    created_at = datetime.now().isoformat(timespec="seconds")
+    if storage.db_configured():
+        storage.log_event(event_type, actor or "", detail or "", created_at)
+        return
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Activity_Log"]
+    ws.append([event_type, actor or "", detail or "", created_at])
+    wb.save(EXCEL_PATH)
+
+
+def list_activity_log(limit=200):
+    if storage.db_configured():
+        return storage.list_activity_log(limit)
+    wb = openpyxl.load_workbook(EXCEL_PATH)
+    ws = wb["Activity_Log"]
+    rows = list(_rows_as_dicts(ws, ACTIVITY_LOG_COLUMNS))
+    rows.sort(key=lambda r: r.get("Created At") or "", reverse=True)
+    return rows[:limit]
 
 
 def update_digital_id_record(token, updates):
@@ -477,6 +508,11 @@ def _handle_submission():
             "Photo Filename": photo_filename,
         })
         regenerate_digital_id_qr(token)
+        log_event(
+            "digital_id_updated",
+            session.get("ms_user_id") or edit_record["Staff ID"],
+            f"Digital ID updated for {edit_record['Staff ID']} ({values['first_name']} {values['last_name']})",
+        )
         session.pop("sso_prefill", None)
         session.pop("sso_photo", None)
         return redirect(url_for("success", token=token))
@@ -525,6 +561,11 @@ def _handle_submission():
         "Microsoft User ID": ms_user_id,
     }
     append_digital_id(record)
+    log_event(
+        "digital_id_created",
+        ms_user_id or values["staff_id"],
+        f"Digital ID created for {values['staff_id']} ({values['first_name']} {values['last_name']})",
+    )
     session.pop("sso_prefill", None)
     session.pop("sso_photo", None)
 
