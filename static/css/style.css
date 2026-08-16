@@ -403,13 +403,40 @@ main, .site-header { position: relative; z-index: 1; }
 .login-manual-link__arrow { display: inline-block; transition: transform var(--dur-fast) ease; }
 .login-manual-link:hover .login-manual-link__arrow { transform: translateX(3px); }
 
-/* ---- Right side: decorative sample Digital ID + ambient light trails ---- */
-.showcase-trails { position: absolute; inset: -60px -40px; z-index: 0; pointer-events: none; overflow: visible; }
+/* ---- Right side: decorative sample Digital ID + golden orbital glow ----
+   A warm radial halo plus two slow-rotating gradient "light ribbon"
+   orbits that wrap around the card, with a handful of twinkling
+   sparkle points -- reads as the warm, premium ambient light seen
+   wrapping around the card in the reference mockup. */
+.showcase-glow {
+  position: absolute; inset: -70px; z-index: -1; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,179,71,0.22), rgba(227,6,19,0.10) 45%, transparent 72%);
+  filter: blur(18px);
+}
+.showcase-trails { position: absolute; inset: -90px -70px; z-index: 0; pointer-events: none; overflow: visible; }
 .showcase-trails__svg { width: 100%; height: 100%; overflow: visible; }
-.trail { fill: none; stroke-width: 1.5; stroke-linecap: round; }
-.trail--1 { stroke: rgba(227,6,19,0.16); stroke-dasharray: 6 14; animation: trailFlow 14s linear infinite; }
-.trail--2 { stroke: rgba(255,255,255,0.6); stroke-dasharray: 4 16; animation: trailFlow 18s linear infinite reverse; }
-@keyframes trailFlow { to { stroke-dashoffset: -400; } }
+.orbit {
+  fill: none; stroke-width: 2.4; stroke-linecap: round; filter: url(#trailBlur);
+  transform-origin: center; transform-box: fill-box;
+}
+.orbit--1 { stroke: url(#trailGold1); stroke-dasharray: 60 18 10 22; animation: orbitSpin1 22s linear infinite; }
+.orbit--2 { stroke: url(#trailGold2); stroke-dasharray: 40 26; animation: orbitSpin2 28s linear infinite reverse; }
+@keyframes orbitSpin1 { to { stroke-dashoffset: -1400; } }
+@keyframes orbitSpin2 { to { stroke-dashoffset: 1200; } }
+
+.sparkle { fill: #fff3d6; filter: url(#trailBlur); animation: sparkleTwinkle 3.2s ease-in-out infinite; }
+.sparkle--1 { animation-delay: 0s; }
+.sparkle--2 { animation-delay: 0.4s; }
+.sparkle--3 { animation-delay: 0.8s; }
+.sparkle--4 { animation-delay: 1.2s; }
+.sparkle--5 { animation-delay: 1.6s; }
+.sparkle--6 { animation-delay: 2s; }
+.sparkle--7 { animation-delay: 2.4s; }
+.sparkle--8 { animation-delay: 2.8s; }
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
 
 .sample-id-wrap { position: relative; z-index: 1; perspective: 1000px; }
 
@@ -1315,7 +1342,7 @@ table.admin-table tr:hover td { background: rgba(255,255,255,0.4); }
   .rise-in { animation: riseInReduced 150ms linear both; }
   .sample-float { animation: none !important; transform: none !important; }
   .sample-idcard-flip { transition: none !important; }
-  .trail--1, .trail--2 { animation: none !important; }
+  .orbit, .sparkle { animation: none !important; }
   .login-brand__eyebrow span, .login-card__accent-line { animation: none !important; transform: scaleX(1) !important; }
 }
 @keyframes riseInReduced { from { opacity: 0; } to { opacity: 1; } }

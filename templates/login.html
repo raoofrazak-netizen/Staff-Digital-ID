@@ -143,10 +143,36 @@
 
             <!-- RIGHT: decorative sample Digital ID showcase -->
             <section class="login-showcase" aria-hidden="true">
+                <div class="showcase-glow"></div>
                 <div class="showcase-trails">
-                    <svg viewBox="0 0 400 500" class="showcase-trails__svg">
-                        <path class="trail trail--1" d="M40,460 C120,380 60,260 160,200 C240,150 220,60 320,30"/>
-                        <path class="trail trail--2" d="M370,470 C300,420 320,300 230,260 C150,220 150,120 70,70"/>
+                    <svg viewBox="0 0 460 560" class="showcase-trails__svg">
+                        <defs>
+                            <linearGradient id="trailGold1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ffd98a" stop-opacity="0"/>
+                                <stop offset="45%" stop-color="#ffb347" stop-opacity="0.9"/>
+                                <stop offset="100%" stop-color="#e30613" stop-opacity="0"/>
+                            </linearGradient>
+                            <linearGradient id="trailGold2" x1="100%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#fff3d6" stop-opacity="0"/>
+                                <stop offset="50%" stop-color="#ffe1a8" stop-opacity="0.85"/>
+                                <stop offset="100%" stop-color="#ff6b00" stop-opacity="0"/>
+                            </linearGradient>
+                            <filter id="trailBlur" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="2.2"/>
+                            </filter>
+                        </defs>
+                        <ellipse class="orbit orbit--1" cx="230" cy="280" rx="185" ry="230" transform="rotate(-8 230 280)"/>
+                        <ellipse class="orbit orbit--2" cx="230" cy="280" rx="150" ry="195" transform="rotate(12 230 280)"/>
+                        <g class="sparkles">
+                            <circle class="sparkle sparkle--1" cx="70" cy="120" r="2.6"/>
+                            <circle class="sparkle sparkle--2" cx="400" cy="90" r="2"/>
+                            <circle class="sparkle sparkle--3" cx="420" cy="330" r="2.4"/>
+                            <circle class="sparkle sparkle--4" cx="40" cy="380" r="2"/>
+                            <circle class="sparkle sparkle--5" cx="60" cy="470" r="2.6"/>
+                            <circle class="sparkle sparkle--6" cx="380" cy="480" r="2.2"/>
+                            <circle class="sparkle sparkle--7" cx="230" cy="40" r="2"/>
+                            <circle class="sparkle sparkle--8" cx="230" cy="540" r="2.2"/>
+                        </g>
                     </svg>
                 </div>
                 <div class="sample-id-wrap" id="sample-id-wrap">
