@@ -13,19 +13,22 @@ instanced to static TTF weights via fontTools since PIL can't load the
 woff2 originals. Arial is kept only as a last-resort fallback if that
 font file is missing.
 
-Note: the official template carries bilingual (English/Arabic) field
-labels. Rendering Arabic correctly in Pillow needs bidi reshaping
-(arabic-reshaper + python-bidi) that this project doesn't otherwise
-depend on, so the generated card intentionally renders English labels
-only -- adding those libraries purely for a duplicate label was judged
-not worth the extra dependency weight.
+Field labels are bilingual (English/Arabic), matching the official
+template. Arabic needs bidi reshaping to render as connected script
+instead of isolated letterforms -- arabic-reshaper + python-bidi handle
+that; the actual Arabic glyphs come from a bundled Noto Naskh Arabic
+TTF (SIL Open Font License) in static/fonts, since the self-hosted
+Archivo family is Latin-only and Vercel's Linux runtime has no system
+Arabic font (unlike a local Windows dev machine's Arial).
 """
 
 import io
 import os
 
+import arabic_reshaper
 import barcode
 from barcode.writer import ImageWriter
+from bidi.algorithm import get_display
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 MDX_RED = (227, 6, 19)
@@ -42,6 +45,7 @@ _ASSETS_DIR = os.path.join(_BASE_DIR, "static", "images")
 _FONTS_DIR = os.path.join(_BASE_DIR, "static", "fonts")
 _ARCHIVO_VAR = os.path.join(_FONTS_DIR, "archivo-var.ttf")
 _ARCHIVO_BLACK = os.path.join(_FONTS_DIR, "archivo-black.ttf")
+_NOTO_ARABIC = os.path.join(_FONTS_DIR, "noto-naskh-arabic.ttf")
 
 UNIVERSITY_ADDRESS_LINES = [
     "Dubai Knowledge Park Block 16",
@@ -82,6 +86,30 @@ def _monument(size):
         return _arial_fallback(True, size)
 
 
+def _arabic_font(size):
+    try:
+        return ImageFont.truetype(_NOTO_ARABIC, size)
+    except Exception:
+        return _arial_fallback(False, size)
+
+
+def _ar(text):
+    """Reshape + apply bidi so Arabic draws as connected script in the
+    correct visual order -- PIL has no bidi/shaping support of its own."""
+    return get_display(arabic_reshaper.reshape(text))
+
+
+def _draw_bilingual_label(draw, x, y, en_text, ar_text, size=15, fill=None):
+    """English label, then its Arabic translation alongside it -- mirrors
+    the official template's "LABEL/ARABIC" bilingual field headers."""
+    fill = fill or MDX_RED
+    en_font = _dax("Bold", size)
+    draw.text((x, y), en_text, font=en_font, fill=fill)
+    en_w = draw.textlength(en_text, font=en_font)
+    ar_font = _arabic_font(size)
+    draw.text((x + en_w + 8, y), _ar(ar_text), font=ar_font, fill=fill)
+
+
 def _wrap_text(draw, text, font, max_width):
     words = text.split()
     lines, current = [], ""
@@ -103,11 +131,17 @@ def _new_card():
 
 
 def _draw_logo(card, draw, top):
+    wordmark_font = _arabic_font(15)
+    wordmark = _ar("جامعة ميدلسكس دبي")
+    wordmark_w = draw.textlength(wordmark, font=wordmark_font)
+    draw.text(((CARD_W - wordmark_w) / 2, top), wordmark, font=wordmark_font, fill=TEXT_SECONDARY)
+    top += 24
+
     logo_path = os.path.join(_ASSETS_DIR, "mdx-logo.jpg")
     if not os.path.exists(logo_path):
         return top
     logo = Image.open(logo_path).convert("RGB")
-    logo_h = 92
+    logo_h = 88
     ratio = logo_h / logo.height
     logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
     card.paste(logo, ((CARD_W - logo.width) // 2, top))
@@ -143,8 +177,8 @@ def render_card_front(record, photo_file):
     card, draw = _new_card()
     margin = 42
 
-    y = _draw_logo(card, draw, 34)
-    y += 28
+    y = _draw_logo(card, draw, 14)
+    y += 22
 
     photo_w, photo_h = 168, 200
     photo_x, photo_y = margin, y
@@ -158,30 +192,28 @@ def render_card_front(record, photo_file):
     )
 
     field_x = photo_x + photo_w + 30
-    label_font = _dax("Bold", 15)
     value_font = _dax("Medium", 20)
     fields = [
-        ("ID NUMBER", record.get("Staff ID", "")),
-        ("GENDER", record.get("Gender") or "\u2014"),
-        ("EXPIRATION", "\u2014"),
+        ("ID NUMBER", "\u0631\u0642\u0645 \u0645\u0639\u0631\u0641", record.get("Staff ID", "")),
+        ("GENDER", "\u0627\u0644\u062c\u0646\u0633", record.get("Gender") or "\u2014"),
+        ("EXPIRATION", "\u0627\u0646\u0642\u0636\u0627\u0621", "\u2014"),
     ]
     field_y = photo_y + 6
-    for label, value in fields:
-        draw.text((field_x, field_y), label, font=label_font, fill=MDX_RED)
-        draw.text((field_x, field_y + 22), value, font=value_font, fill=BLACK)
+    for label, ar_label, value in fields:
+        _draw_bilingual_label(draw, field_x, field_y, label, ar_label, size=13)
+        draw.text((field_x, field_y + 20), value, font=value_font, fill=BLACK)
         field_y += 62
 
     name_y = photo_y + photo_h + 34
     name_font = _dax("Bold", 30)
-    jobtitle_label_font = _dax("Bold", 15)
     jobtitle_font = _dax("Medium", 22)
 
-    draw.text((margin, name_y), "NAME", font=label_font, fill=MDX_RED)
+    _draw_bilingual_label(draw, margin, name_y, "NAME", "\u0627\u0633\u0645", size=15)
     full_name = f"{record.get('First Name', '')} {record.get('Last Name', '')}".strip()
     draw.text((margin, name_y + 24), full_name, font=name_font, fill=BLACK)
 
     title_y = name_y + 84
-    draw.text((margin, title_y), "JOB TITLE", font=jobtitle_label_font, fill=MDX_RED)
+    _draw_bilingual_label(draw, margin, title_y, "JOB TITLE", "\u0627\u0644\u0648\u0638\u064a\u0641\u0629", size=15)
     job_title = record.get("Job Title", "")
     max_w = CARD_W - margin * 2
     for line in _wrap_text(draw, job_title, jobtitle_font, max_w)[:2]:
@@ -203,9 +235,30 @@ def _generate_barcode_image(staff_id, width):
     return img.resize((width, max(1, int(img.height * ratio))), Image.LANCZOS)
 
 
+def _draw_partner_mark(card, draw, x, y):
+    """A simple two-ring mark standing in for the Dubai Knowledge Park
+    'PARTNER' co-brand shown on the official card back."""
+    teal = (31, 122, 108)
+    r = 11
+    draw.ellipse([x, y, x + r * 2, y + r * 2], outline=teal, width=2)
+    draw.ellipse([x + r, y, x + r * 3, y + r * 2], outline=teal, width=2)
+    label_font = _dax("Bold", 10)
+    lines = ["DUBAI", "KNOWLEDGE PARK", "PARTNER"]
+    ly = y + r * 2 + 6
+    for line in lines:
+        w = draw.textlength(line, font=label_font)
+        draw.text((x + r * 2 - w / 2, ly), line, font=label_font, fill=teal)
+        ly += 13
+
+
 def render_card_back(record, qr_file):
     card, draw = _new_card()
     margin = 42
+
+    idref_font = _dax("Medium", 13)
+    idref_text = f"ID Ref# {record.get('Staff ID', '')}"
+    idref_w = draw.textlength(idref_text, font=idref_font)
+    draw.text((CARD_W - margin - idref_w, 26), idref_text, font=idref_font, fill=BLACK)
 
     terms_font = _dax("Regular", 15)
     y = 50
@@ -219,6 +272,7 @@ def render_card_back(record, qr_file):
     draw.line([(margin, y), (CARD_W - margin, y)], fill=LINE, width=2)
     y += 20
 
+    address_top = y
     address_name_font = _dax("Bold", 19)
     address_font = _dax("Regular", 16)
     draw.text((margin, y), "Middlesex University Dubai", font=address_name_font, fill=MDX_RED)
@@ -226,6 +280,8 @@ def render_card_back(record, qr_file):
     for line in UNIVERSITY_ADDRESS_LINES:
         draw.text((margin, y), line, font=address_font, fill=BLACK)
         y += 22
+
+    _draw_partner_mark(card, draw, CARD_W - margin - 90, address_top + 4)
 
     y += 24
     qr_size = 168

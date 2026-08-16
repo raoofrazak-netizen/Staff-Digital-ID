@@ -10,3 +10,5 @@ vercel==0.10.0
 msal==1.37.0
 requests==2.32.3
 python-barcode==0.15.1
+arabic-reshaper==3.0.1
+python-bidi==0.6.11

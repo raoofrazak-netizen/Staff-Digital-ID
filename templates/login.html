@@ -24,8 +24,8 @@
             <!-- LEFT: brand story -->
             <section class="login-brand-copy">
                 <p class="login-brand__eyebrow rise-in rise-in--2"><span aria-hidden="true"></span>Welcome to MDX Digital ID Service</p>
-                <h2 class="login-brand__headline rise-in rise-in--3">Your identity.<br>Digitally elevated.<br>Instantly connected.</h2>
-                <p class="login-brand__sub rise-in rise-in--4">Securely access, verify, and carry your Middlesex University Dubai staff identity in one intelligent digital credential.</p>
+                <h2 class="login-brand__headline rise-in rise-in--3">One credential.<br>Infinite access.<br>Always with you.</h2>
+                <p class="login-brand__sub rise-in rise-in--4">A single secure credential that opens doors, verifies who you are, and connects you to everything Middlesex University Dubai has to offer &mdash; instantly, anywhere.</p>
             </section>
 
             <section class="login-features">
@@ -159,6 +159,7 @@
                                  below are fictional sample data. -->
                             <div class="sample-idcard-face sample-idcard-face--front">
                                 <div class="sif-logo-row">
+                                    <bdi class="sif-arabic-wordmark">&#1580;&#1575;&#1605;&#1593;&#1577; &#1605;&#1610;&#1583;&#1604;&#1587;&#1603;&#1587; &#1583;&#1576;&#1610;</bdi>
                                     <img class="sif-logo" src="{{ url_for('static', filename='images/mdx-logo.jpg') }}" alt="Middlesex University Dubai">
                                 </div>
                                 <div class="sif-top-row">
@@ -180,6 +181,7 @@
                                 <div class="sif-band-grey">SAMPLE DEPARTMENT</div>
                             </div>
                             <div class="sample-idcard-face sample-idcard-face--back">
+                                <div class="sib-idref">ID Ref# MDX-00000</div>
                                 <div class="sib-it-fields">
                                     <div class="sib-it-field"><span>UK IT User ID:</span><strong>sample.user</strong></div>
                                     <div class="sib-it-field"><span>MISIS:</span><strong>&mdash;</strong></div>
@@ -188,13 +190,23 @@
                                 </div>
                                 <ul class="sib-terms">
                                     <li>This card is non-transferable.</li>
-                                    <li>Proof of employment at the university.</li>
-                                    <li>Surrender to I.T. Office upon leaving.</li>
+                                    <li>It serves as the bearer's proof of employment in the university.</li>
+                                    <li>It must be surrendered to the I.T. Office upon leaving the university.</li>
+                                    <li>If found, please contact and return to the address below.</li>
                                 </ul>
                                 <div class="sib-address">
-                                    <strong>Middlesex University Dubai</strong>
-                                    <span>Dubai Knowledge Park Block 16</span>
-                                    <span>PO Box 500697, Dubai, UAE</span>
+                                    <div class="sib-address__row">
+                                        <div class="sib-address__text">
+                                            <strong>Middlesex University Dubai</strong>
+                                            <span>Dubai Knowledge Park Block 16</span>
+                                            <span>PO Box 500697, Dubai, UAE</span>
+                                            <span>Tel. No. 04 367 8100</span>
+                                        </div>
+                                        <div class="sib-partner" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" class="sib-partner__mark"><circle cx="9" cy="12" r="6.5" fill="none" stroke="#1f7a6c" stroke-width="2.4"/><circle cx="15" cy="12" r="6.5" fill="none" stroke="#1f7a6c" stroke-width="2.4"/></svg>
+                                            <span class="sib-partner__text">DUBAI<br>KNOWLEDGE PARK<br><b>PARTNER</b></span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="sib-barcode" aria-hidden="true">
                                     <svg viewBox="0 0 160 40" preserveAspectRatio="none" class="sib-barcode__svg">
