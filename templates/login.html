@@ -57,7 +57,7 @@
                             <img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="" aria-hidden="true">
                         </span>
                         <h1>Admin Portal</h1>
-                        <p class="login-card__subtitle">Sign in to manage Microsoft SSO configuration and Staff Digital IDs.</p>
+                        <p class="login-card__subtitle">Staff Digital ID Application &bull; Admin Log In</p>
                         <p class="login-card__accent-line" aria-hidden="true"></p>
                     </div>
 
@@ -153,29 +153,43 @@
                     <div class="sample-float" id="sample-idcard">
                         <div class="sample-idcard-flip">
                             <div class="sample-idcard-face sample-idcard-face--front">
-                                <div class="sif-header">
-                                    <div class="sif-header__brand">
+                                <div class="sif-band sif-band--top">
+                                    <span class="sif-band__brand">
                                         <img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
-                                        <span>Middlesex<br>University Dubai</span>
-                                    </div>
-                                    <span class="sif-header__label">Staff Digital ID</span>
+                                        Middlesex<br>University Dubai
+                                    </span>
+                                    <span class="sif-band__label">Staff<br>Digital ID</span>
                                 </div>
-                                <div class="sif-rule"></div>
-                                <div class="sif-body">
-                                    <div class="sif-photo"></div>
-                                    <div class="sif-info">
-                                        <p class="sif-info__name">Sample Name</p>
-                                        <p class="sif-info__title">Sample Job Title</p>
-                                        <p class="sif-info__dept">Sample Department, MDX</p>
+                                <div class="sif-content">
+                                    <div class="sif-content-row">
+                                        <div class="sif-photo"></div>
+                                        <div class="sif-fields">
+                                            <div class="sif-field"><span class="sif-field__label">Name</span><span class="sif-field__value"></span></div>
+                                            <div class="sif-field"><span class="sif-field__label">Staff ID</span><span class="sif-field__value"></span></div>
+                                            <div class="sif-field"><span class="sif-field__label">Department</span><span class="sif-field__value"></span></div>
+                                        </div>
                                     </div>
-                                    <div class="sif-qr" aria-hidden="true">
-                                        <svg viewBox="0 0 60 60"><rect width="60" height="60" fill="#fff"/><g fill="#2f2552" opacity="0.85"><rect x="4" y="4" width="14" height="14"/><rect x="42" y="4" width="14" height="14"/><rect x="4" y="42" width="14" height="14"/><rect x="24" y="4" width="6" height="6"/><rect x="24" y="14" width="6" height="6"/><rect x="34" y="24" width="6" height="6"/><rect x="24" y="24" width="6" height="6"/><rect x="44" y="24" width="6" height="6"/><rect x="24" y="34" width="6" height="6"/><rect x="44" y="34" width="6" height="6"/><rect x="24" y="44" width="6" height="6"/><rect x="34" y="44" width="6" height="6"/></g></svg>
+                                    <div class="sif-qr-row">
+                                        <div class="sif-qr" aria-hidden="true">
+                                            <svg class="sif-qr__pattern" viewBox="0 0 100 100">
+                                                <rect width="100" height="100" rx="12" fill="#fff"/>
+                                                <g fill="#2f2552" opacity="0.85">
+                                                    <rect x="8" y="8" width="20" height="20" rx="6"/><rect x="13" y="13" width="10" height="10" rx="3" fill="#fff"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="#2f2552"/>
+                                                    <rect x="72" y="8" width="20" height="20" rx="6"/><rect x="77" y="13" width="10" height="10" rx="3" fill="#fff"/><rect x="79" y="15" width="6" height="6" rx="1.5" fill="#2f2552"/>
+                                                    <rect x="8" y="72" width="20" height="20" rx="6"/><rect x="13" y="77" width="10" height="10" rx="3" fill="#fff"/><rect x="15" y="79" width="6" height="6" rx="1.5" fill="#2f2552"/>
+                                                    <rect x="38" y="10" width="8" height="8" rx="2"/><rect x="50" y="10" width="8" height="8" rx="2"/>
+                                                    <rect x="38" y="38" width="8" height="8" rx="2"/><rect x="50" y="38" width="8" height="8" rx="2"/><rect x="62" y="38" width="8" height="8" rx="2"/>
+                                                    <rect x="72" y="50" width="8" height="8" rx="2"/><rect x="84" y="50" width="8" height="8" rx="2"/>
+                                                    <rect x="38" y="62" width="8" height="8" rx="2"/><rect x="62" y="62" width="8" height="8" rx="2"/>
+                                                    <rect x="10" y="50" width="8" height="8" rx="2"/><rect x="10" y="62" width="8" height="8" rx="2"/>
+                                                    <rect x="50" y="84" width="8" height="8" rx="2"/><rect x="62" y="84" width="8" height="8" rx="2"/><rect x="76" y="76" width="8" height="8" rx="2"/>
+                                                </g>
+                                            </svg>
+                                            <span class="sif-qr__badge"><img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt=""></span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="sif-footer">
-                                    <span>Middlesex University Dubai</span>
-                                    <span>www.mdx.ac.ae</span>
-                                </div>
+                                <div class="sif-band sif-band--bottom">Knowledge &bull; Innovation &bull; Opportunity</div>
                             </div>
                             <div class="sample-idcard-face sample-idcard-face--back">
                                 <img class="sib-watermark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">

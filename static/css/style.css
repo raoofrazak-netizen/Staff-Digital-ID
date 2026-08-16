@@ -228,10 +228,10 @@ main, .site-header { position: relative; z-index: 1; }
    branding -> brand story -> login card -> feature highlights -> sample ID. */
 .login-page { max-width: 1360px; margin: 0 auto; padding: 26px 24px 60px; min-height: 100vh; display: flex; flex-direction: column; }
 
-.login-topbar { display: flex; align-items: center; gap: 16px; }
-.login-topbar__logo { height: 32px; width: auto; flex: none; }
-.login-topbar__divider { width: 1px; height: 24px; background: var(--glass-border); flex: none; }
-.login-topbar__title { font-family: var(--font-display); font-weight: 400; font-size: 0.92rem; letter-spacing: 0.02em; color: var(--mdx-indigo); }
+.login-topbar { display: flex; align-items: center; gap: 20px; }
+.login-topbar__logo { height: 50px; width: auto; flex: none; }
+.login-topbar__divider { width: 1px; height: 36px; background: var(--glass-border); flex: none; }
+.login-topbar__title { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; letter-spacing: 0.015em; color: var(--mdx-indigo); }
 
 .login-grid {
   flex: 1; margin-top: clamp(24px, 5vh, 56px);
@@ -296,12 +296,12 @@ main, .site-header { position: relative; z-index: 1; }
 }
 .login-card__head { margin-bottom: 22px; }
 .login-card__emblem {
-  display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
-  width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.75);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 8px 18px rgba(47,37,82,0.12);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+  width: 84px; height: 84px; border-radius: 50%;
+  background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.8);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 10px 24px rgba(47,37,82,0.14);
 }
-.login-card__emblem img { width: 28px; height: 28px; }
+.login-card__emblem img { width: 52px; height: 52px; }
 .login-card h1 {
   font-family: var(--font-display); font-weight: 400; letter-spacing: 0.01em;
   font-size: clamp(1.3rem, 2.6vw, 1.55rem); margin: 0 0 8px; color: var(--mdx-indigo);
@@ -413,12 +413,13 @@ main, .site-header { position: relative; z-index: 1; }
 
 .sample-id-wrap { position: relative; z-index: 1; perspective: 1000px; }
 
-/* Real-card-proportioned sample (landscape business-card ratio), faded
-   fictional details throughout so it never reads as a genuine record.
-   Float animation lives on .sample-float; the 3D flip lives one level
-   deeper on .sample-idcard-flip, so the two transforms never fight. */
+/* Real-card-proportioned sample (portrait format matching the actual
+   rendered Digital ID: red header/footer bands), faded fictional
+   details throughout so it never reads as a genuine record. Float
+   animation lives on .sample-float; the 3D flip lives one level deeper
+   on .sample-idcard-flip, so the two transforms never fight. */
 .sample-float {
-  width: 300px; aspect-ratio: 1.58; position: relative; perspective: 1200px;
+  width: 270px; aspect-ratio: 0.94; position: relative; perspective: 1200px;
   animation: sampleFloat 7s ease-in-out infinite;
 }
 @keyframes sampleFloat {
@@ -437,33 +438,41 @@ main, .site-header { position: relative; z-index: 1; }
   border: 1px solid rgba(255,255,255,0.7);
 }
 .sample-idcard-face--front {
-  background: linear-gradient(160deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
-  padding: 16px 18px; display: flex; flex-direction: column;
+  background: linear-gradient(160deg, rgba(255,255,255,0.97), rgba(255,255,255,0.82));
+  display: flex; flex-direction: column;
 }
-.sif-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.sif-header__brand { display: flex; align-items: center; gap: 7px; }
-.sif-header__brand img { width: 20px; height: 20px; flex: none; }
-.sif-header__brand span { font-size: 0.56rem; font-weight: 800; line-height: 1.2; color: var(--mdx-indigo); opacity: 0.8; }
-.sif-header__label { font-size: 0.56rem; font-weight: 800; letter-spacing: 0.08em; color: var(--mdx-red); opacity: 0.85; white-space: nowrap; }
-.sif-rule { height: 1px; background: rgba(47,37,82,0.15); margin: 9px 0 11px; }
-.sif-body { display: flex; gap: 10px; align-items: flex-start; flex: 1; }
+.sif-band {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 14px; background: linear-gradient(120deg, var(--mdx-red), var(--mdx-red-dark));
+}
+.sif-band--bottom { justify-content: center; padding: 9px 12px; }
+.sif-band__brand { display: flex; align-items: center; gap: 8px; font-size: 0.62rem; font-weight: 800; line-height: 1.2; color: #fff; }
+.sif-band__brand img { width: 22px; height: 22px; flex: none; }
+.sif-band__label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; line-height: 1.25; color: #fff; text-align: right; }
+.sif-band--bottom { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; color: #fff; opacity: 0.95; }
+.sif-content { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 6px; }
+.sif-content-row { display: flex; gap: 12px; align-items: flex-start; }
 .sif-photo {
-  width: 44px; height: 44px; border-radius: 50%; flex: none; border: 2px solid #fff; opacity: 0.8;
+  width: 48px; height: 48px; border-radius: 50%; flex: none; border: 2px solid #fff; opacity: 0.75;
   box-shadow: var(--shadow-soft);
   background:
-    radial-gradient(circle at 50% 32%, rgba(47,37,82,0.2) 8px, transparent 9px),
-    radial-gradient(ellipse 16px 11px at 50% 80%, rgba(47,37,82,0.2) 99%, transparent 100%),
+    radial-gradient(circle at 50% 32%, rgba(47,37,82,0.2) 9px, transparent 10px),
+    radial-gradient(ellipse 18px 12px at 50% 80%, rgba(47,37,82,0.2) 99%, transparent 100%),
     rgba(47,37,82,0.06);
 }
-.sif-info { flex: 1; min-width: 0; text-align: left; }
-.sif-info__name { font-size: 0.8rem; font-weight: 800; color: var(--mdx-indigo); opacity: 0.6; filter: blur(0.3px); margin: 0 0 2px; }
-.sif-info__title { font-size: 0.64rem; font-weight: 700; color: var(--mdx-red); opacity: 0.65; margin: 0 0 2px; }
-.sif-info__dept { font-size: 0.6rem; color: var(--text-muted); opacity: 0.65; margin: 0; }
-.sif-qr { width: 42px; height: 42px; flex: none; border-radius: 6px; overflow: hidden; opacity: 0.85; }
-.sif-footer {
-  margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(47,37,82,0.15);
-  display: flex; justify-content: space-between; font-size: 0.52rem; color: var(--text-muted); opacity: 0.6;
+.sif-fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding-top: 2px; text-align: left; }
+.sif-field { display: flex; flex-direction: column; gap: 3px; }
+.sif-field__label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.03em; color: var(--mdx-red); opacity: 0.75; }
+.sif-field__value { display: block; height: 6px; width: 72%; border-radius: 3px; background: rgba(47,37,82,0.1); }
+.sif-qr-row { display: flex; justify-content: flex-end; }
+.sif-qr { position: relative; width: 58px; height: 58px; border-radius: 10px; overflow: hidden; opacity: 0.92; box-shadow: 0 4px 10px rgba(47,37,82,0.12); }
+.sif-qr__pattern { width: 100%; height: 100%; display: block; }
+.sif-qr__badge {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--mdx-red);
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
+.sif-qr__badge img { width: 14px; height: 14px; }
 .sample-idcard-face--back {
   transform: rotateY(180deg);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
