@@ -1007,7 +1007,7 @@ main, .site-header { position: relative; z-index: 1; }
 }
 .result-card-wrap { position: relative; z-index: 1; perspective: 1200px; max-width: 560px; margin: 0 auto; }
 .result-card {
-  position: relative; overflow: hidden; border-radius: 22px; padding: 8px;
+  position: relative; border-radius: 22px; padding: 8px;
   background: linear-gradient(160deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8));
   box-shadow:
     0 2px 4px rgba(47,37,82,0.06),
@@ -1015,6 +1015,11 @@ main, .site-header { position: relative; z-index: 1; }
     0 32px 60px rgba(47,37,82,0.16),
     inset 0 1px 0 rgba(255,255,255,0.9);
   transition: transform 0.4s var(--ease-spring);
+  /* transform-style: preserve-3d is required here for the nested
+     .result-card-flip's rotateY to render as true 3D rather than being
+     flattened into this element's plane -- but per spec, overflow other
+     than visible silently forces transform-style back to flat, which is
+     why this rule must NOT also set overflow: hidden. */
   transform-style: preserve-3d; will-change: transform;
 }
 .result-card-flip {
