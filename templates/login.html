@@ -150,22 +150,39 @@
                     </svg>
                 </div>
                 <div class="sample-id-wrap" id="sample-id-wrap">
-                    <div class="sample-idcard" id="sample-idcard">
-                        <div class="sample-idcard__band">
-                            <span class="sample-idcard__band-label">STAFF DIGITAL ID</span>
-                        </div>
-                        <div class="sample-idcard__body">
-                            <div class="sample-idcard__photo"></div>
-                            <p class="sample-idcard__name">A. Sample</p>
-                            <p class="sample-idcard__role">Faculty of Sample Studies</p>
-                            <div class="sample-idcard__pills">
-                                <span class="sample-idcard__pill">MDX00000</span>
-                                <span class="sample-idcard__pill">Active</span>
+                    <div class="sample-float" id="sample-idcard">
+                        <div class="sample-idcard-flip">
+                            <div class="sample-idcard-face sample-idcard-face--front">
+                                <div class="sif-header">
+                                    <div class="sif-header__brand">
+                                        <img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
+                                        <span>Middlesex<br>University Dubai</span>
+                                    </div>
+                                    <span class="sif-header__label">Staff Digital ID</span>
+                                </div>
+                                <div class="sif-rule"></div>
+                                <div class="sif-body">
+                                    <div class="sif-photo"></div>
+                                    <div class="sif-info">
+                                        <p class="sif-info__name">Sample Name</p>
+                                        <p class="sif-info__title">Sample Job Title</p>
+                                        <p class="sif-info__dept">Sample Department, MDX</p>
+                                    </div>
+                                    <div class="sif-qr" aria-hidden="true">
+                                        <svg viewBox="0 0 60 60"><rect width="60" height="60" fill="#fff"/><g fill="#2f2552" opacity="0.85"><rect x="4" y="4" width="14" height="14"/><rect x="42" y="4" width="14" height="14"/><rect x="4" y="42" width="14" height="14"/><rect x="24" y="4" width="6" height="6"/><rect x="24" y="14" width="6" height="6"/><rect x="34" y="24" width="6" height="6"/><rect x="24" y="24" width="6" height="6"/><rect x="44" y="24" width="6" height="6"/><rect x="24" y="34" width="6" height="6"/><rect x="44" y="34" width="6" height="6"/><rect x="24" y="44" width="6" height="6"/><rect x="34" y="44" width="6" height="6"/></g></svg>
+                                    </div>
+                                </div>
+                                <div class="sif-footer">
+                                    <span>Middlesex University Dubai</span>
+                                    <span>www.mdx.ac.ae</span>
+                                </div>
                             </div>
-                            <div class="sample-idcard__qr" aria-hidden="true">
-                                <svg viewBox="0 0 60 60"><rect width="60" height="60" fill="#fff"/><g fill="#2f2552" opacity="0.75"><rect x="4" y="4" width="14" height="14"/><rect x="42" y="4" width="14" height="14"/><rect x="4" y="42" width="14" height="14"/><rect x="24" y="4" width="6" height="6"/><rect x="24" y="14" width="6" height="6"/><rect x="34" y="24" width="6" height="6"/><rect x="24" y="24" width="6" height="6"/><rect x="44" y="24" width="6" height="6"/><rect x="24" y="34" width="6" height="6"/><rect x="44" y="34" width="6" height="6"/><rect x="24" y="44" width="6" height="6"/><rect x="34" y="44" width="6" height="6"/></g></svg>
+                            <div class="sample-idcard-face sample-idcard-face--back">
+                                <img class="sib-watermark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
+                                <p class="sib-title">Digital Identity</p>
+                                <p class="sib-sub">Sample Preview</p>
+                                <p class="sib-badge"><span aria-hidden="true">🔒</span> Verified &amp; Secure</p>
                             </div>
-                            <p class="sample-idcard__footer">Middlesex University Dubai — Sample Preview</p>
                         </div>
                     </div>
                 </div>
