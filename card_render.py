@@ -255,34 +255,38 @@ def _generate_barcode_image(staff_id, width):
 
 
 def _draw_partner_mark(card, draw, right_x, y):
-    """A bordered badge with a small teal mark and the 'DUBAI KNOWLEDGE
-    PARK' wordmark, standing in for the co-brand shown on the official
-    card back. right_x is the badge's right edge (it's right-aligned
-    against the card's margin, like the address block above it)."""
-    teal = (31, 122, 108)
-    label_font = _dax("Bold", 11)
-    label = "DUBAI KNOWLEDGE PARK"
-    label_w = draw.textlength(label, font=label_font)
+    """The Dubai Knowledge Park co-brand mark shown on the official card
+    back: a teal three-loop knot icon beside a stacked "DUBAI / KNOWLEDGE
+    / PARK" wordmark in dark charcoal (no border/box -- plain, like the
+    real lockup). right_x is the mark's right edge, right-aligned against
+    the card's margin like the address block above it."""
+    teal = (23, 106, 93)
+    text_color = (58, 58, 58)
+    lines = ["DUBAI", "KNOWLEDGE", "PARK"]
+    label_font = _monument(11)
+    line_h = 13
+    text_block_h = line_h * len(lines)
+    gap = 8
 
-    icon_d = 18
-    pad_x, gap = 10, 6
-    badge_w = pad_x + icon_d + gap + label_w + pad_x
-    badge_h = 30
-    x = right_x - badge_w
+    label_w = max(draw.textlength(line, font=label_font) for line in lines)
+    icon_d = text_block_h
+    total_w = icon_d + gap + label_w
+    x0 = right_x - total_w
 
-    draw.rounded_rectangle(
-        [x, y, x + badge_w, y + badge_h], radius=badge_h / 2,
-        outline=(205, 200, 195), width=1, fill=(255, 255, 255),
-    )
+    icon_cx, icon_cy = x0 + icon_d / 2, y + text_block_h / 2
+    r = icon_d * 0.3
+    offset = r * 1.05
+    ring_centers = [
+        (icon_cx, icon_cy - offset),
+        (icon_cx - offset * 0.87, icon_cy + offset * 0.5),
+        (icon_cx + offset * 0.87, icon_cy + offset * 0.5),
+    ]
+    for cx, cy in ring_centers:
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline=teal, width=2)
 
-    icon_x, icon_y = x + pad_x, y + (badge_h - icon_d) / 2
-    r = icon_d / 2.6
-    draw.ellipse([icon_x, icon_y + (icon_d - r * 2) / 2, icon_x + r * 2, icon_y + (icon_d + r * 2) / 2], outline=teal, width=2)
-    draw.ellipse([icon_x + icon_d - r * 2, icon_y + (icon_d - r * 2) / 2, icon_x + icon_d, icon_y + (icon_d + r * 2) / 2], outline=teal, width=2)
-
-    text_x = icon_x + icon_d + gap
-    text_h = label_font.getbbox(label)[3] - label_font.getbbox(label)[1]
-    draw.text((text_x, y + (badge_h - text_h) / 2 - 2), label, font=label_font, fill=(26, 24, 34))
+    text_x = x0 + icon_d + gap
+    for i, line in enumerate(lines):
+        draw.text((text_x, y + i * line_h), line, font=label_font, fill=text_color)
 
 
 def render_card_back(record):
