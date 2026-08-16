@@ -946,21 +946,47 @@ main, .site-header { position: relative; z-index: 1; }
 .idcard {
   width: 100%; margin: 0 auto; max-width: 320px;
   border-radius: var(--radius-lg);
-  padding: 28px 26px;
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  overflow: hidden; position: relative;
+  position: relative;
   background: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55));
   transition: transform 0.35s var(--ease-spring);
+  /* transform-style: preserve-3d is required here so the nested
+     .idcard-flip's rotateY renders as true 3D rather than being
+     flattened into this element's plane -- which is exactly why this
+     rule must NOT also carry overflow: hidden (see the identical note
+     on .result-card in the success-page styles below). */
   transform-style: preserve-3d; will-change: transform;
 }
 .idcard__sheen {
-  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  position: absolute; inset: 0; pointer-events: none; z-index: 2; border-radius: inherit;
   background: radial-gradient(480px circle at var(--gx, 50%) var(--gy, 0%), rgba(255,255,255,0.55), transparent 55%);
   opacity: 0; transition: opacity var(--dur-fast) ease;
 }
 .idcard-tilt-wrap:hover .idcard__sheen { opacity: 1; }
 .idcard.updated { animation: cardPulse 0.5s var(--ease-spring); }
 @keyframes cardPulse { 0% { transform: scale(1); } 40% { transform: scale(1.015); } 100% { transform: scale(1); } }
+
+.idcard-flip {
+  position: relative; width: 100%;
+  transform-style: preserve-3d; transition: transform 0.9s var(--ease-spring);
+}
+.idcard-tilt-wrap:hover .idcard-flip { transform: rotateY(180deg); }
+.idcard-face {
+  border-radius: inherit; padding: 28px 26px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.idcard-face--front { position: relative; overflow: hidden; }
+.idcard-face--back {
+  position: absolute; inset: 0; overflow: hidden; transform: rotateY(180deg);
+  background: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55));
+  justify-content: center;
+}
+.idcard-back__title { font-family: var(--font-display); font-weight: 400; font-size: 1rem; color: var(--mdx-indigo); margin: 0 0 18px; }
+.idcard-back__row { width: 100%; padding: 9px 0; border-bottom: 1px dashed rgba(47,37,82,0.14); }
+.idcard-back__row:last-of-type { border-bottom: none; }
+.idcard-back__label { display: block; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--mdx-red); }
+.idcard-back__value { display: block; font-size: 0.86rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; word-break: break-word; }
+.idcard-back__secure { margin-top: 18px; }
 
 /* ============ Digital ID result page (premium redesign) ============ */
 .result-shell { max-width: 640px; margin: 0 auto; padding: 40px 20px 90px; text-align: center; position: relative; z-index: 1; }

@@ -390,35 +390,63 @@
                 <div class="idcard-tilt-wrap" id="idcard-tilt-wrap">
                     <div class="idcard" id="idcard">
                         <div class="idcard__sheen" id="idcard-sheen"></div>
-                        <div class="idcard__top">
-                            <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
-                            <span class="idcard__uni">Middlesex University Dubai</span>
-                        </div>
-                        <div class="idcard__subtitle">Staff Digital ID</div>
+                        <div class="idcard-flip" id="idcard-flip">
+                            <div class="idcard-face idcard-face--front">
+                                <div class="idcard__top">
+                                    <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
+                                    <span class="idcard__uni">Middlesex University Dubai</span>
+                                </div>
+                                <div class="idcard__subtitle">Staff Digital ID</div>
 
-                        <div class="idcard__photo" id="live-photo-box">
-                            <img id="live-photo" alt="">
-                        </div>
+                                <div class="idcard__photo" id="live-photo-box">
+                                    <img id="live-photo" alt="">
+                                </div>
 
-                        <div class="idcard__name" id="live-name">Your Name</div>
-                        <div class="idcard__title" id="live-title">Job title</div>
+                                <div class="idcard__name" id="live-name">Your Name</div>
+                                <div class="idcard__title" id="live-title">Job title</div>
 
-                        <div class="idcard__pills">
-                            <span class="idcard__pill idcard__pill--accent" id="live-staff-id">Staff ID —</span>
-                            <span class="idcard__pill" id="live-dept">Department</span>
-                            <span class="idcard__pill" id="live-status">Employment Status</span>
-                            <span class="idcard__pill" id="live-gender">—</span>
-                            <span class="idcard__pill" id="live-mobile" style="display:none;"></span>
-                        </div>
+                                <div class="idcard__pills">
+                                    <span class="idcard__pill idcard__pill--accent" id="live-staff-id">Staff ID —</span>
+                                    <span class="idcard__pill" id="live-dept">Department</span>
+                                    <span class="idcard__pill" id="live-status">Employment Status</span>
+                                    <span class="idcard__pill" id="live-gender">—</span>
+                                    <span class="idcard__pill" id="live-mobile" style="display:none;"></span>
+                                </div>
 
-                        <div class="idcard__footer">
-                            <div class="idcard__scan-label">Scan to Save Staff Contact</div>
-                            <div class="qr-panel" id="qr-panel">
-                                <span class="qr-badge">Preview</span>
-                                <div class="qr-placeholder" id="qr-placeholder">Fill in your name &amp; ID</div>
-                                <img class="qr-live-img" id="qr-live-img" alt="Staff contact QR code" style="display:none;">
+                                <div class="idcard__footer">
+                                    <div class="idcard__scan-label">Scan to Save Staff Contact</div>
+                                    <div class="qr-panel" id="qr-panel">
+                                        <span class="qr-badge">Preview</span>
+                                        <div class="qr-placeholder" id="qr-placeholder">Fill in your name &amp; ID</div>
+                                        <img class="qr-live-img" id="qr-live-img" alt="Staff contact QR code" style="display:none;">
+                                    </div>
+                                    <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
+                                </div>
                             </div>
-                            <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
+                            <div class="idcard-face idcard-face--back">
+                                <p class="idcard-back__title">Registration Details</p>
+                                <div class="idcard-back__row">
+                                    <span class="idcard-back__label">Email</span>
+                                    <span class="idcard-back__value" id="live-email">—</span>
+                                </div>
+                                <div class="idcard-back__row">
+                                    <span class="idcard-back__label">Mobile Number</span>
+                                    <span class="idcard-back__value" id="live-mobile-back">—</span>
+                                </div>
+                                <div class="idcard-back__row">
+                                    <span class="idcard-back__label">Department</span>
+                                    <span class="idcard-back__value" id="live-dept-back">—</span>
+                                </div>
+                                <div class="idcard-back__row">
+                                    <span class="idcard-back__label">Employment Status</span>
+                                    <span class="idcard-back__value" id="live-status-back">—</span>
+                                </div>
+                                <div class="idcard-back__row">
+                                    <span class="idcard-back__label">Gender</span>
+                                    <span class="idcard-back__value" id="live-gender-back">—</span>
+                                </div>
+                                <div class="idcard__secure idcard-back__secure"><span class="dot"></span>Secure Digital Identity</div>
+                            </div>
                         </div>
                     </div>
                 </div>

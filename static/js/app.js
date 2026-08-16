@@ -89,6 +89,11 @@
     const liveMobile = document.getElementById("live-mobile");
     const livePhoto = document.getElementById("live-photo");
     const livePhotoBox = document.getElementById("live-photo-box");
+    const liveEmail = document.getElementById("live-email");
+    const liveMobileBack = document.getElementById("live-mobile-back");
+    const liveDeptBack = document.getElementById("live-dept-back");
+    const liveStatusBack = document.getElementById("live-status-back");
+    const liveGenderBack = document.getElementById("live-gender-back");
 
     function fieldValue(name) {
         const panel = document.querySelector(".tab-panel.active");
@@ -129,6 +134,11 @@
             liveMobile.style.display = mobile ? "" : "none";
             if (mobile) setTextIfChanged(liveMobile, mobile);
         }
+        if (liveEmail) setTextIfChanged(liveEmail, email || "—");
+        if (liveMobileBack) setTextIfChanged(liveMobileBack, mobile || "—");
+        if (liveDeptBack) setTextIfChanged(liveDeptBack, department || "—");
+        if (liveStatusBack) setTextIfChanged(liveStatusBack, employmentStatus || "—");
+        if (liveGenderBack) setTextIfChanged(liveGenderBack, gender || "—");
         bumpCard();
         updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email || "", mobile || "");
         updateStepper();

@@ -225,7 +225,7 @@ def render_card_front(record, photo_file, qr_file=None):
     # empty on the official layout -- the vCard QR fills it naturally
     # rather than crowding the ID/Gender/Expiration column above.
     qr_size = 190
-    qr_y = title_y + 44
+    qr_y = title_y + 110
     qr_x = (CARD_W - qr_size) // 2
     draw.rounded_rectangle(
         [qr_x - 8, qr_y - 8, qr_x + qr_size + 8, qr_y + qr_size + 8],
@@ -316,7 +316,7 @@ def render_card_back(record):
 
     _draw_partner_mark(card, draw, CARD_W - margin - 90, address_top + 4)
 
-    y += 40
+    y += 170
     barcode_img = _generate_barcode_image(record.get("Staff ID", ""), CARD_W - margin * 2)
     card.paste(barcode_img, (margin, y))
     y += barcode_img.height + 6
