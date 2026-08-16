@@ -9,3 +9,4 @@ psycopg2-binary==2.9.9
 vercel==0.10.0
 msal==1.37.0
 requests==2.32.3
+python-barcode==0.15.1

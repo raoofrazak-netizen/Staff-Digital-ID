@@ -419,7 +419,7 @@ main, .site-header { position: relative; z-index: 1; }
    animation lives on .sample-float; the 3D flip lives one level deeper
    on .sample-idcard-flip, so the two transforms never fight. */
 .sample-float {
-  width: 270px; aspect-ratio: 0.94; position: relative; perspective: 1200px;
+  width: 210px; aspect-ratio: 0.6275; position: relative; perspective: 1200px;
   animation: sampleFloat 7s ease-in-out infinite;
 }
 @keyframes sampleFloat {
@@ -437,53 +437,61 @@ main, .site-header { position: relative; z-index: 1; }
   box-shadow: 0 2px 4px rgba(47,37,82,0.06), 0 20px 44px rgba(47,37,82,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
   border: 1px solid rgba(255,255,255,0.7);
 }
-.sample-idcard-face--front {
-  background: linear-gradient(160deg, rgba(255,255,255,0.97), rgba(255,255,255,0.82));
-  display: flex; flex-direction: column;
+/* Front/back faces mirror the official MDX Staff ID badge template
+   (portrait CR80 card, 2.125in x 3.375in): plain white body, bilingual
+   red field labels, a photo box, and a solid grey category/website bar
+   top-to-bottom -- no invented red banners. */
+.sample-idcard-face--front, .sample-idcard-face--back {
+  background: #fdfdfd; display: flex; flex-direction: column; padding: 10px 12px 0;
 }
-.sif-band {
-  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 10px 14px; background: linear-gradient(120deg, var(--mdx-red), var(--mdx-red-dark));
-}
-.sif-band--bottom { justify-content: center; padding: 9px 12px; }
-.sif-band__brand { display: flex; align-items: center; gap: 8px; font-size: 0.62rem; font-weight: 800; line-height: 1.2; color: #fff; }
-.sif-band__brand img { width: 22px; height: 22px; flex: none; }
-.sif-band__label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; line-height: 1.25; color: #fff; text-align: right; }
-.sif-band--bottom { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; color: #fff; opacity: 0.95; }
-.sif-content { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 6px; }
-.sif-content-row { display: flex; gap: 12px; align-items: flex-start; }
+.sample-idcard-face--back { transform: rotateY(180deg); }
+.sif-logo-row { flex: none; display: flex; justify-content: center; padding: 4px 0 8px; }
+.sif-logo { height: 30px; width: auto; opacity: 0.92; }
+.sif-top-row { display: flex; gap: 8px; align-items: flex-start; }
 .sif-photo {
-  width: 48px; height: 48px; border-radius: 50%; flex: none; border: 2px solid #fff; opacity: 0.75;
-  box-shadow: var(--shadow-soft);
+  width: 44px; height: 52px; border-radius: 4px; flex: none; border: 1px solid rgba(47,37,82,0.18); opacity: 0.7;
   background:
-    radial-gradient(circle at 50% 32%, rgba(47,37,82,0.2) 9px, transparent 10px),
-    radial-gradient(ellipse 18px 12px at 50% 80%, rgba(47,37,82,0.2) 99%, transparent 100%),
-    rgba(47,37,82,0.06);
+    radial-gradient(circle at 50% 34%, rgba(47,37,82,0.22) 8px, transparent 9px),
+    radial-gradient(ellipse 17px 11px at 50% 82%, rgba(47,37,82,0.22) 99%, transparent 100%),
+    rgba(47,37,82,0.05);
 }
-.sif-fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding-top: 2px; text-align: left; }
-.sif-field { display: flex; flex-direction: column; gap: 3px; }
-.sif-field__label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.03em; color: var(--mdx-red); opacity: 0.75; }
-.sif-field__value { display: block; height: 6px; width: 72%; border-radius: 3px; background: rgba(47,37,82,0.1); }
-.sif-qr-row { display: flex; justify-content: flex-end; }
-.sif-qr { position: relative; width: 58px; height: 58px; border-radius: 10px; overflow: hidden; opacity: 0.92; box-shadow: 0 4px 10px rgba(47,37,82,0.12); }
-.sif-qr__pattern { width: 100%; height: 100%; display: block; }
-.sif-qr__badge {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--mdx-red);
-  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+.sif-fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; text-align: left; }
+.sif-field { display: flex; flex-direction: column; gap: 1px; }
+.sif-field__label {
+  display: flex; gap: 4px; align-items: baseline;
+  font-size: 0.44rem; font-weight: 800; letter-spacing: 0.02em; color: var(--mdx-red); opacity: 0.85; white-space: nowrap;
 }
-.sif-qr__badge img { width: 14px; height: 14px; }
-.sample-idcard-face--back {
-  transform: rotateY(180deg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
-  background:
-    repeating-linear-gradient(135deg, rgba(47,37,82,0.05) 0 2px, transparent 2px 9px),
-    linear-gradient(160deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+.sif-field__label bdi { font-weight: 700; opacity: 0.85; direction: rtl; unicode-bidi: isolate; }
+.sif-field__value { font-size: 0.56rem; color: var(--text-primary); opacity: 0.75; }
+.sif-name-block { display: flex; flex-direction: column; gap: 2px; margin-top: 9px; text-align: left; }
+.sif-name { font-family: var(--font-display); font-weight: 400; font-size: 0.72rem; color: var(--text-primary); opacity: 0.7; filter: blur(0.2px); }
+.sif-jobtitle { font-size: 0.56rem; font-weight: 700; color: var(--text-primary); opacity: 0.65; }
+.sif-band-grey {
+  margin-top: auto; flex: none; background: #767676; color: #fff;
+  font-size: 0.5rem; font-weight: 800; letter-spacing: 0.05em; text-align: center;
+  padding: 7px 8px; margin-inline: -12px;
 }
-.sib-watermark { width: 44px; height: 44px; opacity: 0.2; margin-bottom: 2px; }
-.sib-title { font-family: var(--font-display); font-weight: 400; font-size: 0.9rem; color: var(--mdx-indigo); margin: 0; }
-.sib-sub { font-size: 0.66rem; color: var(--text-secondary); letter-spacing: 0.03em; margin: 0; }
-.sib-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; color: var(--mdx-red); margin: 6px 0 0; opacity: 0.85; }
+
+/* ---- Back face ---- */
+.sib-it-fields { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+.sib-it-field { display: flex; flex-direction: column; gap: 1px; }
+.sib-it-field span { font-size: 0.42rem; font-weight: 800; color: var(--mdx-red); opacity: 0.8; }
+.sib-it-field strong { font-size: 0.5rem; font-weight: 700; color: var(--text-primary); opacity: 0.7; }
+.sib-terms {
+  list-style: none; margin: 10px 0 0; padding: 6px 0 0; border-top: 1px solid rgba(47,37,82,0.12);
+  display: flex; flex-direction: column; gap: 3px; text-align: left;
+}
+.sib-terms li { position: relative; padding-left: 8px; font-size: 0.4rem; color: var(--text-secondary); line-height: 1.3; }
+.sib-terms li::before { content: "\25B8"; position: absolute; left: 0; color: var(--mdx-red); opacity: 0.7; }
+.sib-address {
+  margin-top: 8px; display: flex; flex-direction: column; gap: 1px; text-align: left;
+  padding-top: 6px; border-top: 1px solid rgba(47,37,82,0.12);
+}
+.sib-address strong { font-size: 0.46rem; font-weight: 800; color: var(--mdx-red); opacity: 0.85; }
+.sib-address span { font-size: 0.4rem; color: var(--text-secondary); opacity: 0.8; }
+.sib-barcode { margin-top: auto; padding: 8px 0 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.sib-barcode__svg { width: 82%; height: 26px; opacity: 0.88; }
+.sib-barcode__label { font-size: 0.42rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); }
 
 /* ---- Responsive: single centered column, spec-defined mobile order ---- */
 @media (max-width: 1100px) {
@@ -496,7 +504,7 @@ main, .site-header { position: relative; z-index: 1; }
   .login-brand__eyebrow, .login-feature { justify-content: center; }
   .login-brand__sub { margin-inline: auto; }
   .login-showcase { margin-top: 10px; }
-  .sample-float { width: 240px; }
+  .sample-float { width: 190px; }
 }
 @media (max-width: 480px) {
   .login-page { padding: 20px 16px 40px; }
@@ -996,6 +1004,16 @@ main, .site-header { position: relative; z-index: 1; }
 .result-status--Deactivated .result-status__dot, .result-status--Expired .result-status__dot { background: var(--mdx-red-dark); box-shadow: none; animation: none; }
 .result-status__meta { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
 
+.result-card-flip-btn {
+  display: inline-flex; align-items: center; gap: 6px; margin: 14px auto 0;
+  padding: 8px 18px; border-radius: var(--radius-pill); border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.55); color: var(--mdx-indigo); font-weight: 700; font-size: 0.78rem; cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) ease;
+}
+.result-card-flip-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+.result-card-flip-btn__arrow { display: inline-block; transition: transform 0.4s var(--ease-spring); }
+.result-card-flip-btn.is-back .result-card-flip-btn__arrow { transform: rotate(180deg); }
+
 /* 6. Wallet section */
 .result-wallet { margin-top: 34px; padding: clamp(24px, 4vw, 34px); border-radius: var(--radius-lg); }
 .result-wallet h2 {
@@ -1299,7 +1317,7 @@ table.admin-table tr:hover td { background: rgba(255,255,255,0.4); }
 @media print {
   .site-header, .result-hero, .result-status, .result-status__meta, .result-card-glow,
   .result-wallet, .result-actions, .result-verify, .result-journey, .result-trust,
-  .back-link, #bg-canvas, .grain { display: none !important; }
+  .result-card-flip-btn, .back-link, #bg-canvas, .grain { display: none !important; }
   body { background: #fff !important; }
   .result-shell { padding: 0; max-width: 100%; }
   .result-card-wrap, .result-card { transform: none !important; box-shadow: none !important; }

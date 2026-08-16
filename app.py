@@ -13,7 +13,7 @@ import storage
 import wallet
 import wallet_apple
 import sso_config
-from card_render import render_card_png
+from card_render import render_card_front, render_card_back
 from admin import admin_bp
 from sso_routes import sso_bp
 
@@ -764,17 +764,33 @@ def serve_qr(token):
 
 @app.route("/preview/<token>")
 def preview_card(token):
-    """Serves the exact same rendered card image used by /download, inline
-    (not as an attachment) so the success page can show staff the real
-    final Digital ID -- not just a CSS approximation of it -- before they
-    download or add it to a wallet."""
+    """Serves the front of the rendered card image used by /download,
+    inline (not as an attachment) so the success page can show staff the
+    real final Digital ID -- not just a CSS approximation of it -- before
+    they download or add it to a wallet."""
     record = find_digital_id_by_token(token)
     if not record:
         abort(404)
 
     photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
+    card = render_card_front(record, photo_file)
+
+    buf = io.BytesIO()
+    card.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(buf, mimetype="image/png", as_attachment=False)
+
+
+@app.route("/preview/<token>/back")
+def preview_card_back(token):
+    """Back of the card: IT-office terms, address, the vCard QR, and the
+    Code128 barcode of the Staff ID."""
+    record = find_digital_id_by_token(token)
+    if not record:
+        abort(404)
+
     qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
-    card = render_card_png(record, photo_file, qr_file)
+    card = render_card_back(record, qr_file)
 
     buf = io.BytesIO()
     card.save(buf, format="PNG")
@@ -789,8 +805,7 @@ def download(token):
         abort(404)
 
     photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
-    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
-    card = render_card_png(record, photo_file, qr_file)
+    card = render_card_front(record, photo_file)
 
     buf = io.BytesIO()
     card.save(buf, format="PNG")
@@ -801,16 +816,19 @@ def download(token):
 
 @app.route("/download/<token>/pdf")
 def download_pdf(token):
+    """A 2-page PDF -- front then back -- mirroring the official Staff ID
+    badge template's own front/back page structure."""
     record = find_digital_id_by_token(token)
     if not record:
         abort(404)
 
     photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
     qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
-    card = render_card_png(record, photo_file, qr_file).convert("RGB")
+    front = render_card_front(record, photo_file).convert("RGB")
+    back = render_card_back(record, qr_file).convert("RGB")
 
     buf = io.BytesIO()
-    card.save(buf, format="PDF")
+    front.save(buf, format="PDF", save_all=True, append_images=[back])
     buf.seek(0)
     filename = f"MDX-Digital-ID-{record['Staff ID']}.pdf"
     return send_file(buf, mimetype="application/pdf", as_attachment=True, download_name=filename)

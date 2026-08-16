@@ -1,28 +1,40 @@
-"""Composes a downloadable PNG of a staff Digital ID card.
-
-Matches the look of the official Middlesex University Dubai business card:
-white background, black body text, the red shield crest, red for the
-university name/website, and the same real address footer — extended with
-a photo, live role/department info, and a QR code so it still works as a
-Digital ID, not just a static business card.
+"""Composes the downloadable Staff Digital ID card as two images -- front
+and back -- matching the official Middlesex University Dubai Staff ID
+badge template (portrait CR80 badge, 2.125in x 3.375in) rather than an
+invented landscape business-card layout: white body, photo box, ID
+Number / Gender / Expiration column, Name / Job Title, and a solid grey
+category bar on the front; IT-office terms, the university address, the
+scan-to-save-contact vCard QR, and a Code128 barcode of the Staff ID on
+the back.
 
 Typography uses the same self-hosted Archivo family the live site uses as
-the Dax / Monument Extended stand-in (per Brand Guidelines p.24-28 — Dax for
-body/wordmark text, Monument Extended for bold display tags), instanced to
-static TTF weights via fontTools since PIL can't load the woff2 originals.
-Arial is kept only as a last-resort fallback if that font file is missing.
+the Dax / Monument Extended stand-in (per Brand Guidelines p.24-28),
+instanced to static TTF weights via fontTools since PIL can't load the
+woff2 originals. Arial is kept only as a last-resort fallback if that
+font file is missing.
+
+Note: the official template carries bilingual (English/Arabic) field
+labels. Rendering Arabic correctly in Pillow needs bidi reshaping
+(arabic-reshaper + python-bidi) that this project doesn't otherwise
+depend on, so the generated card intentionally renders English labels
+only -- adding those libraries purely for a duplicate label was judged
+not worth the extra dependency weight.
 """
 
+import io
 import os
 
+import barcode
+from barcode.writer import ImageWriter
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 MDX_RED = (227, 6, 19)
-BLACK = (20, 20, 20)
-GREY = (90, 90, 90)
-LINE = (60, 60, 60)
-CARD_BG = (255, 255, 255)
-CARD_W, CARD_H = 1050, 650
+GREY_BAR = (118, 118, 118)
+BLACK = (26, 24, 34)
+TEXT_SECONDARY = (98, 95, 107)
+LINE = (225, 220, 210)
+CARD_BG = (253, 253, 253)
+CARD_W, CARD_H = 638, 1013
 
 _WIN_FONT_DIR = "C:/Windows/Fonts"
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,11 +44,17 @@ _ARCHIVO_VAR = os.path.join(_FONTS_DIR, "archivo-var.ttf")
 _ARCHIVO_BLACK = os.path.join(_FONTS_DIR, "archivo-black.ttf")
 
 UNIVERSITY_ADDRESS_LINES = [
-    "Blocks 15, 16, 17 & 19",
-    "Dubai Knowledge Park",
+    "Dubai Knowledge Park Block 16",
     "PO Box 500697, Dubai, UAE",
+    "Tel. No. 04 367 8100",
 ]
 UNIVERSITY_WEBSITE = "www.mdx.ac.ae"
+CARD_TERMS = [
+    "This card is non-transferable.",
+    "It serves as the bearer's proof of employment in the university.",
+    "It must be surrendered to the I.T. Office upon leaving the university.",
+    "If found, please contact and return to the address below.",
+]
 
 
 def _arial_fallback(bold, size):
@@ -64,122 +82,172 @@ def _monument(size):
         return _arial_fallback(True, size)
 
 
-def _circle_crop(img, size):
-    img = ImageOps.fit(img, (size, size), Image.LANCZOS)
-    mask = Image.new("L", (size, size), 0)
-    ImageDraw.Draw(mask).ellipse([0, 0, size, size], fill=255)
-    out = Image.new("RGBA", (size, size))
-    out.paste(img, (0, 0), mask)
-    return out
+def _wrap_text(draw, text, font, max_width):
+    words = text.split()
+    lines, current = [], ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if draw.textlength(candidate, font=font) <= max_width or not current:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
 
 
-def render_card_png(record, photo_file, qr_file):
-    """photo_file / qr_file are file-like objects (or None) — already-open
-    local files or in-memory buffers fetched from Blob storage; the caller
-    resolves whichever storage backend is active before calling this."""
+def _new_card():
     card = Image.new("RGB", (CARD_W, CARD_H), CARD_BG)
-    draw = ImageDraw.Draw(card)
+    return card, ImageDraw.Draw(card)
 
-    margin = 55
 
-    # --- Header: official MDX logo lockup (crest + wordmark as one asset,
-    # supplied directly rather than recreated with a font approximation). ---
+def _draw_logo(card, draw, top):
     logo_path = os.path.join(_ASSETS_DIR, "mdx-logo.jpg")
-    logo_h = 96
-    if os.path.exists(logo_path):
-        logo = Image.open(logo_path).convert("RGB")
-        ratio = logo_h / logo.height
-        logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
-        card.paste(logo, (margin, 36))
+    if not os.path.exists(logo_path):
+        return top
+    logo = Image.open(logo_path).convert("RGB")
+    logo_h = 92
+    ratio = logo_h / logo.height
+    logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
+    card.paste(logo, ((CARD_W - logo.width) // 2, top))
+    return top + logo_h
 
-    tag_font = _monument(14)
-    tag_text = "STAFF DIGITAL ID"
-    tag_w = draw.textlength(tag_text, font=tag_font)
-    draw.text((CARD_W - margin - tag_w, 60), tag_text, font=tag_font, fill=MDX_RED)
 
-    draw.line([(margin, 132), (CARD_W - margin, 132)], fill=LINE, width=2)
+def _draw_grey_bar(card, draw, text):
+    bar_h = 56
+    top = CARD_H - bar_h
+    draw.rectangle([0, top, CARD_W, CARD_H], fill=GREY_BAR)
 
-    # --- Main content: photo, name/title/department, QR ---
-    photo_size = 150
-    photo_x, photo_y = margin, 165
+    max_w = CARD_W - 40
+    size = 20
+    font = _monument(size)
+    while size > 11 and draw.textlength(text, font=font) > max_w:
+        size -= 1
+        font = _monument(size)
+    if draw.textlength(text, font=font) > max_w:
+        truncated = text
+        while truncated and draw.textlength(truncated + "…", font=font) > max_w:
+            truncated = truncated[:-1].rstrip()
+        text = (truncated + "…") if truncated else text
+
+    w = draw.textlength(text, font=font)
+    text_h = font.getbbox(text)[3] - font.getbbox(text)[1]
+    draw.text(((CARD_W - w) / 2, top + (bar_h - text_h) / 2), text, font=font, fill=(255, 255, 255))
+
+
+def render_card_front(record, photo_file):
+    """photo_file is a file-like object (or None) -- an already-open local
+    file or in-memory buffer fetched from Blob storage; the caller resolves
+    whichever storage backend is active before calling this."""
+    card, draw = _new_card()
+    margin = 42
+
+    y = _draw_logo(card, draw, 34)
+    y += 28
+
+    photo_w, photo_h = 168, 200
+    photo_x, photo_y = margin, y
     if photo_file:
         photo = Image.open(photo_file).convert("RGB")
-        circ = _circle_crop(photo, photo_size)
-        card.paste(circ, (photo_x, photo_y), circ)
-    draw.ellipse(
-        [photo_x - 3, photo_y - 3, photo_x + photo_size + 3, photo_y + photo_size + 3],
-        outline=(210, 210, 210), width=2,
+        photo = ImageOps.fit(photo, (photo_w, photo_h), Image.LANCZOS)
+        card.paste(photo, (photo_x, photo_y))
+    draw.rectangle(
+        [photo_x - 1, photo_y - 1, photo_x + photo_w + 1, photo_y + photo_h + 1],
+        outline=(200, 195, 205), width=2,
     )
 
-    text_x = photo_x + photo_size + 40
-    name_font = _dax("Bold", 34)
-    role_font = _dax("Medium", 22)
-    dept_font = _dax("Regular", 19)
+    field_x = photo_x + photo_w + 30
+    label_font = _dax("Bold", 15)
+    value_font = _dax("Medium", 20)
+    fields = [
+        ("ID NUMBER", record.get("Staff ID", "")),
+        ("GENDER", record.get("Gender") or "\u2014"),
+        ("EXPIRATION", "\u2014"),
+    ]
+    field_y = photo_y + 6
+    for label, value in fields:
+        draw.text((field_x, field_y), label, font=label_font, fill=MDX_RED)
+        draw.text((field_x, field_y + 22), value, font=value_font, fill=BLACK)
+        field_y += 62
 
+    name_y = photo_y + photo_h + 34
+    name_font = _dax("Bold", 30)
+    jobtitle_label_font = _dax("Bold", 15)
+    jobtitle_font = _dax("Medium", 22)
+
+    draw.text((margin, name_y), "NAME", font=label_font, fill=MDX_RED)
     full_name = f"{record.get('First Name', '')} {record.get('Last Name', '')}".strip()
-    draw.text((text_x, 170), full_name, font=name_font, fill=BLACK)
-    draw.text((text_x, 214), record.get("Job Title", ""), font=role_font, fill=MDX_RED)
+    draw.text((margin, name_y + 24), full_name, font=name_font, fill=BLACK)
 
-    department = record.get("Department", "")
-    max_dept_width = CARD_W - margin - 210 - text_x  # keep clear of the QR column
-    if draw.textlength(department, font=dept_font) > max_dept_width:
-        while department and draw.textlength(department + "…", font=dept_font) > max_dept_width:
-            department = department[:-1]
-        department = (department + "…") if department else ""
-    draw.text((text_x, 250), department, font=dept_font, fill=GREY)
+    title_y = name_y + 84
+    draw.text((margin, title_y), "JOB TITLE", font=jobtitle_label_font, fill=MDX_RED)
+    job_title = record.get("Job Title", "")
+    max_w = CARD_W - margin * 2
+    for line in _wrap_text(draw, job_title, jobtitle_font, max_w)[:2]:
+        draw.text((margin, title_y + 24), line, font=jobtitle_font, fill=BLACK)
+        title_y += 28
 
-    # Contact block — label:value columns with a divider, styled after the
-    # physical card's "Email: / Tel:" layout. Mobile is only shown when the
-    # staff member provided one; Staff ID always stands in for a work Tel
-    # line since staff phone extensions aren't collected by this portal.
-    label_font = _dax("Bold", 18)
-    value_font = _dax("Regular", 18)
-    contact_rows = [("Email:", record.get("Email", ""))]
-    if record.get("Mobile Number"):
-        contact_rows.append(("Mobile:", record.get("Mobile Number")))
-    contact_rows.append(("Staff ID:", record.get("Staff ID", "")))
+    _draw_grey_bar(card, draw, (record.get("Department") or "STAFF").upper())
+    return card
 
-    contact_y = photo_y + photo_size + 26
-    row_h = 28
-    value_x = text_x + 92
-    draw.line(
-        [(value_x - 14, contact_y), (value_x - 14, contact_y + row_h * (len(contact_rows) - 1) + 22)],
-        fill=(210, 210, 210), width=2,
-    )
-    for i, (label, value) in enumerate(contact_rows):
-        y = contact_y + i * row_h
-        draw.text((text_x, y), label, font=label_font, fill=BLACK)
-        draw.text((value_x, y), value, font=value_font, fill=GREY)
 
-    qr_size = 170
-    qr_x, qr_y = CARD_W - margin - qr_size, 165
-    draw.rounded_rectangle(
-        [qr_x - 10, qr_y - 10, qr_x + qr_size + 10, qr_y + qr_size + 10],
-        radius=10, fill=(255, 255, 255), outline=(210, 210, 210), width=2,
-    )
+def _generate_barcode_image(staff_id, width):
+    code128 = barcode.get_barcode_class("code128")
+    buf = io.BytesIO()
+    writer_options = {"write_text": False, "module_height": 14.0, "quiet_zone": 2.0, "module_width": 0.35}
+    code128(staff_id or "0", writer=ImageWriter()).write(buf, options=writer_options)
+    buf.seek(0)
+    img = Image.open(buf).convert("RGB")
+    ratio = width / img.width
+    return img.resize((width, max(1, int(img.height * ratio))), Image.LANCZOS)
+
+
+def render_card_back(record, qr_file):
+    card, draw = _new_card()
+    margin = 42
+
+    terms_font = _dax("Regular", 15)
+    y = 50
+    for term in CARD_TERMS:
+        for line in _wrap_text(draw, f"\u2022 {term}", terms_font, CARD_W - margin * 2):
+            draw.text((margin, y), line, font=terms_font, fill=TEXT_SECONDARY)
+            y += 22
+        y += 4
+
+    y += 14
+    draw.line([(margin, y), (CARD_W - margin, y)], fill=LINE, width=2)
+    y += 20
+
+    address_name_font = _dax("Bold", 19)
+    address_font = _dax("Regular", 16)
+    draw.text((margin, y), "Middlesex University Dubai", font=address_name_font, fill=MDX_RED)
+    y += 30
+    for line in UNIVERSITY_ADDRESS_LINES:
+        draw.text((margin, y), line, font=address_font, fill=BLACK)
+        y += 22
+
+    y += 24
+    qr_size = 168
     if qr_file:
         qr_img = Image.open(qr_file).convert("RGB").resize((qr_size, qr_size), Image.NEAREST)
-        card.paste(qr_img, (qr_x, qr_y))
+        card.paste(qr_img, (margin, y))
+    draw.rectangle([margin - 2, y - 2, margin + qr_size + 2, y + qr_size + 2], outline=(210, 210, 210), width=2)
     caption_font = _dax("Bold", 13)
-    caption_text = "SCAN TO SAVE CONTACT"
-    caption_w = draw.textlength(caption_text, font=caption_font)
-    draw.text((qr_x + (qr_size - caption_w) / 2, qr_y + qr_size + 18), caption_text, font=caption_font, fill=GREY)
+    caption_text = "SCAN TO\nSAVE CONTACT"
+    caption_y = y + 4
+    for line in caption_text.split("\n"):
+        draw.text((margin + qr_size + 22, caption_y), line, font=caption_font, fill=TEXT_SECONDARY)
+        caption_y += 18
 
-    # --- Footer: real university name/address, matching the physical card ---
-    footer_top = CARD_H - 150
-    draw.line([(margin, footer_top), (CARD_W - margin, footer_top)], fill=LINE, width=2)
+    y += qr_size + 36
+    barcode_img = _generate_barcode_image(record.get("Staff ID", ""), CARD_W - margin * 2)
+    card.paste(barcode_img, (margin, y))
+    y += barcode_img.height + 6
+    id_font = _dax("Bold", 15)
+    id_text = record.get("Staff ID", "")
+    id_w = draw.textlength(id_text, font=id_font)
+    draw.text(((CARD_W - id_w) / 2, y), id_text, font=id_font, fill=BLACK)
 
-    footer_name_font = _dax("Bold", 22)
-    footer_font = _dax("Regular", 17)
-    website_font = _dax("Bold", 17)
-
-    draw.text((margin, footer_top + 22), "Middlesex University Dubai", font=footer_name_font, fill=MDX_RED)
-    line_y = footer_top + 58
-    for line in UNIVERSITY_ADDRESS_LINES:
-        draw.text((margin, line_y), line, font=footer_font, fill=BLACK)
-        line_y += 24
-
-    website_w = draw.textlength(UNIVERSITY_WEBSITE, font=website_font)
-    draw.text((CARD_W - margin - website_w, footer_top + 22), UNIVERSITY_WEBSITE, font=website_font, fill=MDX_RED)
-
+    _draw_grey_bar(card, draw, UNIVERSITY_WEBSITE)
     return card

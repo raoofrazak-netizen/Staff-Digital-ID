@@ -152,50 +152,60 @@
                 <div class="sample-id-wrap" id="sample-id-wrap">
                     <div class="sample-float" id="sample-idcard">
                         <div class="sample-idcard-flip">
+                            <!-- Front/back layout mirrors the official MDX Staff ID badge
+                                 template (CR80 vertical badge, 2.125in x 3.375in) — bilingual
+                                 EN/AR field labels, photo box, ID/Gender/Expiration column,
+                                 Name + Job Title, and a solid grey category bar. All values
+                                 below are fictional sample data. -->
                             <div class="sample-idcard-face sample-idcard-face--front">
-                                <div class="sif-band sif-band--top">
-                                    <span class="sif-band__brand">
-                                        <img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
-                                        Middlesex<br>University Dubai
-                                    </span>
-                                    <span class="sif-band__label">Staff<br>Digital ID</span>
+                                <div class="sif-logo-row">
+                                    <img class="sif-logo" src="{{ url_for('static', filename='images/mdx-logo.jpg') }}" alt="Middlesex University Dubai">
                                 </div>
-                                <div class="sif-content">
-                                    <div class="sif-content-row">
-                                        <div class="sif-photo"></div>
-                                        <div class="sif-fields">
-                                            <div class="sif-field"><span class="sif-field__label">Name</span><span class="sif-field__value"></span></div>
-                                            <div class="sif-field"><span class="sif-field__label">Staff ID</span><span class="sif-field__value"></span></div>
-                                            <div class="sif-field"><span class="sif-field__label">Department</span><span class="sif-field__value"></span></div>
-                                        </div>
-                                    </div>
-                                    <div class="sif-qr-row">
-                                        <div class="sif-qr" aria-hidden="true">
-                                            <svg class="sif-qr__pattern" viewBox="0 0 100 100">
-                                                <rect width="100" height="100" rx="12" fill="#fff"/>
-                                                <g fill="#2f2552" opacity="0.85">
-                                                    <rect x="8" y="8" width="20" height="20" rx="6"/><rect x="13" y="13" width="10" height="10" rx="3" fill="#fff"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="#2f2552"/>
-                                                    <rect x="72" y="8" width="20" height="20" rx="6"/><rect x="77" y="13" width="10" height="10" rx="3" fill="#fff"/><rect x="79" y="15" width="6" height="6" rx="1.5" fill="#2f2552"/>
-                                                    <rect x="8" y="72" width="20" height="20" rx="6"/><rect x="13" y="77" width="10" height="10" rx="3" fill="#fff"/><rect x="15" y="79" width="6" height="6" rx="1.5" fill="#2f2552"/>
-                                                    <rect x="38" y="10" width="8" height="8" rx="2"/><rect x="50" y="10" width="8" height="8" rx="2"/>
-                                                    <rect x="38" y="38" width="8" height="8" rx="2"/><rect x="50" y="38" width="8" height="8" rx="2"/><rect x="62" y="38" width="8" height="8" rx="2"/>
-                                                    <rect x="72" y="50" width="8" height="8" rx="2"/><rect x="84" y="50" width="8" height="8" rx="2"/>
-                                                    <rect x="38" y="62" width="8" height="8" rx="2"/><rect x="62" y="62" width="8" height="8" rx="2"/>
-                                                    <rect x="10" y="50" width="8" height="8" rx="2"/><rect x="10" y="62" width="8" height="8" rx="2"/>
-                                                    <rect x="50" y="84" width="8" height="8" rx="2"/><rect x="62" y="84" width="8" height="8" rx="2"/><rect x="76" y="76" width="8" height="8" rx="2"/>
-                                                </g>
-                                            </svg>
-                                            <span class="sif-qr__badge"><img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt=""></span>
-                                        </div>
+                                <div class="sif-top-row">
+                                    <div class="sif-photo"></div>
+                                    <div class="sif-fields">
+                                        <div class="sif-field"><span class="sif-field__label">ID NUMBER<bdi>&#1585;&#1602;&#1605; &#1605;&#1593;&#1585;&#1601;</bdi></span><span class="sif-field__value sif-field__value--text">MDX00000</span></div>
+                                        <div class="sif-field"><span class="sif-field__label">GENDER<bdi>&#1575;&#1604;&#1580;&#1606;&#1587;</bdi></span><span class="sif-field__value sif-field__value--text">&mdash;</span></div>
+                                        <div class="sif-field"><span class="sif-field__label">EXPIRATION<bdi>&#1575;&#1606;&#1602;&#1590;&#1575;&#1569;</bdi></span><span class="sif-field__value sif-field__value--text">&mdash;</span></div>
                                     </div>
                                 </div>
-                                <div class="sif-band sif-band--bottom">Knowledge &bull; Innovation &bull; Opportunity</div>
+                                <div class="sif-name-block">
+                                    <span class="sif-field__label">NAME<bdi>&#1575;&#1587;&#1605;</bdi></span>
+                                    <span class="sif-name">Sample Name</span>
+                                </div>
+                                <div class="sif-name-block">
+                                    <span class="sif-field__label">JOB TITLE<bdi>&#1575;&#1604;&#1608;&#1592;&#1610;&#1601;&#1577;</bdi></span>
+                                    <span class="sif-jobtitle">Sample Job Title</span>
+                                </div>
+                                <div class="sif-band-grey">SAMPLE DEPARTMENT</div>
                             </div>
                             <div class="sample-idcard-face sample-idcard-face--back">
-                                <img class="sib-watermark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
-                                <p class="sib-title">Digital Identity</p>
-                                <p class="sib-sub">Sample Preview</p>
-                                <p class="sib-badge"><span aria-hidden="true">🔒</span> Verified &amp; Secure</p>
+                                <div class="sib-it-fields">
+                                    <div class="sib-it-field"><span>UK IT User ID:</span><strong>sample.user</strong></div>
+                                    <div class="sib-it-field"><span>MISIS:</span><strong>&mdash;</strong></div>
+                                    <div class="sib-it-field"><span>Local Login:</span><strong>sample.user</strong></div>
+                                    <div class="sib-it-field"><span>Dubai Email:</span><strong>sample@mdx.ac.ae</strong></div>
+                                </div>
+                                <ul class="sib-terms">
+                                    <li>This card is non-transferable.</li>
+                                    <li>Proof of employment at the university.</li>
+                                    <li>Surrender to I.T. Office upon leaving.</li>
+                                </ul>
+                                <div class="sib-address">
+                                    <strong>Middlesex University Dubai</strong>
+                                    <span>Dubai Knowledge Park Block 16</span>
+                                    <span>PO Box 500697, Dubai, UAE</span>
+                                </div>
+                                <div class="sib-barcode" aria-hidden="true">
+                                    <svg viewBox="0 0 160 40" preserveAspectRatio="none" class="sib-barcode__svg">
+                                        <rect width="160" height="40" fill="#fff"/>
+                                        <g fill="#1a1822">
+                                            <rect x="2" y="4" width="2" height="32"/><rect x="6" y="4" width="1" height="32"/><rect x="9" y="4" width="3" height="32"/><rect x="14" y="4" width="1" height="32"/><rect x="17" y="4" width="2" height="32"/><rect x="21" y="4" width="1" height="32"/><rect x="24" y="4" width="3" height="32"/><rect x="29" y="4" width="2" height="32"/><rect x="33" y="4" width="1" height="32"/><rect x="36" y="4" width="2" height="32"/><rect x="40" y="4" width="1" height="32"/><rect x="43" y="4" width="3" height="32"/><rect x="48" y="4" width="1" height="32"/><rect x="51" y="4" width="2" height="32"/><rect x="55" y="4" width="3" height="32"/><rect x="60" y="4" width="1" height="32"/><rect x="63" y="4" width="1" height="32"/><rect x="66" y="4" width="2" height="32"/><rect x="70" y="4" width="3" height="32"/><rect x="75" y="4" width="1" height="32"/><rect x="78" y="4" width="2" height="32"/><rect x="82" y="4" width="1" height="32"/><rect x="85" y="4" width="3" height="32"/><rect x="90" y="4" width="2" height="32"/><rect x="94" y="4" width="1" height="32"/><rect x="97" y="4" width="2" height="32"/><rect x="101" y="4" width="3" height="32"/><rect x="106" y="4" width="1" height="32"/><rect x="109" y="4" width="2" height="32"/><rect x="113" y="4" width="1" height="32"/><rect x="116" y="4" width="3" height="32"/><rect x="121" y="4" width="2" height="32"/><rect x="125" y="4" width="1" height="32"/><rect x="128" y="4" width="2" height="32"/><rect x="132" y="4" width="3" height="32"/><rect x="137" y="4" width="1" height="32"/><rect x="140" y="4" width="2" height="32"/><rect x="144" y="4" width="1" height="32"/><rect x="147" y="4" width="3" height="32"/><rect x="152" y="4" width="2" height="32"/><rect x="156" y="4" width="2" height="32"/>
+                                        </g>
+                                    </svg>
+                                    <span class="sib-barcode__label">MDX00000</span>
+                                </div>
+                                <div class="sif-band-grey">www.mdx.ac.ae</div>
                             </div>
                         </div>
                     </div>
