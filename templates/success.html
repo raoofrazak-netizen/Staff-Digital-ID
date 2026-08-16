@@ -57,9 +57,7 @@
                     </div>
                 </div>
             </div>
-            <button type="button" class="result-card-flip-btn" id="result-card-flip-btn">
-                View Back of ID <span class="result-card-flip-btn__arrow" aria-hidden="true">&#8635;</span>
-            </button>
+            <p class="result-card-hint">Hover the card to see the back</p>
 
             <!-- 5. Status -->
             <div class="result-status result-status--{{ record['Status'] }}">
@@ -113,21 +111,6 @@
                 <span class="result-action__sub">Update your permitted details</span>
             </a>
             {% endif %}
-            <a href="#verify" class="result-action">
-                <span class="result-action__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M17 20v-3h3"/></svg></span>
-                <span class="result-action__title">Verification</span>
-                <span class="result-action__sub">View your verification QR code</span>
-            </a>
-        </section>
-
-        <!-- 8. Verification -->
-        <section class="result-verify glass scroll-reveal" id="verify">
-            <h2>Secure Verification</h2>
-            <div class="result-qr-frame">
-                <div class="result-qr-scanline" id="qr-scanline" aria-hidden="true"></div>
-                <div id="verify-qr"></div>
-            </div>
-            <p class="result-verify__sub">Scan this code to securely verify the authenticity and current status of this Staff Digital ID.</p>
         </section>
 
         <!-- 9. Journey -->
@@ -156,8 +139,6 @@
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
     <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/qrcode-generator-base.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/qrcode-generator.js') }}"></script>
     <script>
         const REDUCE_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const HAS_HOVER = window.matchMedia("(hover: hover)").matches;
@@ -180,17 +161,17 @@
             });
         }
 
-        // --- 3D flip to reveal the back of the rendered card ---
-        const flipBtn = document.getElementById("result-card-flip-btn");
+        // --- Flip to the back of the card: hover on desktop, tap on touch ---
         const cardFlip = document.getElementById("result-card-flip");
-        if (flipBtn && cardFlip) {
-            let showingBack = false;
-            flipBtn.addEventListener("click", () => {
-                showingBack = !showingBack;
-                cardFlip.classList.toggle("is-flipped", showingBack);
-                flipBtn.classList.toggle("is-back", showingBack);
-                flipBtn.firstChild.textContent = showingBack ? "View Front of ID " : "View Back of ID ";
-            });
+        const cardHint = document.querySelector(".result-card-hint");
+        if (cardWrap && cardFlip) {
+            if (HAS_HOVER) {
+                cardWrap.addEventListener("pointerenter", () => cardFlip.classList.add("is-flipped"));
+                cardWrap.addEventListener("pointerleave", () => cardFlip.classList.remove("is-flipped"));
+            } else {
+                if (cardHint) cardHint.textContent = "Tap the card to see the back";
+                cardWrap.addEventListener("click", () => cardFlip.classList.toggle("is-flipped"));
+            }
         }
 
         // --- Wallet button device priority ---
@@ -207,21 +188,6 @@
 
         const printAction = document.getElementById("print-action");
         if (printAction) printAction.addEventListener("click", () => window.print());
-
-        // --- Verification QR (separate from the vCard QR on the card itself) ---
-        const verifyQrHost = document.getElementById("verify-qr");
-        if (verifyQrHost && typeof qrcode !== "undefined") {
-            try {
-                const qr = qrcode(0, "M");
-                qr.addData({{ verify_url|tojson }});
-                qr.make();
-                const img = document.createElement("img");
-                img.src = qr.createDataURL(8, 4);
-                img.alt = "Digital ID verification QR code";
-                img.className = "result-qr-frame__img";
-                verifyQrHost.appendChild(img);
-            } catch (err) { /* leave the frame empty rather than break the page */ }
-        }
 
         // --- Scroll-reveal for sections below the fold ---
         const revealEls = document.querySelectorAll(".scroll-reveal");

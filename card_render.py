@@ -2,10 +2,11 @@
 and back -- matching the official Middlesex University Dubai Staff ID
 badge template (portrait CR80 badge, 2.125in x 3.375in) rather than an
 invented landscape business-card layout: white body, photo box, ID
-Number / Gender / Expiration column, Name / Job Title, and a solid grey
-category bar on the front; IT-office terms, the university address, the
-scan-to-save-contact vCard QR, and a Code128 barcode of the Staff ID on
-the back.
+Number / Gender / Expiration column, Name / Job Title, the
+scan-to-save-contact vCard QR (filling what would otherwise be empty
+space below Job Title), and a solid grey category bar on the front;
+IT-office terms, the university address, and a Code128 barcode of the
+Staff ID on the back.
 
 Typography uses the same self-hosted Archivo family the live site uses as
 the Dax / Monument Extended stand-in (per Brand Guidelines p.24-28),
@@ -170,10 +171,10 @@ def _draw_grey_bar(card, draw, text):
     draw.text(((CARD_W - w) / 2, top + (bar_h - text_h) / 2), text, font=font, fill=(255, 255, 255))
 
 
-def render_card_front(record, photo_file):
-    """photo_file is a file-like object (or None) -- an already-open local
-    file or in-memory buffer fetched from Blob storage; the caller resolves
-    whichever storage backend is active before calling this."""
+def render_card_front(record, photo_file, qr_file=None):
+    """photo_file/qr_file are file-like objects (or None) -- already-open
+    local files or in-memory buffers fetched from Blob storage; the caller
+    resolves whichever storage backend is active before calling this."""
     card, draw = _new_card()
     margin = 42
 
@@ -220,6 +221,24 @@ def render_card_front(record, photo_file):
         draw.text((margin, title_y + 24), line, font=jobtitle_font, fill=BLACK)
         title_y += 28
 
+    # The gap between Job Title and the bottom category bar is otherwise
+    # empty on the official layout -- the vCard QR fills it naturally
+    # rather than crowding the ID/Gender/Expiration column above.
+    qr_size = 190
+    qr_y = title_y + 44
+    qr_x = (CARD_W - qr_size) // 2
+    draw.rounded_rectangle(
+        [qr_x - 8, qr_y - 8, qr_x + qr_size + 8, qr_y + qr_size + 8],
+        radius=10, fill=(255, 255, 255), outline=(210, 205, 200), width=2,
+    )
+    if qr_file:
+        qr_img = Image.open(qr_file).convert("RGB").resize((qr_size, qr_size), Image.NEAREST)
+        card.paste(qr_img, (qr_x, qr_y))
+    caption_font = _dax("Bold", 13)
+    caption_text = "SCAN TO SAVE CONTACT"
+    caption_w = draw.textlength(caption_text, font=caption_font)
+    draw.text(((CARD_W - caption_w) / 2, qr_y + qr_size + 18), caption_text, font=caption_font, fill=TEXT_SECONDARY)
+
     _draw_grey_bar(card, draw, (record.get("Department") or "STAFF").upper())
     return card
 
@@ -251,7 +270,7 @@ def _draw_partner_mark(card, draw, x, y):
         ly += 13
 
 
-def render_card_back(record, qr_file):
+def render_card_back(record):
     card, draw = _new_card()
     margin = 42
 
@@ -297,20 +316,7 @@ def render_card_back(record, qr_file):
 
     _draw_partner_mark(card, draw, CARD_W - margin - 90, address_top + 4)
 
-    y += 24
-    qr_size = 168
-    if qr_file:
-        qr_img = Image.open(qr_file).convert("RGB").resize((qr_size, qr_size), Image.NEAREST)
-        card.paste(qr_img, (margin, y))
-    draw.rectangle([margin - 2, y - 2, margin + qr_size + 2, y + qr_size + 2], outline=(210, 210, 210), width=2)
-    caption_font = _dax("Bold", 13)
-    caption_text = "SCAN TO\nSAVE CONTACT"
-    caption_y = y + 4
-    for line in caption_text.split("\n"):
-        draw.text((margin + qr_size + 22, caption_y), line, font=caption_font, fill=TEXT_SECONDARY)
-        caption_y += 18
-
-    y += qr_size + 36
+    y += 40
     barcode_img = _generate_barcode_image(record.get("Staff ID", ""), CARD_W - margin * 2)
     card.paste(barcode_img, (margin, y))
     y += barcode_img.height + 6

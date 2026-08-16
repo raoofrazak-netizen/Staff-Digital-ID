@@ -1057,15 +1057,7 @@ main, .site-header { position: relative; z-index: 1; }
 .result-status--Deactivated .result-status__dot, .result-status--Expired .result-status__dot { background: var(--mdx-red-dark); box-shadow: none; animation: none; }
 .result-status__meta { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
 
-.result-card-flip-btn {
-  display: inline-flex; align-items: center; gap: 6px; margin: 14px auto 0;
-  padding: 8px 18px; border-radius: var(--radius-pill); border: 1px solid var(--glass-border);
-  background: rgba(255,255,255,0.55); color: var(--mdx-indigo); font-weight: 700; font-size: 0.78rem; cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) ease;
-}
-.result-card-flip-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
-.result-card-flip-btn__arrow { display: inline-block; transition: transform 0.4s var(--ease-spring); }
-.result-card-flip-btn.is-back .result-card-flip-btn__arrow { transform: rotate(180deg); }
+.result-card-hint { margin: 14px 0 0; font-size: 0.76rem; color: var(--text-muted); font-weight: 600; }
 
 /* 6. Wallet section */
 .result-wallet { margin-top: 34px; padding: clamp(24px, 4vw, 34px); border-radius: var(--radius-lg); }
@@ -1100,33 +1092,6 @@ main, .site-header { position: relative; z-index: 1; }
 .result-action__title { font-weight: 800; font-size: 0.86rem; }
 .result-action__sub { font-size: 0.72rem; color: var(--text-muted); }
 .result-action__sub a { color: var(--mdx-red-dark); font-weight: 700; text-decoration: underline; }
-
-/* 8. Verification */
-.result-verify {
-  margin-top: 26px; padding: clamp(24px, 4vw, 34px); border-radius: var(--radius-lg);
-  opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s var(--ease-spring);
-}
-.result-verify.in-view { opacity: 1; transform: translateY(0); }
-.result-verify h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.1rem; color: var(--mdx-indigo); margin: 0 0 18px; }
-.result-qr-frame {
-  position: relative; overflow: hidden; width: 180px; height: 180px; margin: 0 auto 16px;
-  border-radius: 16px; background: #fff; border: 1px solid var(--glass-border);
-  box-shadow: inset 0 2px 8px rgba(47,37,82,0.08);
-  display: flex; align-items: center; justify-content: center;
-}
-.result-qr-frame__img { width: 150px; height: 150px; }
-.result-qr-scanline {
-  position: absolute; left: 6px; right: 6px; top: 0; height: 2px; z-index: 2; pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--mdx-red), transparent);
-  animation: resultQrScan 1.4s ease-in-out 0.3s 1 both;
-}
-@keyframes resultQrScan {
-  0% { top: 6px; opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { top: calc(100% - 8px); opacity: 0; }
-}
-.result-verify__sub { color: var(--text-secondary); font-size: 0.85rem; max-width: 420px; margin: 0 auto; }
 
 /* 9. Journey timeline */
 .result-journey {
@@ -1369,8 +1334,8 @@ table.admin-table tr:hover td { background: rgba(255,255,255,0.4); }
 /* ============ Print: isolate just the ID card ============ */
 @media print {
   .site-header, .result-hero, .result-status, .result-status__meta, .result-card-glow,
-  .result-wallet, .result-actions, .result-verify, .result-journey, .result-trust,
-  .result-card-flip-btn, .back-link, #bg-canvas, .grain { display: none !important; }
+  .result-wallet, .result-actions, .result-journey, .result-trust,
+  .result-card-hint, .back-link, #bg-canvas, .grain { display: none !important; }
   body { background: #fff !important; }
   .result-shell { padding: 0; max-width: 100%; }
   .result-card-wrap, .result-card, .result-card-flip { transform: none !important; box-shadow: none !important; }

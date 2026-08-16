@@ -818,7 +818,8 @@ def preview_card(token):
         abort(404)
 
     photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
-    card = render_card_front(record, photo_file)
+    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
+    card = render_card_front(record, photo_file, qr_file)
 
     buf = io.BytesIO()
     card.save(buf, format="PNG")
@@ -828,14 +829,13 @@ def preview_card(token):
 
 @app.route("/preview/<token>/back")
 def preview_card_back(token):
-    """Back of the card: IT-office terms, address, the vCard QR, and the
-    Code128 barcode of the Staff ID."""
+    """Back of the card: IT-office terms, address, and the Code128 barcode
+    of the Staff ID."""
     record = find_digital_id_by_token(token)
     if not record:
         abort(404)
 
-    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
-    card = render_card_back(record, qr_file)
+    card = render_card_back(record)
 
     buf = io.BytesIO()
     card.save(buf, format="PNG")
@@ -850,7 +850,8 @@ def download(token):
         abort(404)
 
     photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
-    card = render_card_front(record, photo_file)
+    qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
+    card = render_card_front(record, photo_file, qr_file)
 
     buf = io.BytesIO()
     card.save(buf, format="PNG")
@@ -869,8 +870,8 @@ def download_pdf(token):
 
     photo_file = _load_media_bytes(record.get("Photo Filename"), PHOTO_DIR)
     qr_file = _load_media_bytes(record.get("QR Filename"), QR_DIR)
-    front = render_card_front(record, photo_file).convert("RGB")
-    back = render_card_back(record, qr_file).convert("RGB")
+    front = render_card_front(record, photo_file, qr_file).convert("RGB")
+    back = render_card_back(record).convert("RGB")
 
     buf = io.BytesIO()
     front.save(buf, format="PDF", save_all=True, append_images=[back])
