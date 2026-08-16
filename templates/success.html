@@ -51,12 +51,13 @@
             <div class="result-card-wrap" id="result-card-wrap">
                 <div class="result-card" id="result-card">
                     <div class="result-card__sheen" id="result-card-sheen"></div>
-                    <img class="result-card__img" id="result-card-img" src="{{ url_for('preview_card', token=token) }}" alt="Your Middlesex University Dubai Staff Digital ID">
+                    <div class="result-card-flip" id="result-card-flip">
+                        <img class="result-card__img result-card__img--front" src="{{ url_for('preview_card', token=token) }}" alt="Your Middlesex University Dubai Staff Digital ID — front">
+                        <img class="result-card__img result-card__img--back" src="{{ url_for('preview_card_back', token=token) }}" alt="Your Middlesex University Dubai Staff Digital ID — back">
+                    </div>
                 </div>
             </div>
-            <button type="button" class="result-card-flip-btn" id="result-card-flip-btn"
-                    data-front-src="{{ url_for('preview_card', token=token) }}"
-                    data-back-src="{{ url_for('preview_card_back', token=token) }}">
+            <button type="button" class="result-card-flip-btn" id="result-card-flip-btn">
                 View Back of ID <span class="result-card-flip-btn__arrow" aria-hidden="true">&#8635;</span>
             </button>
 
@@ -179,14 +180,14 @@
             });
         }
 
-        // --- Front/back toggle for the rendered card image ---
+        // --- 3D flip to reveal the back of the rendered card ---
         const flipBtn = document.getElementById("result-card-flip-btn");
-        const cardImg = document.getElementById("result-card-img");
-        if (flipBtn && cardImg) {
+        const cardFlip = document.getElementById("result-card-flip");
+        if (flipBtn && cardFlip) {
             let showingBack = false;
             flipBtn.addEventListener("click", () => {
                 showingBack = !showingBack;
-                cardImg.src = showingBack ? flipBtn.dataset.backSrc : flipBtn.dataset.frontSrc;
+                cardFlip.classList.toggle("is-flipped", showingBack);
                 flipBtn.classList.toggle("is-back", showingBack);
                 flipBtn.firstChild.textContent = showingBack ? "View Front of ID " : "View Back of ID ";
             });

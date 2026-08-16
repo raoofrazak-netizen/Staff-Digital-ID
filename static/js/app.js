@@ -701,6 +701,8 @@
             setVal("r-email", profile.email);
             setVal("r-mobile", profile.mobile_number);
             setVal("r-job-title", profile.job_title);
+            setVal("r-uk-it-user-id", profile.uk_it_user_id);
+            setVal("r-local-login", profile.local_login);
 
             const selectByText = (id, value) => {
                 const el = document.getElementById(id);
@@ -713,6 +715,8 @@
             selectByText("r-department", profile.department);
             selectByText("r-gender", profile.gender);
             selectByText("r-employment-status", profile.employment_status);
+            selectByText("r-category", profile.category);
+            setVal("r-misis", profile.misis);
 
             if (ssoPayload.photo) {
                 fetch(ssoPayload.photo)

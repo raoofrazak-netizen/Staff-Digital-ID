@@ -229,7 +229,7 @@ main, .site-header { position: relative; z-index: 1; }
 .login-page { max-width: 1360px; margin: 0 auto; padding: 26px 24px 60px; min-height: 100vh; display: flex; flex-direction: column; }
 
 .login-topbar { display: flex; align-items: center; gap: 20px; }
-.login-topbar__logo { height: 50px; width: auto; flex: none; }
+.login-topbar__logo { height: 64px; width: auto; flex: none; }
 .login-topbar__divider { width: 1px; height: 36px; background: var(--glass-border); flex: none; }
 .login-topbar__title { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; letter-spacing: 0.015em; color: var(--mdx-indigo); }
 
@@ -1017,7 +1017,16 @@ main, .site-header { position: relative; z-index: 1; }
   transition: transform 0.4s var(--ease-spring);
   transform-style: preserve-3d; will-change: transform;
 }
-.result-card__img { display: block; width: 100%; height: auto; border-radius: 16px; }
+.result-card-flip {
+  position: relative; width: 100%; aspect-ratio: 638 / 1013;
+  transform-style: preserve-3d; transition: transform 0.9s var(--ease-spring);
+}
+.result-card-flip.is-flipped { transform: rotateY(180deg); }
+.result-card__img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  border-radius: 16px; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.result-card__img--back { transform: rotateY(180deg); }
 .result-card__sheen {
   position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
   background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 0%), rgba(255,255,255,0.5), transparent 55%);
@@ -1359,5 +1368,5 @@ table.admin-table tr:hover td { background: rgba(255,255,255,0.4); }
   .result-card-flip-btn, .back-link, #bg-canvas, .grain { display: none !important; }
   body { background: #fff !important; }
   .result-shell { padding: 0; max-width: 100%; }
-  .result-card-wrap, .result-card { transform: none !important; box-shadow: none !important; }
+  .result-card-wrap, .result-card, .result-card-flip { transform: none !important; box-shadow: none !important; }
 }

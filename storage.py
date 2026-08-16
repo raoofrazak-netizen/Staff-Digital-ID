@@ -30,11 +30,13 @@ DIGITAL_ID_COLUMNS_SQL = [
     "token", "track_id", "staff_id", "first_name", "last_name", "email", "mobile_number",
     "department", "job_title", "gender", "employment_status",
     "photo_url", "qr_url", "created_at", "status", "ms_user_id",
+    "category", "uk_it_user_id", "local_login", "misis",
 ]
 DIGITAL_ID_DISPLAY = [
     "Token", "Track ID", "Staff ID", "First Name", "Last Name", "Email", "Mobile Number",
     "Department", "Job Title", "Gender", "Employment Status",
     "Photo Filename", "QR Filename", "Created At", "Status", "Microsoft User ID",
+    "Category", "UK IT User ID", "Local Login", "MISIS",
 ]
 
 
@@ -83,6 +85,10 @@ def init_db(sample_directory_rows):
             # Additive, idempotent -- safe to run against a table created
             # before the Microsoft SSO column existed.
             cur.execute("ALTER TABLE digital_ids ADD COLUMN IF NOT EXISTS ms_user_id TEXT")
+            cur.execute("ALTER TABLE digital_ids ADD COLUMN IF NOT EXISTS category TEXT")
+            cur.execute("ALTER TABLE digital_ids ADD COLUMN IF NOT EXISTS uk_it_user_id TEXT")
+            cur.execute("ALTER TABLE digital_ids ADD COLUMN IF NOT EXISTS local_login TEXT")
+            cur.execute("ALTER TABLE digital_ids ADD COLUMN IF NOT EXISTS misis TEXT")
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS sso_settings (
                     id INTEGER PRIMARY KEY,

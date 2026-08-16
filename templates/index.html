@@ -200,6 +200,45 @@
                         </div>
                     </div>
 
+                    <div class="field">
+                        <label for="r-category"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Category</label>
+                        <div class="field-input-wrap">
+                            <select id="r-category" name="category" data-live="category" required>
+                                <option value="">Select…</option>
+                                {% for c in categories %}
+                                <option value="{{ c }}" {% if form and form.get('category') == c %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <p class="form-section__title">IT &amp; Access Information <span style="text-transform:none; font-weight:600; opacity:0.65;">(optional — shown on the back of your Digital ID)</span></p>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="r-uk-it-user-id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>UK IT User ID</label>
+                            <div class="field-input-wrap">
+                                <input type="text" id="r-uk-it-user-id" name="uk_it_user_id" data-live="uk_it_user_id"
+                                       placeholder="firstname.lastname"
+                                       value="{{ form.get('uk_it_user_id', '') if form else '' }}">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="r-local-login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Local Login</label>
+                            <div class="field-input-wrap">
+                                <input type="text" id="r-local-login" name="local_login" data-live="local_login"
+                                       placeholder="firstname.lastname"
+                                       value="{{ form.get('local_login', '') if form else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="r-misis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>MISIS</label>
+                        <div class="field-input-wrap">
+                            <input type="text" id="r-misis" name="misis" data-live="misis"
+                                   value="{{ form.get('misis', '') if form else '' }}">
+                        </div>
+                    </div>
+
                     <p class="form-section__title">Digital Identity</p>
                     <div class="field">
                         <label>Staff Photo</label>

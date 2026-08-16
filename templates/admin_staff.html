@@ -50,6 +50,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Department</th>
+                        <th>Category</th>
                         <th>Status</th>
                         <th>Created</th>
                         <th>Actions</th>
@@ -62,6 +63,7 @@
                         <td>{{ r['First Name'] }} {{ r['Last Name'] }}</td>
                         <td>{{ r['Email'] }}</td>
                         <td>{{ r['Department'] }}</td>
+                        <td>{{ r['Category'] or '—' }}</td>
                         <td><span class="status-badge {{ r['Status'] }}">{{ r['Status'] }}</span></td>
                         <td>{{ r['Created At'] }}</td>
                         <td>
@@ -81,7 +83,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No Digital IDs found.</td></tr>
+                    <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No Digital IDs found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

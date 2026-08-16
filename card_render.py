@@ -260,8 +260,22 @@ def render_card_back(record, qr_file):
     idref_w = draw.textlength(idref_text, font=idref_font)
     draw.text((CARD_W - margin - idref_w, 26), idref_text, font=idref_font, fill=BLACK)
 
+    it_label_font = _dax("Bold", 14)
+    it_value_font = _dax("Regular", 17)
+    it_fields = [
+        ("UK IT User ID:", record.get("UK IT User ID") or "—"),
+        ("MISIS:", record.get("MISIS") or "—"),
+        ("Local Login:", record.get("Local Login") or "—"),
+        ("Dubai Email:", record.get("Email") or "—"),
+    ]
+    y = 26
+    for label, value in it_fields:
+        draw.text((margin, y), label, font=it_label_font, fill=MDX_RED)
+        draw.text((margin, y + 18), value, font=it_value_font, fill=BLACK)
+        y += 46
+
+    y += 14
     terms_font = _dax("Regular", 15)
-    y = 50
     for term in CARD_TERMS:
         for line in _wrap_text(draw, f"\u2022 {term}", terms_font, CARD_W - margin * 2):
             draw.text((margin, y), line, font=terms_font, fill=TEXT_SECONDARY)

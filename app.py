@@ -49,19 +49,40 @@ ALLOWED_PHOTO_FORMATS = {"JPEG", "PNG", "WEBP"}
 PHOTO_MAX_DIMENSION = 640
 
 DEPARTMENTS = [
-    "Information Technology, AI and Cybersecurity (ITAC)",
-    "Administration",
-    "Registry",
-    "Library",
-    "Human Resources",
+    "Visa",
+    "Human Resource Management",
+    "Psychology",
+    "Accounting & Finance",
+    "Business School",
+    "Computer Engineering & Informatics",
     "Finance",
-    "Marketing & Communications",
-    "Academic - Business School",
-    "Academic - Engineering",
-    "Academic - Media",
+    "Facilities",
+    "Quality",
+    "International Foundation Programme",
+    "Directors",
+    "Campus Central",
+    "Centre for Academic Success",
+    "Student Activities",
+    "Library",
+    "Media",
+    "Marketing",
+    "Law",
+    "Graphic Design",
+    "CIPD",
+    "School of Health and Education",
+    "Dubai Academic Registry",
+    "Careers & Employability Services",
+    "Student Recruitment",
+    "Information Technology, AI and Cybersecurity (ITAC)",
+    "Digital Marketing",
+    "Digital Transformation",
+    "London Sports Institute",
+    "HR",
+    "Tourism",
 ]
 EMPLOYMENT_STATUSES = ["Full-Time", "Part-Time", "Contract", "Visiting"]
 GENDERS = ["Male", "Female"]
+CATEGORIES = ["Administration", "Faculty"]
 
 DIRECTORY_COLUMNS = [
     "Staff ID", "First Name", "Last Name", "Email",
@@ -71,6 +92,7 @@ DIGITAL_ID_COLUMNS = [
     "Token", "Track ID", "Staff ID", "First Name", "Last Name", "Email", "Mobile Number",
     "Department", "Job Title", "Gender", "Employment Status",
     "Photo Filename", "QR Filename", "Created At", "Status", "Microsoft User ID",
+    "Category", "UK IT User ID", "Local Login", "MISIS",
 ]
 DIGITAL_ID_STATUSES = ("Active", "Suspended", "Deactivated", "Expired")
 ACTIVITY_LOG_COLUMNS = ["Event", "Actor", "Detail", "Created At"]
@@ -131,11 +153,18 @@ def init_excel():
     else:
         ws = wb["Digital_IDs"]
         header = [c.value for c in next(ws.iter_rows(min_row=1, max_row=1))]
-        if header != DIGITAL_ID_COLUMNS and not _sheet_has_data_rows(ws):
-            wb.remove(ws)
-            ws = wb.create_sheet("Digital_IDs")
-            ws.append(DIGITAL_ID_COLUMNS)
-            changed = True
+        if header != DIGITAL_ID_COLUMNS:
+            if not _sheet_has_data_rows(ws):
+                wb.remove(ws)
+                ws = wb.create_sheet("Digital_IDs")
+                ws.append(DIGITAL_ID_COLUMNS)
+                changed = True
+            elif header == DIGITAL_ID_COLUMNS[: len(header)]:
+                # Existing rows are untouched; new columns just get appended
+                # header cells so future rows line up under a real name too.
+                for i, col in enumerate(DIGITAL_ID_COLUMNS[len(header):], start=len(header) + 1):
+                    ws.cell(row=1, column=i, value=col)
+                changed = True
 
     if "Activity_Log" not in wb.sheetnames:
         ws = wb.create_sheet("Activity_Log")
@@ -451,6 +480,10 @@ def _handle_submission():
     form = request.form
     values = {field: (form.get(field) or "").strip() for field in REQUIRED_FIELDS}
     mobile_number = (form.get("mobile_number") or "").strip()
+    category = (form.get("category") or "").strip()
+    uk_it_user_id = (form.get("uk_it_user_id") or "").strip()
+    local_login = (form.get("local_login") or "").strip()
+    misis = (form.get("misis") or "").strip()
 
     edit_token = (form.get("edit_token") or "").strip()
     edit_record = None
@@ -471,7 +504,7 @@ def _handle_submission():
     if missing:
         return render_template(
             "index.html",
-            departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
+            departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS, categories=CATEGORIES,
             error=f"Missing required field(s): {', '.join(missing)}",
             form=form, edit_record=edit_record,
         ), 400
@@ -481,7 +514,7 @@ def _handle_submission():
     if not edit_record and (find_active_digital_id_by_staff(values["staff_id"]) or find_digital_id_by_ms_user_id(ms_user_id)):
         return render_template(
             "index.html",
-            departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
+            departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS, categories=CATEGORIES,
             error="A Digital ID already exists for this Staff ID. Use \u201cExisting Staff Activation\u201d instead.",
             form=form,
         ), 409
@@ -494,7 +527,7 @@ def _handle_submission():
         if photo_error:
             return render_template(
                 "index.html",
-                departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
+                departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS, categories=CATEGORIES,
                 error=photo_error,
                 form=form, edit_record=edit_record,
             ), 400
@@ -506,6 +539,10 @@ def _handle_submission():
             "Department": values["department"], "Job Title": values["job_title"],
             "Gender": values["gender"], "Employment Status": values["employment_status"],
             "Photo Filename": photo_filename,
+            "Category": category or edit_record.get("Category") or "",
+            "UK IT User ID": uk_it_user_id or edit_record.get("UK IT User ID") or "",
+            "Local Login": local_login or edit_record.get("Local Login") or "",
+            "MISIS": misis or edit_record.get("MISIS") or "",
         })
         regenerate_digital_id_qr(token)
         log_event(
@@ -559,6 +596,10 @@ def _handle_submission():
         "Created At": datetime.now().isoformat(timespec="seconds"),
         "Status": "Active",
         "Microsoft User ID": ms_user_id,
+        "Category": category,
+        "UK IT User ID": uk_it_user_id,
+        "Local Login": local_login,
+        "MISIS": misis,
     }
     append_digital_id(record)
     log_event(
@@ -612,6 +653,10 @@ def _edit_prefill_profile(record):
         "mobile_number": record.get("Mobile Number") or "",
         "department": record["Department"], "job_title": record["Job Title"],
         "gender": record.get("Gender") or "", "employment_status": record.get("Employment Status") or "",
+        "category": record.get("Category") or "",
+        "uk_it_user_id": record.get("UK IT User ID") or "",
+        "local_login": record.get("Local Login") or "",
+        "misis": record.get("MISIS") or "",
     }
 
 
@@ -635,7 +680,7 @@ def portal():
 
     return render_template(
         "index.html",
-        departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS,
+        departments=DEPARTMENTS, employment_statuses=EMPLOYMENT_STATUSES, genders=GENDERS, categories=CATEGORIES,
         show_sso_banner=sso_config.is_enabled() and not session.get("ms_user_id") and not edit_record,
         sso_error=session.pop("sso_error", None),
         sso_prefill=sso_prefill,

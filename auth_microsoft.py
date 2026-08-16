@@ -85,18 +85,26 @@ def fetch_profile(access_token):
     resp.raise_for_status()
     data = resp.json()
 
+    username = data.get("userPrincipalName") or ""
+    # Local-part of the Azure AD sign-in name -- the closest thing this app
+    # has to the physical badge's "UK IT User ID" / "Local Login" fields,
+    # since Graph doesn't expose a separate on-prem AD username here.
+    login_local_part = username.split("@")[0] if "@" in username else username
+
     return {
         "ms_user_id": data.get("id"),
         "first_name": data.get("givenName") or "",
         "last_name": data.get("surname") or "",
         "full_name": data.get("displayName") or "",
-        "email": data.get("mail") or data.get("userPrincipalName") or "",
-        "username": data.get("userPrincipalName") or "",
+        "email": data.get("mail") or username or "",
+        "username": username,
         "staff_id": data.get("employeeId") or "",
         "department": data.get("department") or "",
         "job_title": data.get("jobTitle") or "",
         "office_location": data.get("officeLocation") or "",
         "mobile_number": data.get("mobilePhone") or (data.get("businessPhones") or [None])[0] or "",
+        "uk_it_user_id": login_local_part,
+        "local_login": login_local_part,
     }
 
 
