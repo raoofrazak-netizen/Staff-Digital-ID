@@ -72,7 +72,14 @@ a { color: inherit; text-decoration: none; }
 #bg-canvas {
   position: fixed; inset: 0; z-index: -2;
   width: 100%; height: 100%; display: block;
-  background: var(--canvas);
+  /* Same warm gold->red direction as the login sample card's glow, pulled
+     down to page-background intensity (two faint corner glows, not one
+     saturated centre burst) so every page reads as the same premium warm
+     canvas the animated particles then draw on top of. */
+  background:
+    radial-gradient(circle at 22% 15%, rgba(255,180,70,0.10), rgba(227,6,19,0.05) 45%, transparent 65%),
+    radial-gradient(circle at 80% 85%, rgba(255,140,40,0.08), rgba(227,6,19,0.04) 45%, transparent 65%),
+    var(--canvas);
 }
 .bg-noscript-fallback {
   position: fixed; inset: 0; z-index: -3;
@@ -477,12 +484,12 @@ main, .site-header { position: relative; z-index: 1; }
   background: #fdfdfd; display: flex; flex-direction: column; padding: 10px 12px 0;
 }
 .sample-idcard-face--back { transform: rotateY(180deg); }
-.sif-logo-row { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0 8px; }
-.sif-logo { height: 30px; width: auto; opacity: 0.92; }
+.sif-logo-row { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 4px 0 8px; }
+.sif-logo { height: 24px; width: auto; opacity: 0.92; }
 .sif-arabic-wordmark { font-size: 0.44rem; font-weight: 700; color: var(--text-secondary); opacity: 0.7; direction: rtl; unicode-bidi: isolate; }
 .sif-top-row { display: flex; gap: 8px; align-items: flex-start; }
 .sif-photo {
-  width: 44px; height: 52px; border-radius: 4px; flex: none; border: 1px solid rgba(47,37,82,0.18); opacity: 0.7;
+  width: 44px; height: 52px; border-radius: 4px; flex: none; border: 1px solid #000; opacity: 0.85;
   background:
     radial-gradient(circle at 50% 34%, rgba(47,37,82,0.22) 8px, transparent 9px),
     radial-gradient(ellipse 17px 11px at 50% 82%, rgba(47,37,82,0.22) 99%, transparent 100%),

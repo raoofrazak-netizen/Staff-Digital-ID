@@ -145,21 +145,23 @@ def _new_card():
     return card, ImageDraw.Draw(card)
 
 
-def _draw_logo(card, draw, top):
+def _draw_logo(card, draw, top, left_x):
+    """Logo sits left-aligned with the photo box just below it (not spanning
+    the full card width) -- it reads as sitting a little above the photo
+    rather than as a separate centered banner."""
     wordmark_font = _arabic_font(_s(15))
     wordmark = _ar("جامعة ميدلسكس دبي")
-    wordmark_w = draw.textlength(wordmark, font=wordmark_font)
-    draw.text(((CARD_W - wordmark_w) / 2, top), wordmark, font=wordmark_font, fill=TEXT_SECONDARY)
-    top += _s(24)
+    draw.text((left_x, top), wordmark, font=wordmark_font, fill=TEXT_SECONDARY)
+    top += _s(22)
 
     logo_path = os.path.join(_ASSETS_DIR, "mdx-logo.jpg")
     if not os.path.exists(logo_path):
         return top
     logo = Image.open(logo_path).convert("RGB")
-    logo_h = _s(88)
+    logo_h = _s(72)
     ratio = logo_h / logo.height
     logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
-    card.paste(logo, ((CARD_W - logo.width) // 2, top))
+    card.paste(logo, (left_x, top))
     return top + logo_h
 
 
@@ -193,8 +195,8 @@ def render_card_front(record, photo_file, qr_file=None):
     card, draw = _new_card()
     margin = _s(42)
 
-    y = _draw_logo(card, draw, _s(14))
-    y += _s(22)
+    y = _draw_logo(card, draw, _s(14), margin)
+    y += _s(20)
 
     photo_w, photo_h = _s(168), _s(200)
     photo_x, photo_y = margin, y
@@ -204,7 +206,7 @@ def render_card_front(record, photo_file, qr_file=None):
         card.paste(photo, (photo_x, photo_y))
     draw.rectangle(
         [photo_x - 2, photo_y - 2, photo_x + photo_w + 2, photo_y + photo_h + 2],
-        outline=(200, 195, 205), width=3,
+        outline=(0, 0, 0), width=3,
     )
 
     field_x = photo_x + photo_w + _s(30)
