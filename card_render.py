@@ -171,8 +171,8 @@ def _draw_category_bar(card, draw, text):
     draw.rectangle([0, top, CARD_W, CARD_H], fill=MDX_RED)
 
     max_w = CARD_W - _s(40)
-    size = _s(20)
-    min_size = _s(11)
+    size = _s(24)
+    min_size = _s(13)
     font = _monument(size)
     while size > min_size and draw.textlength(text, font=font) > max_w:
         size -= 1
@@ -210,7 +210,7 @@ def render_card_front(record, photo_file, qr_file=None):
     )
 
     field_x = photo_x + photo_w + _s(30)
-    value_font = _dax("Medium", _s(23))
+    value_font = _dax("Bold", _s(30))
     fields = [
         ("ID NUMBER", "رقم معرف", record.get("Staff ID", "")),
         ("GENDER", "الجنس", record.get("Gender") or "—"),
@@ -224,14 +224,19 @@ def render_card_front(record, photo_file, qr_file=None):
     for label, ar_label, value in fields:
         _draw_bilingual_label(draw, field_x, field_y, label, ar_label, size=_s(15))
         draw.text((field_x, field_y + _s(22)), value, font=value_font, fill=BLACK)
-        field_y += _s(66)
+        field_y += _s(72)
 
     name_y = photo_y + photo_h + _s(34)
     name_font = _dax("Bold", _s(34))
-    jobtitle_font = _dax("Medium", _s(25))
+    jobtitle_font = _dax("Bold", _s(29))
 
     _draw_bilingual_label(draw, margin, name_y, "NAME", "اسم", size=_s(17))
     full_name = f"{record.get('First Name', '')} {record.get('Last Name', '')}".strip()
+    name_max_w = CARD_W - margin * 2
+    name_size = _s(34)
+    while name_size > _s(20) and draw.textlength(full_name, font=name_font) > name_max_w:
+        name_size -= 1
+        name_font = _dax("Bold", name_size)
     draw.text((margin, name_y + _s(26)), full_name, font=name_font, fill=BLACK)
 
     title_y = name_y + _s(88)
@@ -240,13 +245,13 @@ def render_card_front(record, photo_file, qr_file=None):
     max_w = CARD_W - margin * 2
     for line in _wrap_text(draw, job_title, jobtitle_font, max_w)[:2]:
         draw.text((margin, title_y + _s(26)), line, font=jobtitle_font, fill=BLACK)
-        title_y += _s(31)
+        title_y += _s(36)
 
     # The gap between Job Title and the bottom category bar is otherwise
     # empty on the official layout -- the vCard QR fills it naturally
     # rather than crowding the ID/Gender/Expiration column above.
     qr_size = _s(225)
-    qr_y = title_y + _s(90)
+    qr_y = title_y + _s(140)
     qr_x = (CARD_W - qr_size) // 2
     draw.rounded_rectangle(
         [qr_x - _s(8), qr_y - _s(8), qr_x + qr_size + _s(8), qr_y + qr_size + _s(8)],
