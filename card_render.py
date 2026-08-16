@@ -264,63 +264,56 @@ def render_card_front(record, photo_file, qr_file=None):
     return card
 
 
-def _generate_barcode_image(staff_id, width):
+def _generate_barcode_image(value, width):
     code128 = barcode.get_barcode_class("code128")
     buf = io.BytesIO()
     writer_options = {"write_text": False, "module_height": 14.0, "quiet_zone": 2.0, "module_width": 0.35}
-    code128(staff_id or "0", writer=ImageWriter()).write(buf, options=writer_options)
+    code128(value or "0", writer=ImageWriter()).write(buf, options=writer_options)
     buf.seek(0)
     img = Image.open(buf).convert("RGB")
     ratio = width / img.width
     return img.resize((width, max(1, int(img.height * ratio))), Image.LANCZOS)
 
 
-def _draw_partner_mark(card, draw, right_x, y):
+def _draw_partner_mark(card, right_x, y):
     """The Dubai Knowledge Park co-brand mark shown on the official card
-    back: three tightly overlapping teal rings (the real mark's rings
-    interlock closely, leaving a small rounded-triangle gap where all
-    three meet -- spacing them further apart reads as three separate
-    dots instead of one knot) beside a stacked "DUBAI / KNOWLEDGE / PARK"
-    wordmark in dark charcoal, no border/box. right_x is the mark's right
-    edge, right-aligned against the card's margin like the address block
-    above it."""
-    teal = (23, 106, 93)
-    text_color = (58, 58, 58)
-    lines = ["DUBAI", "KNOWLEDGE", "PARK"]
-    label_font = _monument(_s(11))
-    line_h = _s(13)
-    text_block_h = line_h * len(lines)
-    gap = _s(8)
-
-    label_w = max(draw.textlength(line, font=label_font) for line in lines)
-    icon_d = text_block_h
-    total_w = icon_d + gap + label_w
-    x0 = right_x - total_w
-
-    icon_cx, icon_cy = x0 + icon_d / 2, y + text_block_h / 2
-    r = icon_d * 0.34
-    offset = r * 0.8
-    ring_centers = [
-        (icon_cx, icon_cy - offset),
-        (icon_cx - offset * 0.87, icon_cy + offset * 0.5),
-        (icon_cx + offset * 0.87, icon_cy + offset * 0.5),
-    ]
-    for cx, cy in ring_centers:
-        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline=teal, width=max(2, _s(2)))
-
-    text_x = x0 + icon_d + gap
-    for i, line in enumerate(lines):
-        draw.text((text_x, y + i * line_h), line, font=label_font, fill=text_color)
+    back -- pasted in verbatim from the real logo file rather than redrawn,
+    since a hand-drawn approximation never quite matched the source. right_x
+    is the mark's right edge, right-aligned against the card's margin like
+    the address block above it."""
+    logo_path = os.path.join(_ASSETS_DIR, "dkp-logo.jpg")
+    if not os.path.exists(logo_path):
+        return
+    logo = Image.open(logo_path).convert("RGB")
+    logo_h = _s(34)
+    ratio = logo_h / logo.height
+    logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
+    card.paste(logo, (right_x - logo.width, y))
 
 
 def render_card_back(record):
     card, draw = _new_card()
     margin = _s(42)
 
+    # Barcode sits at the top of the back (not the bottom) and encodes the
+    # MISIS number rather than the Staff ID -- MISIS is the reference IT
+    # actually scans against, falling back to Staff ID only if MISIS was
+    # never filled in.
+    barcode_value = record.get("MISIS") or record.get("Staff ID", "")
+    y = _s(26)
+    barcode_img = _generate_barcode_image(barcode_value, CARD_W - margin * 2)
+    card.paste(barcode_img, (margin, y))
+    y += barcode_img.height + _s(6)
+    id_font = _dax("Bold", _s(15))
+    id_w = draw.textlength(barcode_value, font=id_font)
+    draw.text(((CARD_W - id_w) / 2, y), barcode_value, font=id_font, fill=BLACK)
+    y += _s(24)
+
     idref_font = _dax("Medium", _s(13))
     idref_text = f"ID Ref# {record.get('Staff ID', '')}"
     idref_w = draw.textlength(idref_text, font=idref_font)
-    draw.text((CARD_W - margin - idref_w, _s(26)), idref_text, font=idref_font, fill=BLACK)
+    draw.text((CARD_W - margin - idref_w, y), idref_text, font=idref_font, fill=TEXT_SECONDARY)
+    y += _s(28)
 
     it_label_font = _dax("Bold", _s(14))
     it_value_font = _dax("Regular", _s(17))
@@ -330,7 +323,6 @@ def render_card_back(record):
         ("Local Login:", record.get("Local Login") or "—"),
         ("Dubai Email:", record.get("Email") or "—"),
     ]
-    y = _s(26)
     for label, value in it_fields:
         draw.text((margin, y), label, font=it_label_font, fill=MDX_RED)
         draw.text((margin, y + _s(18)), value, font=it_value_font, fill=BLACK)
@@ -357,16 +349,7 @@ def render_card_back(record):
         draw.text((margin, y), line, font=address_font, fill=BLACK)
         y += _s(22)
 
-    _draw_partner_mark(card, draw, CARD_W - margin, address_top + _s(4))
-
-    y += _s(170)
-    barcode_img = _generate_barcode_image(record.get("Staff ID", ""), CARD_W - margin * 2)
-    card.paste(barcode_img, (margin, y))
-    y += barcode_img.height + _s(6)
-    id_font = _dax("Bold", _s(15))
-    id_text = record.get("Staff ID", "")
-    id_w = draw.textlength(id_text, font=id_font)
-    draw.text(((CARD_W - id_w) / 2, y), id_text, font=id_font, fill=BLACK)
+    _draw_partner_mark(card, CARD_W - margin, address_top + _s(4))
 
     _draw_category_bar(card, draw, UNIVERSITY_WEBSITE)
     return card

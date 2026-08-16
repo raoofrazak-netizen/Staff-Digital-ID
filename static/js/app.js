@@ -717,9 +717,15 @@
             const selectByText = (id, value) => {
                 const el = document.getElementById(id);
                 if (!el || !value) return;
-                const match = Array.from(el.options).find(
-                    (o) => o.value.toLowerCase() === value.toLowerCase()
-                );
+                const needle = value.toLowerCase();
+                const options = Array.from(el.options);
+                // Azure AD's "department" field is often a short code (e.g.
+                // "ITAC") rather than the portal's full department name --
+                // exact match first, then fall back to a substring match
+                // either direction so those still land on the right option.
+                const match =
+                    options.find((o) => o.value.toLowerCase() === needle) ||
+                    options.find((o) => o.value.toLowerCase().includes(needle) || needle.includes(o.value.toLowerCase()));
                 if (match) el.value = match.value;
             };
             selectByText("r-department", profile.department);
