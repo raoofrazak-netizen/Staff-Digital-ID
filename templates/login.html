@@ -13,88 +13,168 @@
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="grain" aria-hidden="true"></div>
 
-    <div class="login-shell login-shell--no-header">
-        <section class="login-card glass" id="login-card">
-            <div class="login-card__head rise-in rise-in--2">
-                <img class="login-card__logo" src="{{ url_for('static', filename='images/mdx-logo.jpg') }}" alt="Middlesex University Dubai">
-                <h1>Staff Digital ID<span class="login-card__subheading">Admin Log in</span></h1>
-                <p class="login-card__subtitle">Manage Microsoft SSO configuration and Staff Digital IDs.</p>
-                <p class="login-card__badge"><span aria-hidden="true">🔒</span> Secure Administrative Access</p>
-            </div>
+    <div class="login-page">
+        <div class="login-topbar rise-in rise-in--1">
+            <img class="login-topbar__logo" src="{{ url_for('static', filename='images/mdx-logo.jpg') }}" alt="Middlesex University Dubai">
+            <span class="login-topbar__divider" aria-hidden="true"></span>
+            <span class="login-topbar__title">Staff Digital ID Service</span>
+        </div>
 
-            {% if admin_error %}
-            <div class="auth-alert rise-in rise-in--2" role="alert">
-                <span class="auth-alert__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
-                </span>
-                <span>{{ admin_error }}</span>
-            </div>
-            {% endif %}
+        <div class="login-grid">
+            <!-- LEFT: brand story -->
+            <section class="login-brand-copy">
+                <p class="login-brand__eyebrow rise-in rise-in--2"><span aria-hidden="true"></span>Welcome to MDX Digital ID Service</p>
+                <h2 class="login-brand__headline rise-in rise-in--3">Your identity.<br>Digitally elevated.<br>Instantly connected.</h2>
+                <p class="login-brand__sub rise-in rise-in--4">Securely access, verify, and carry your Middlesex University Dubai staff identity in one intelligent digital credential.</p>
+            </section>
 
-            <form method="POST" action="{{ url_for('admin.login') }}" class="admin-inline-form rise-in rise-in--3" id="admin-form">
-                <input type="hidden" name="source" value="main">
-                <div class="field">
-                    <label for="admin-username">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
-                        Username
-                    </label>
-                    <div class="field-input-wrap">
-                        <input type="text" id="admin-username" name="username" autocomplete="username"
-                               value="{{ request.form.get('username', '') if admin_error else '' }}">
-                    </div>
+            <section class="login-features">
+                <div class="login-feature rise-in rise-in--5">
+                    <span class="login-feature__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+                    </span>
+                    <div class="login-feature__text"><strong>SECURE</strong><span>Trusted &amp; Protected</span></div>
                 </div>
-                <div class="field">
-                    <label for="admin-password">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
-                        Password
-                    </label>
-                    <div class="field-input-wrap field-input-wrap--password">
-                        <input type="password" id="admin-password" name="password" autocomplete="current-password">
-                        <button type="button" class="field-toggle" id="toggle-password" aria-label="Show password" aria-pressed="false">
-                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.9 10.9 0 0112 19.5C5 19.5 1.5 12 1.5 12a17.6 17.6 0 014.22-5.06M9.9 4.24A10.6 10.6 0 0112 4.5c7 0 10.5 7.5 10.5 7.5a17.7 17.7 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                <div class="login-feature rise-in rise-in--5">
+                    <span class="login-feature__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.2 7.8l7.6 8.4M6 9v3a6 6 0 006 6h1"/></svg>
+                    </span>
+                    <div class="login-feature__text"><strong>CONNECTED</strong><span>Seamless Access</span></div>
+                </div>
+                <div class="login-feature rise-in rise-in--5">
+                    <span class="login-feature__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+                    </span>
+                    <div class="login-feature__text"><strong>EMPOWERED</strong><span>Work Smarter</span></div>
+                </div>
+            </section>
+
+            <!-- CENTER: Admin login card (all functional markup preserved) -->
+            <div class="login-card-wrap">
+                <section class="login-card glass" id="login-card">
+                    <div class="login-card__head rise-in rise-in--2">
+                        <span class="login-card__emblem">
+                            <img src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="" aria-hidden="true">
+                        </span>
+                        <h1>Admin Portal</h1>
+                        <p class="login-card__subtitle">Sign in to manage Microsoft SSO configuration and Staff Digital IDs.</p>
+                        <p class="login-card__accent-line" aria-hidden="true"></p>
+                    </div>
+
+                    {% if admin_error %}
+                    <div class="auth-alert rise-in rise-in--2" role="alert">
+                        <span class="auth-alert__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                        </span>
+                        <span>{{ admin_error }}</span>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('admin.login') }}" class="admin-inline-form rise-in rise-in--3" id="admin-form">
+                        <input type="hidden" name="source" value="main">
+                        <div class="field">
+                            <label for="admin-username">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+                                Username
+                            </label>
+                            <div class="field-input-wrap">
+                                <input type="text" id="admin-username" name="username" autocomplete="username" placeholder="Enter your username"
+                                       value="{{ request.form.get('username', '') if admin_error else '' }}">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="admin-password">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                                Password
+                            </label>
+                            <div class="field-input-wrap field-input-wrap--password">
+                                <input type="password" id="admin-password" name="password" autocomplete="current-password" placeholder="Enter your password">
+                                <button type="button" class="field-toggle" id="toggle-password" aria-label="Show password" aria-pressed="false">
+                                    <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.9 10.9 0 0112 19.5C5 19.5 1.5 12 1.5 12a17.6 17.6 0 014.22-5.06M9.9 4.24A10.6 10.6 0 0112 4.5c7 0 10.5 7.5 10.5 7.5a17.7 17.7 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-admin-signin" id="admin-submit">
+                            <span class="btn-admin-signin__content">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+                                <span class="btn-admin-signin__label">Sign In</span>
+                                <svg class="btn-admin-signin__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                            </span>
+                            <span class="btn-admin-signin__spinner" aria-hidden="true"></span>
                         </button>
+                    </form>
+
+                    <div class="login-divider rise-in rise-in--4"><span>or continue with</span></div>
+
+                    {% if sso_error %}
+                    <div class="auth-alert" role="alert">
+                        <span class="auth-alert__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                        </span>
+                        <span>{{ sso_error }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if sso_configured %}
+                    <a href="{{ url_for('sso.microsoft_login') }}" class="btn-microsoft btn-microsoft--lg rise-in rise-in--4">
+                        <svg viewBox="0 0 21 21" width="18" height="18"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+                        <span>Sign in with Microsoft</span>
+                        <span class="btn-microsoft__arrow" aria-hidden="true">→</span>
+                    </a>
+                    {% else %}
+                    <button type="button" class="btn-microsoft btn-microsoft--lg disabled rise-in rise-in--4" title="Microsoft Sign-In isn't configured yet">
+                        <svg viewBox="0 0 21 21" width="18" height="18"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+                        <span>Sign in with Microsoft</span>
+                    </button>
+                    <p class="login-card__hint">Microsoft Sign-In isn't set up on this portal yet.</p>
+                    {% endif %}
+
+                    <p class="login-card__trust rise-in rise-in--5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>
+                        Protected Administrative Access
+                    </p>
+
+                    <a href="{{ url_for('portal') }}" class="login-manual-link rise-in rise-in--5">
+                        Continue to Registration Portal <span class="login-manual-link__arrow">→</span>
+                    </a>
+                </section>
+            </div>
+
+            <!-- RIGHT: decorative sample Digital ID showcase -->
+            <section class="login-showcase" aria-hidden="true">
+                <div class="showcase-trails">
+                    <svg viewBox="0 0 400 500" class="showcase-trails__svg">
+                        <path class="trail trail--1" d="M40,460 C120,380 60,260 160,200 C240,150 220,60 320,30"/>
+                        <path class="trail trail--2" d="M370,470 C300,420 320,300 230,260 C150,220 150,120 70,70"/>
+                    </svg>
+                </div>
+                <div class="sample-id-wrap" id="sample-id-wrap">
+                    <div class="sample-idcard" id="sample-idcard">
+                        <div class="sample-idcard__band">
+                            <span class="sample-idcard__band-label">STAFF DIGITAL ID</span>
+                        </div>
+                        <div class="sample-idcard__body">
+                            <div class="sample-idcard__photo"></div>
+                            <p class="sample-idcard__name">A. Sample</p>
+                            <p class="sample-idcard__role">Faculty of Sample Studies</p>
+                            <div class="sample-idcard__pills">
+                                <span class="sample-idcard__pill">MDX00000</span>
+                                <span class="sample-idcard__pill">Active</span>
+                            </div>
+                            <div class="sample-idcard__qr" aria-hidden="true">
+                                <svg viewBox="0 0 60 60"><rect width="60" height="60" fill="#fff"/><g fill="#2f2552" opacity="0.75"><rect x="4" y="4" width="14" height="14"/><rect x="42" y="4" width="14" height="14"/><rect x="4" y="42" width="14" height="14"/><rect x="24" y="4" width="6" height="6"/><rect x="24" y="14" width="6" height="6"/><rect x="34" y="24" width="6" height="6"/><rect x="24" y="24" width="6" height="6"/><rect x="44" y="24" width="6" height="6"/><rect x="24" y="34" width="6" height="6"/><rect x="44" y="34" width="6" height="6"/><rect x="24" y="44" width="6" height="6"/><rect x="34" y="44" width="6" height="6"/></g></svg>
+                            </div>
+                            <p class="sample-idcard__footer">Middlesex University Dubai — Sample Preview</p>
+                        </div>
                     </div>
                 </div>
-                <button type="submit" class="btn-admin-signin" id="admin-submit">
-                    <span class="btn-admin-signin__label">Sign In</span>
-                    <span class="btn-admin-signin__spinner" aria-hidden="true"></span>
-                </button>
-            </form>
-
-            <div class="login-divider rise-in rise-in--4"><span>or continue with</span></div>
-
-            {% if sso_error %}
-            <div class="auth-alert" role="alert">
-                <span class="auth-alert__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
-                </span>
-                <span>{{ sso_error }}</span>
-            </div>
-            {% endif %}
-
-            {% if sso_configured %}
-            <a href="{{ url_for('sso.microsoft_login') }}" class="btn-microsoft btn-microsoft--lg rise-in rise-in--4">
-                <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
-                Sign in with Microsoft
-            </a>
-            {% else %}
-            <button type="button" class="btn-microsoft btn-microsoft--lg disabled rise-in rise-in--4" title="Microsoft Sign-In isn't configured yet">
-                <svg viewBox="0 0 21 21" width="20" height="20"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
-                Sign in with Microsoft
-            </button>
-            <p class="login-card__hint">Microsoft Sign-In isn't set up on this portal yet.</p>
-            {% endif %}
-
-            <p class="login-card__trust rise-in rise-in--5"><span aria-hidden="true">🔒</span> Protected Administrative Access</p>
-
-            <a href="{{ url_for('portal') }}" class="login-manual-link rise-in rise-in--5">
-                Continue to Registration Portal <span class="login-manual-link__arrow">→</span>
-            </a>
-        </section>
+            </section>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sample-idcard.js') }}"></script>
     <script>
         const adminUser = document.getElementById("admin-username");
         const adminPass = document.getElementById("admin-password");

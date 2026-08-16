@@ -221,11 +221,62 @@ main, .site-header { position: relative; z-index: 1; }
   color: var(--mdx-indigo); font-size: 0.8rem; font-weight: 600; line-height: 1.4;
 }
 
-/* ============ Login (landing) / Admin Portal auth page ============ */
-.login-shell { max-width: 440px; margin: 60px auto; padding: 0 20px; }
-.login-shell--no-header {
-  min-height: 100vh; margin: 0 auto; display: flex; align-items: center; justify-content: center;
+/* ============ Login (landing) / Admin Portal auth page ============
+   Three-section cinematic composition: brand story (left) / admin login
+   (center, the interactive focus) / decorative sample Digital ID (right).
+   Collapses to a single centered column on tablet/mobile, in the order
+   branding -> brand story -> login card -> feature highlights -> sample ID. */
+.login-page { max-width: 1360px; margin: 0 auto; padding: 26px 24px 60px; min-height: 100vh; display: flex; flex-direction: column; }
+
+.login-topbar { display: flex; align-items: center; gap: 16px; }
+.login-topbar__logo { height: 32px; width: auto; flex: none; }
+.login-topbar__divider { width: 1px; height: 24px; background: var(--glass-border); flex: none; }
+.login-topbar__title { font-family: var(--font-display); font-weight: 400; font-size: 0.92rem; letter-spacing: 0.02em; color: var(--mdx-indigo); }
+
+.login-grid {
+  flex: 1; margin-top: clamp(24px, 5vh, 56px);
+  display: grid; align-items: center; column-gap: clamp(24px, 4vw, 56px); row-gap: 34px;
+  grid-template-columns: 1fr minmax(360px, 440px) 1fr;
+  grid-template-areas: "brandcopy card showcase" "features card showcase";
 }
+.login-brand-copy { grid-area: brandcopy; max-width: 460px; justify-self: start; }
+.login-features { grid-area: features; max-width: 420px; justify-self: start; display: flex; flex-direction: column; gap: 14px; }
+.login-card-wrap { grid-area: card; }
+.login-showcase { grid-area: showcase; position: relative; justify-self: center; }
+
+.login-brand__eyebrow {
+  display: inline-flex; align-items: center; gap: 12px; margin: 0 0 18px;
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.26em; text-transform: uppercase; color: var(--mdx-red);
+}
+.login-brand__eyebrow span {
+  width: 26px; height: 2px; border-radius: 2px; background: var(--mdx-tangerine); flex: none;
+  transform-origin: left; animation: brandLineDraw 0.7s var(--ease-spring) 0.5s both;
+}
+@keyframes brandLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.login-brand__headline {
+  font-family: var(--font-display); font-weight: 400; letter-spacing: 0.005em; color: var(--mdx-indigo);
+  font-size: clamp(1.9rem, 3.4vw, 2.7rem); line-height: 1.18; margin: 0 0 18px;
+}
+.login-brand__sub { color: var(--text-secondary); font-size: 1rem; line-height: 1.6; margin: 0; max-width: 400px; }
+
+.login-feature {
+  display: flex; align-items: center; gap: 14px; padding: 6px;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.login-feature:hover { transform: translateX(3px); }
+.login-feature__icon {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, rgba(255,255,255,0.9), rgba(255,255,255,0.55));
+  color: var(--mdx-red); box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 8px 18px rgba(47,37,82,0.1);
+  border: 1px solid rgba(255,255,255,0.7);
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) ease;
+}
+.login-feature:hover .login-feature__icon { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 12px 26px rgba(227,6,19,0.18); }
+.login-feature__icon svg { width: 21px; height: 21px; }
+.login-feature__text { display: flex; flex-direction: column; line-height: 1.35; }
+.login-feature__text strong { font-family: var(--font-display); font-weight: 400; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--mdx-indigo); }
+.login-feature__text span { font-size: 0.82rem; color: var(--text-secondary); }
+
 /* Liquid Glass: an intensified, more refractive variant of the shared
    .glass material used just for this card -- heavier blur/saturation so
    the particle background genuinely diffuses through it, a brighter
@@ -244,21 +295,28 @@ main, .site-header { position: relative; z-index: 1; }
     0 24px 64px rgba(47,37,82,0.22);
 }
 .login-card__head { margin-bottom: 22px; }
-.login-card__logo { display: block; max-width: 190px; width: 100%; height: auto; margin: 0 auto 18px; }
+.login-card__emblem {
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 8px 18px rgba(47,37,82,0.12);
+}
+.login-card__emblem img { width: 28px; height: 28px; }
 .login-card h1 {
   font-family: var(--font-display); font-weight: 400; letter-spacing: 0.01em;
   font-size: clamp(1.3rem, 2.6vw, 1.55rem); margin: 0 0 8px; color: var(--mdx-indigo);
 }
-.login-card__subheading {
-  display: block; font-size: 0.62em; font-weight: 700; letter-spacing: 0.04em;
-  color: var(--text-secondary); margin-top: 4px;
+.login-card__subtitle { color: var(--text-secondary); font-size: 0.86rem; line-height: 1.5; margin: 0 0 14px; max-width: 300px; margin-inline: auto; }
+.login-card__accent-line {
+  width: 46px; height: 2px; margin: 0 auto; border-radius: 2px;
+  background: linear-gradient(90deg, var(--mdx-red), var(--mdx-tangerine));
+  transform-origin: center; animation: brandLineDraw 0.7s var(--ease-spring) 0.6s both;
 }
-.login-card__subtitle { color: var(--text-secondary); font-size: 0.86rem; line-height: 1.5; margin: 0 0 12px; }
-.login-card__badge {
-  display: inline-flex; align-items: center; gap: 6px; margin: 0;
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; color: var(--text-muted);
+.login-card__trust {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 0.72rem; color: var(--text-muted); margin: 18px 0 0;
 }
-.login-card__trust { font-size: 0.72rem; color: var(--text-muted); margin: 18px 0 0; }
+.login-card__trust svg { width: 14px; height: 14px; }
 
 .auth-alert {
   display: flex; align-items: flex-start; gap: 10px; text-align: left;
@@ -298,13 +356,23 @@ main, .site-header { position: relative; z-index: 1; }
 
 .btn-admin-signin {
   position: relative; width: 100%; padding: 14px 22px; border-radius: 12px; border: none; cursor: pointer;
-  font-weight: 700; font-size: 0.9rem; color: #fff;
+  font-weight: 700; font-size: 0.9rem; color: #fff; overflow: hidden;
   background: linear-gradient(120deg, var(--mdx-red), var(--mdx-red-dark));
   box-shadow: 0 10px 22px rgba(227,6,19,0.28);
   transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) ease, filter var(--dur-fast) ease;
 }
+.btn-admin-signin::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg); transition: left 0.6s ease;
+}
+.btn-admin-signin:hover::before { left: 130%; }
 .btn-admin-signin:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 14px 28px rgba(227,6,19,0.34); filter: brightness(1.04); }
 .btn-admin-signin:active { transform: translateY(1px) scale(0.98); box-shadow: 0 6px 14px rgba(227,6,19,0.24); }
+.btn-admin-signin__content { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-admin-signin__content svg { width: 16px; height: 16px; flex: none; }
+.btn-admin-signin__arrow { transition: transform var(--dur-fast) ease; }
+.btn-admin-signin:hover .btn-admin-signin__arrow { transform: translateX(3px); }
 .btn-admin-signin__spinner { display: none; }
 .btn-admin-signin.is-loading { cursor: default; opacity: 0.9; }
 .btn-admin-signin.is-loading .btn-admin-signin__spinner {
@@ -317,6 +385,8 @@ main, .site-header { position: relative; z-index: 1; }
 .btn-microsoft--lg { width: 100%; justify-content: center; padding: 15px 24px; font-size: 0.92rem; }
 .btn-microsoft:hover { background: #fafafa; border-color: #6b6b6b; }
 .btn-microsoft.disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+.btn-microsoft__arrow { transition: transform var(--dur-fast) ease; }
+.btn-microsoft:hover .btn-microsoft__arrow { transform: translateX(3px); }
 .login-card__hint { font-size: 0.76rem; color: var(--text-muted); margin: 10px 0 0; }
 
 .login-divider {
@@ -332,6 +402,68 @@ main, .site-header { position: relative; z-index: 1; }
 .login-manual-link:hover { color: var(--mdx-red); }
 .login-manual-link__arrow { display: inline-block; transition: transform var(--dur-fast) ease; }
 .login-manual-link:hover .login-manual-link__arrow { transform: translateX(3px); }
+
+/* ---- Right side: decorative sample Digital ID + ambient light trails ---- */
+.showcase-trails { position: absolute; inset: -60px -40px; z-index: 0; pointer-events: none; overflow: visible; }
+.showcase-trails__svg { width: 100%; height: 100%; overflow: visible; }
+.trail { fill: none; stroke-width: 1.5; stroke-linecap: round; }
+.trail--1 { stroke: rgba(227,6,19,0.16); stroke-dasharray: 6 14; animation: trailFlow 14s linear infinite; }
+.trail--2 { stroke: rgba(255,255,255,0.6); stroke-dasharray: 4 16; animation: trailFlow 18s linear infinite reverse; }
+@keyframes trailFlow { to { stroke-dashoffset: -400; } }
+
+.sample-id-wrap { position: relative; z-index: 1; perspective: 1000px; }
+.sample-idcard {
+  width: 260px; border-radius: 22px; overflow: hidden; position: relative;
+  background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(255,255,255,0.68));
+  box-shadow: 0 2px 4px rgba(47,37,82,0.06), 0 20px 44px rgba(47,37,82,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.7);
+  animation: sampleFloat 7s ease-in-out infinite;
+  transform-style: preserve-3d; will-change: transform;
+}
+@keyframes sampleFloat {
+  0%, 100% { transform: translateY(-6px) rotate(-0.6deg); }
+  50% { transform: translateY(6px) rotate(0.6deg); }
+}
+.sample-idcard__band {
+  padding: 12px 18px; background: linear-gradient(120deg, var(--mdx-red), var(--mdx-red-dark)); text-align: center;
+}
+.sample-idcard__band-label { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; color: #fff; }
+.sample-idcard__body { padding: 22px 20px 18px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.sample-idcard__photo {
+  width: 62px; height: 62px; border-radius: 50%; margin-bottom: 12px; border: 3px solid #fff;
+  box-shadow: var(--shadow-soft);
+  background:
+    radial-gradient(circle at 50% 32%, rgba(47,37,82,0.18) 11px, transparent 12px),
+    radial-gradient(ellipse 22px 14px at 50% 80%, rgba(47,37,82,0.18) 99%, transparent 100%),
+    rgba(47,37,82,0.06);
+}
+.sample-idcard__name { font-size: 0.98rem; font-weight: 800; color: var(--mdx-indigo); margin: 0 0 2px; filter: blur(0.2px); opacity: 0.85; }
+.sample-idcard__role { font-size: 0.74rem; color: var(--text-muted); margin: 0 0 12px; }
+.sample-idcard__pills { display: flex; gap: 6px; margin-bottom: 16px; }
+.sample-idcard__pill {
+  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.03em; padding: 4px 11px; border-radius: var(--radius-pill);
+  background: rgba(47,37,82,0.07); color: var(--mdx-indigo); opacity: 0.85;
+}
+.sample-idcard__qr { width: 62px; height: 62px; margin-bottom: 12px; border-radius: 10px; overflow: hidden; opacity: 0.9; }
+.sample-idcard__footer { font-size: 0.6rem; color: var(--text-muted); margin: 0; padding-top: 12px; border-top: 1px dashed rgba(47,37,82,0.15); width: 100%; }
+
+/* ---- Responsive: single centered column, spec-defined mobile order ---- */
+@media (max-width: 1100px) {
+  .login-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "brandcopy" "card" "features" "showcase";
+    justify-items: center; text-align: center;
+  }
+  .login-brand-copy, .login-features { justify-self: center; max-width: 480px; }
+  .login-brand__eyebrow, .login-feature { justify-content: center; }
+  .login-brand__sub { margin-inline: auto; }
+  .login-showcase { margin-top: 10px; }
+  .sample-idcard { width: 220px; }
+}
+@media (max-width: 480px) {
+  .login-page { padding: 20px 16px 40px; }
+  .login-brand__headline { font-size: 1.7rem; }
+}
 
 /* ============ Post-login welcome hub ============ */
 .account-shell { max-width: 460px; margin: 60px auto; padding: 0 20px; }
@@ -1118,6 +1250,9 @@ table.admin-table tr:hover td { background: rgba(255,255,255,0.4); }
   [data-tilt], .idcard, .idcard-tilt-wrap .idcard { transform: none !important; }
   [data-tilt]::after, .idcard__sheen { display: none !important; }
   .rise-in { animation: riseInReduced 150ms linear both; }
+  .sample-idcard { animation: none !important; transform: none !important; }
+  .trail--1, .trail--2 { animation: none !important; }
+  .login-brand__eyebrow span, .login-card__accent-line { animation: none !important; transform: scaleX(1) !important; }
 }
 @keyframes riseInReduced { from { opacity: 0; } to { opacity: 1; } }
 
