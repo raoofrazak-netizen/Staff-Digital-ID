@@ -4,7 +4,7 @@ badge template (portrait CR80 badge, 2.125in x 3.375in) rather than an
 invented landscape business-card layout: white body, photo box, ID
 Number / Gender / Expiration column, Name / Job Title, the
 scan-to-save-contact vCard QR (filling what would otherwise be empty
-space below Job Title), and a solid grey category bar on the front;
+space below Job Title), and a solid red category bar on the front;
 IT-office terms, the university address, and a Code128 barcode of the
 Staff ID on the back.
 
@@ -33,7 +33,7 @@ from bidi.algorithm import get_display
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 MDX_RED = (227, 6, 19)
-GREY_BAR = (118, 118, 118)
+MDX_RED_DARK = (184, 5, 15)
 BLACK = (26, 24, 34)
 TEXT_SECONDARY = (98, 95, 107)
 LINE = (225, 220, 210)
@@ -149,10 +149,10 @@ def _draw_logo(card, draw, top):
     return top + logo_h
 
 
-def _draw_grey_bar(card, draw, text):
+def _draw_category_bar(card, draw, text):
     bar_h = 56
     top = CARD_H - bar_h
-    draw.rectangle([0, top, CARD_W, CARD_H], fill=GREY_BAR)
+    draw.rectangle([0, top, CARD_W, CARD_H], fill=MDX_RED)
 
     max_w = CARD_W - 40
     size = 20
@@ -239,7 +239,7 @@ def render_card_front(record, photo_file, qr_file=None):
     caption_w = draw.textlength(caption_text, font=caption_font)
     draw.text(((CARD_W - caption_w) / 2, qr_y + qr_size + 18), caption_text, font=caption_font, fill=TEXT_SECONDARY)
 
-    _draw_grey_bar(card, draw, (record.get("Department") or "STAFF").upper())
+    _draw_category_bar(card, draw, (record.get("Department") or "STAFF").upper())
     return card
 
 
@@ -254,20 +254,35 @@ def _generate_barcode_image(staff_id, width):
     return img.resize((width, max(1, int(img.height * ratio))), Image.LANCZOS)
 
 
-def _draw_partner_mark(card, draw, x, y):
-    """A simple two-ring mark standing in for the Dubai Knowledge Park
-    'PARTNER' co-brand shown on the official card back."""
+def _draw_partner_mark(card, draw, right_x, y):
+    """A bordered badge with a small teal mark and the 'DUBAI KNOWLEDGE
+    PARK' wordmark, standing in for the co-brand shown on the official
+    card back. right_x is the badge's right edge (it's right-aligned
+    against the card's margin, like the address block above it)."""
     teal = (31, 122, 108)
-    r = 11
-    draw.ellipse([x, y, x + r * 2, y + r * 2], outline=teal, width=2)
-    draw.ellipse([x + r, y, x + r * 3, y + r * 2], outline=teal, width=2)
-    label_font = _dax("Bold", 10)
-    lines = ["DUBAI", "KNOWLEDGE PARK", "PARTNER"]
-    ly = y + r * 2 + 6
-    for line in lines:
-        w = draw.textlength(line, font=label_font)
-        draw.text((x + r * 2 - w / 2, ly), line, font=label_font, fill=teal)
-        ly += 13
+    label_font = _dax("Bold", 11)
+    label = "DUBAI KNOWLEDGE PARK"
+    label_w = draw.textlength(label, font=label_font)
+
+    icon_d = 18
+    pad_x, gap = 10, 6
+    badge_w = pad_x + icon_d + gap + label_w + pad_x
+    badge_h = 30
+    x = right_x - badge_w
+
+    draw.rounded_rectangle(
+        [x, y, x + badge_w, y + badge_h], radius=badge_h / 2,
+        outline=(205, 200, 195), width=1, fill=(255, 255, 255),
+    )
+
+    icon_x, icon_y = x + pad_x, y + (badge_h - icon_d) / 2
+    r = icon_d / 2.6
+    draw.ellipse([icon_x, icon_y + (icon_d - r * 2) / 2, icon_x + r * 2, icon_y + (icon_d + r * 2) / 2], outline=teal, width=2)
+    draw.ellipse([icon_x + icon_d - r * 2, icon_y + (icon_d - r * 2) / 2, icon_x + icon_d, icon_y + (icon_d + r * 2) / 2], outline=teal, width=2)
+
+    text_x = icon_x + icon_d + gap
+    text_h = label_font.getbbox(label)[3] - label_font.getbbox(label)[1]
+    draw.text((text_x, y + (badge_h - text_h) / 2 - 2), label, font=label_font, fill=(26, 24, 34))
 
 
 def render_card_back(record):
@@ -314,7 +329,7 @@ def render_card_back(record):
         draw.text((margin, y), line, font=address_font, fill=BLACK)
         y += 22
 
-    _draw_partner_mark(card, draw, CARD_W - margin - 90, address_top + 4)
+    _draw_partner_mark(card, draw, CARD_W - margin, address_top + 4)
 
     y += 170
     barcode_img = _generate_barcode_image(record.get("Staff ID", ""), CARD_W - margin * 2)
@@ -325,5 +340,5 @@ def render_card_back(record):
     id_w = draw.textlength(id_text, font=id_font)
     draw.text(((CARD_W - id_w) / 2, y), id_text, font=id_font, fill=BLACK)
 
-    _draw_grey_bar(card, draw, UNIVERSITY_WEBSITE)
+    _draw_category_bar(card, draw, UNIVERSITY_WEBSITE)
     return card
