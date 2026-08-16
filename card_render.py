@@ -210,7 +210,7 @@ def render_card_front(record, photo_file, qr_file=None):
     )
 
     field_x = photo_x + photo_w + _s(30)
-    value_font = _dax("Medium", _s(20))
+    value_font = _dax("Medium", _s(23))
     fields = [
         ("ID NUMBER", "رقم معرف", record.get("Staff ID", "")),
         ("GENDER", "الجنس", record.get("Gender") or "—"),
@@ -222,31 +222,31 @@ def render_card_front(record, photo_file, qr_file=None):
         fields.append(("EXPIRATION", "انقضاء", "—"))
     field_y = photo_y + _s(6)
     for label, ar_label, value in fields:
-        _draw_bilingual_label(draw, field_x, field_y, label, ar_label, size=_s(13))
-        draw.text((field_x, field_y + _s(20)), value, font=value_font, fill=BLACK)
-        field_y += _s(62)
+        _draw_bilingual_label(draw, field_x, field_y, label, ar_label, size=_s(15))
+        draw.text((field_x, field_y + _s(22)), value, font=value_font, fill=BLACK)
+        field_y += _s(66)
 
     name_y = photo_y + photo_h + _s(34)
-    name_font = _dax("Bold", _s(30))
-    jobtitle_font = _dax("Medium", _s(22))
+    name_font = _dax("Bold", _s(34))
+    jobtitle_font = _dax("Medium", _s(25))
 
-    _draw_bilingual_label(draw, margin, name_y, "NAME", "اسم", size=_s(15))
+    _draw_bilingual_label(draw, margin, name_y, "NAME", "اسم", size=_s(17))
     full_name = f"{record.get('First Name', '')} {record.get('Last Name', '')}".strip()
-    draw.text((margin, name_y + _s(24)), full_name, font=name_font, fill=BLACK)
+    draw.text((margin, name_y + _s(26)), full_name, font=name_font, fill=BLACK)
 
-    title_y = name_y + _s(84)
-    _draw_bilingual_label(draw, margin, title_y, "JOB TITLE", "الوظيفة", size=_s(15))
+    title_y = name_y + _s(88)
+    _draw_bilingual_label(draw, margin, title_y, "JOB TITLE", "الوظيفة", size=_s(17))
     job_title = record.get("Job Title", "")
     max_w = CARD_W - margin * 2
     for line in _wrap_text(draw, job_title, jobtitle_font, max_w)[:2]:
-        draw.text((margin, title_y + _s(24)), line, font=jobtitle_font, fill=BLACK)
-        title_y += _s(28)
+        draw.text((margin, title_y + _s(26)), line, font=jobtitle_font, fill=BLACK)
+        title_y += _s(31)
 
     # The gap between Job Title and the bottom category bar is otherwise
     # empty on the official layout -- the vCard QR fills it naturally
     # rather than crowding the ID/Gender/Expiration column above.
-    qr_size = _s(190)
-    qr_y = title_y + _s(110)
+    qr_size = _s(225)
+    qr_y = title_y + _s(90)
     qr_x = (CARD_W - qr_size) // 2
     draw.rounded_rectangle(
         [qr_x - _s(8), qr_y - _s(8), qr_x + qr_size + _s(8), qr_y + qr_size + _s(8)],
@@ -255,10 +255,10 @@ def render_card_front(record, photo_file, qr_file=None):
     if qr_file:
         qr_img = Image.open(qr_file).convert("RGB").resize((qr_size, qr_size), Image.NEAREST)
         card.paste(qr_img, (qr_x, qr_y))
-    caption_font = _dax("Bold", _s(13))
+    caption_font = _dax("Bold", _s(14))
     caption_text = "SCAN TO SAVE CONTACT"
     caption_w = draw.textlength(caption_text, font=caption_font)
-    draw.text(((CARD_W - caption_w) / 2, qr_y + qr_size + _s(18)), caption_text, font=caption_font, fill=TEXT_SECONDARY)
+    draw.text(((CARD_W - caption_w) / 2, qr_y + qr_size + _s(16)), caption_text, font=caption_font, fill=TEXT_SECONDARY)
 
     _draw_category_bar(card, draw, (record.get("Department") or "STAFF").upper())
     return card
@@ -285,7 +285,7 @@ def _draw_partner_mark(card, right_x, y):
     if not os.path.exists(logo_path):
         return
     logo = Image.open(logo_path).convert("RGB")
-    logo_h = _s(34)
+    logo_h = _s(58)
     ratio = logo_h / logo.height
     logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
     card.paste(logo, (right_x - logo.width, y))
@@ -304,19 +304,19 @@ def render_card_back(record):
     barcode_img = _generate_barcode_image(barcode_value, CARD_W - margin * 2)
     card.paste(barcode_img, (margin, y))
     y += barcode_img.height + _s(6)
-    id_font = _dax("Bold", _s(15))
+    id_font = _dax("Bold", _s(17))
     id_w = draw.textlength(barcode_value, font=id_font)
     draw.text(((CARD_W - id_w) / 2, y), barcode_value, font=id_font, fill=BLACK)
-    y += _s(24)
+    y += _s(26)
 
-    idref_font = _dax("Medium", _s(13))
+    idref_font = _dax("Medium", _s(14))
     idref_text = f"ID Ref# {record.get('Staff ID', '')}"
     idref_w = draw.textlength(idref_text, font=idref_font)
     draw.text((CARD_W - margin - idref_w, y), idref_text, font=idref_font, fill=TEXT_SECONDARY)
-    y += _s(28)
+    y += _s(30)
 
-    it_label_font = _dax("Bold", _s(14))
-    it_value_font = _dax("Regular", _s(17))
+    it_label_font = _dax("Bold", _s(16))
+    it_value_font = _dax("Regular", _s(19))
     it_fields = [
         ("UK IT User ID:", record.get("UK IT User ID") or "—"),
         ("MISIS:", record.get("MISIS") or "—"),
@@ -325,15 +325,15 @@ def render_card_back(record):
     ]
     for label, value in it_fields:
         draw.text((margin, y), label, font=it_label_font, fill=MDX_RED)
-        draw.text((margin, y + _s(18)), value, font=it_value_font, fill=BLACK)
-        y += _s(46)
+        draw.text((margin, y + _s(20)), value, font=it_value_font, fill=BLACK)
+        y += _s(50)
 
     y += _s(14)
-    terms_font = _dax("Regular", _s(15))
+    terms_font = _dax("Regular", _s(17))
     for term in CARD_TERMS:
         for line in _wrap_text(draw, f"• {term}", terms_font, CARD_W - margin * 2):
             draw.text((margin, y), line, font=terms_font, fill=TEXT_SECONDARY)
-            y += _s(22)
+            y += _s(24)
         y += _s(4)
 
     y += _s(14)
@@ -341,13 +341,13 @@ def render_card_back(record):
     y += _s(20)
 
     address_top = y
-    address_name_font = _dax("Bold", _s(19))
-    address_font = _dax("Regular", _s(16))
+    address_name_font = _dax("Bold", _s(21))
+    address_font = _dax("Regular", _s(18))
     draw.text((margin, y), "Middlesex University Dubai", font=address_name_font, fill=MDX_RED)
-    y += _s(30)
+    y += _s(32)
     for line in UNIVERSITY_ADDRESS_LINES:
         draw.text((margin, y), line, font=address_font, fill=BLACK)
-        y += _s(22)
+        y += _s(24)
 
     _draw_partner_mark(card, CARD_W - margin, address_top + _s(4))
 
