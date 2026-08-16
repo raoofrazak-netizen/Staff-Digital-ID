@@ -157,6 +157,67 @@ main, .site-header { position: relative; z-index: 1; }
 .rise-in--4 { animation-delay: 360ms; }
 .rise-in--5 { animation-delay: 480ms; }
 
+/* Scroll-triggered reveal for below-the-fold sections -- lighter weight
+   than a full scroll library (IntersectionObserver in ui.js), separate
+   from .rise-in above since that animates unconditionally on page load. */
+.scroll-reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-spring), transform 0.7s var(--ease-spring);
+}
+.scroll-reveal.is-visible { opacity: 1; transform: none; }
+
+/* ============ Toast notifications ============ */
+.toast-region {
+  position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+  display: flex; flex-direction: column; gap: 10px;
+  max-width: min(360px, calc(100vw - 32px));
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-radius: var(--radius-md);
+  background: var(--glass); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--shadow-soft); font-size: 0.85rem; font-weight: 700; color: var(--text-primary);
+  animation: toastIn 0.35s var(--ease-spring);
+}
+.toast--success { border-left: 4px solid var(--success); }
+.toast--error { border-left: 4px solid var(--mdx-red); }
+.toast--info { border-left: 4px solid var(--mdx-indigo); }
+.toast.is-leaving { animation: toastOut 0.25s ease forwards; }
+.toast__close {
+  margin-left: auto; background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 1.1rem; line-height: 1; padding: 2px;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(8px) scale(0.98); } }
+
+/* ============ Skeleton loading shimmer ============ */
+.skeleton { position: relative; overflow: hidden; background: rgba(47,37,82,0.08); }
+.skeleton::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: skeletonSweep 1.4s ease-in-out infinite;
+}
+@keyframes skeletonSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* ============ Empty state ============ */
+.empty-state {
+  border: 1.5px dashed rgba(47,37,82,0.25); border-radius: var(--radius-md);
+  padding: 22px; text-align: center; margin: 6px 0 20px;
+}
+.empty-state__icon { width: 30px; height: 30px; margin: 0 auto 10px; color: var(--mdx-red); }
+.empty-state__title { font-weight: 800; font-size: 0.92rem; color: var(--text-primary); margin: 0 0 4px; }
+.empty-state__sub { font-size: 0.8rem; color: var(--text-secondary); margin: 0; }
+
+/* ============ Inline stat (count-up) ============ */
+.stat-inline {
+  display: inline-flex; align-items: center; gap: 8px; margin: 10px 0 0;
+  padding: 8px 16px; border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.5); border: 1px solid var(--glass-border);
+  font-size: 0.78rem; font-weight: 700; color: var(--text-secondary);
+}
+.stat-inline strong { color: var(--mdx-red-dark); font-family: var(--font-display); font-weight: 400; font-size: 0.95rem; }
+
 /* ============ Header / floating nav ============ */
 .site-header { padding: 18px 20px 0; }
 .nav {
@@ -559,8 +620,15 @@ main, .site-header { position: relative; z-index: 1; }
 /* ============ Post-login welcome hub ============ */
 .account-shell { max-width: 460px; margin: 60px auto; padding: 0 20px; }
 .account-card { padding: clamp(32px, 5vw, 44px) clamp(26px, 4vw, 36px); border-radius: var(--radius-lg); text-align: center; }
+.account-card__photo-wrap {
+  width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 18px;
+  border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 8px 20px rgba(47,37,82,0.18);
+}
 .account-card__photo {
-  width: 84px; height: 84px; border-radius: 50%; object-fit: cover; margin: 0 auto 18px;
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+}
+.account-card__photo--placeholder {
+  width: 84px; height: 84px; margin: 0 auto 18px;
   border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 8px 20px rgba(47,37,82,0.18);
 }
 .account-card__photo--placeholder {

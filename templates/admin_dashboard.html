@@ -12,6 +12,7 @@
     <div class="bg-noscript-fallback"></div>
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="grain" aria-hidden="true"></div>
+    {% if flash_toast %}<div id="flash-toast-data" data-message="{{ flash_toast }}" data-type="success" hidden></div>{% endif %}
 
     <header class="site-header">
         <nav class="nav glass rise-in rise-in--1">
@@ -31,7 +32,7 @@
         <p class="panel-sub">Configure Microsoft SSO and manage Staff Digital IDs.</p>
 
         <div class="admin-grid">
-            <div class="admin-card glass">
+            <div class="admin-card glass scroll-reveal">
                 <span class="status-chip {{ 'ok' if sso_enabled else ('off' if not sso_configured else 'bad') }}">
                     {{ 'Enabled' if sso_enabled else ('Not Configured' if not sso_configured else 'Configured, Disabled') }}
                 </span>
@@ -40,7 +41,7 @@
                 <a href="{{ url_for('admin.sso_settings') }}" class="btn btn-secondary"><span>Configure SSO</span></a>
             </div>
 
-            <div class="admin-card glass">
+            <div class="admin-card glass scroll-reveal">
                 <span class="status-chip {{ 'ok' if (google_configured or apple_configured) else 'off' }}">
                     {{ 'Configured' if (google_configured or apple_configured) else 'Not Configured' }}
                 </span>
@@ -49,14 +50,14 @@
                 <a href="{{ url_for('admin.wallets') }}" class="btn btn-secondary"><span>View Wallet Status</span></a>
             </div>
 
-            <div class="admin-card glass">
+            <div class="admin-card glass scroll-reveal">
                 <span class="status-chip ok">Management</span>
                 <h3>Staff Digital IDs</h3>
                 <p>Search staff records, activate/deactivate IDs, and regenerate QR codes.</p>
                 <a href="{{ url_for('admin.staff') }}" class="btn btn-secondary"><span>Manage Staff IDs</span></a>
             </div>
 
-            <div class="admin-card glass">
+            <div class="admin-card glass scroll-reveal">
                 <span class="status-chip ok">Audit Trail</span>
                 <h3>Activity Log</h3>
                 <p>Admin logins, staff Microsoft sign-ins, and Digital ID create/update history.</p>
@@ -66,5 +67,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
 </body>
 </html>

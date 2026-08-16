@@ -12,6 +12,7 @@
     <div class="bg-noscript-fallback"></div>
     <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="grain" aria-hidden="true"></div>
+    {% if flash_toast %}<div id="flash-toast-data" data-message="{{ flash_toast }}" data-type="success" hidden></div>{% endif %}
 
     <header class="site-header">
         <nav class="nav glass rise-in rise-in--1">
@@ -43,6 +44,9 @@
             <h1>Your Staff Digital ID is Ready</h1>
             <p class="result-hero__sub">Your digital identity has been successfully created and is ready to use.</p>
             <p class="result-hero__track">Track ID <strong>{{ record['Track ID'] }}</strong> — save it to look up this Digital ID again later.</p>
+            {% if active_count %}
+            <p class="stat-inline">You're one of <strong data-countup="{{ active_count }}">0</strong> staff with an active Digital ID</p>
+            {% endif %}
         </section>
 
         <!-- 2 + 3. The Digital ID as hero, with 3D tilt -->
@@ -94,10 +98,10 @@
 
         <!-- 7. Quick actions -->
         <section class="result-actions scroll-reveal">
-            <a href="{{ url_for('download', token=token) }}" class="result-action">
+            <a href="{{ url_for('download', token=token) }}" class="result-action" data-toast-message="Digital ID downloaded" data-toast-type="success">
                 <span class="result-action__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>
                 <span class="result-action__title">Download</span>
-                <span class="result-action__sub">Save as PNG or <a href="{{ url_for('download_pdf', token=token) }}" onclick="event.stopPropagation()">PDF</a></span>
+                <span class="result-action__sub">Save as PNG or <a href="{{ url_for('download_pdf', token=token) }}" onclick="event.stopPropagation()" data-toast-message="Digital ID downloaded (PDF)" data-toast-type="success">PDF</a></span>
             </a>
             <button type="button" class="result-action" id="print-action">
                 <span class="result-action__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 01-1-1v-4a1 1 0 011-1h16a1 1 0 011 1v4a1 1 0 01-1 1h-2"/></svg></span>
@@ -139,6 +143,7 @@
 
     <script src="{{ url_for('static', filename='js/background.js') }}"></script>
     <script src="{{ url_for('static', filename='js/nav-status.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
     <script>
         const REDUCE_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const HAS_HOVER = window.matchMedia("(hover: hover)").matches;

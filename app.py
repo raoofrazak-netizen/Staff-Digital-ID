@@ -275,6 +275,10 @@ def list_digital_ids(search=None):
     return records
 
 
+def count_active_digital_ids():
+    return sum(1 for r in list_digital_ids() if r.get("Status") == "Active")
+
+
 def update_digital_id_status(token, status):
     if status not in DIGITAL_ID_STATUSES:
         return
@@ -643,6 +647,7 @@ def index():
         "login.html",
         sso_configured=sso_config.is_enabled(),
         sso_error=session.pop("sso_error", None),
+        flash_toast=session.pop("flash_toast", None),
     )
 
 
@@ -772,6 +777,7 @@ def success(token):
         record=record, token=token, verify_url=verify_url, can_edit=can_edit,
         wallet_url=wallet_url, wallet_configured=wallet.is_configured(),
         apple_configured=wallet_apple.is_configured(),
+        active_count=count_active_digital_ids(),
     )
 
 

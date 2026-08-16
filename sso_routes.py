@@ -103,4 +103,5 @@ def microsoft_logout():
     session.pop("ms_user_id", None)
     session.pop("sso_prefill", None)
     session.pop("sso_photo", None)
+    session["flash_toast"] = "Signed out successfully"
     return redirect(url_for("index"))

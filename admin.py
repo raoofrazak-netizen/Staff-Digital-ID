@@ -55,6 +55,7 @@ def login():
         elif _check_credentials(username, request.form.get("password", "")):
             session["is_admin"] = True
             session["admin_username"] = username
+            session["flash_toast"] = "Signed in successfully"
             app_module.log_event("admin_login", username, "Admin signed in")
             return redirect(request.args.get("next") or url_for("admin.dashboard"))
         else:
@@ -69,6 +70,7 @@ def login():
 def logout():
     session.pop("is_admin", None)
     session.pop("admin_username", None)
+    session["flash_toast"] = "Signed out successfully"
     return redirect(url_for("index"))
 
 
@@ -81,6 +83,7 @@ def dashboard():
         sso_enabled=sso_config.is_enabled(),
         google_configured=wallet.is_configured(),
         apple_configured=wallet_apple.is_configured(),
+        flash_toast=session.pop("flash_toast", None),
     )
 
 
@@ -144,7 +147,10 @@ def staff():
 
     query = (request.args.get("q") or "").strip()
     records = app_module.list_digital_ids(query or None)
-    return render_template("admin_staff.html", records=records, query=query)
+    return render_template(
+        "admin_staff.html", records=records, query=query,
+        flash_toast=session.pop("flash_toast", None),
+    )
 
 
 @admin_bp.route("/staff/<token>/status", methods=["POST"])
@@ -160,6 +166,7 @@ def set_status(token):
             session.get("admin_username", "admin"),
             f"Status changed to {new_status} for token {token}",
         )
+        session["flash_toast"] = f"Status updated to {new_status}"
     return redirect(request.referrer or url_for("admin.staff"))
 
 
@@ -174,4 +181,5 @@ def regenerate_qr(token):
         session.get("admin_username", "admin"),
         f"QR code regenerated for token {token}",
     )
+    session["flash_toast"] = "QR code regenerated"
     return redirect(request.referrer or url_for("admin.staff"))
