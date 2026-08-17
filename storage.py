@@ -319,12 +319,12 @@ def list_activity_log(limit=200):
 
 
 def upload_photo(data, token):
-    result = blob_put(f"photos/{token}.jpg", data, access="private", content_type="image/jpeg")
+    result = blob_put(f"photos/{token}.jpg", data, access="private", content_type="image/jpeg", overwrite=True)
     return result.url
 
 
 def upload_qr(data, token):
-    result = blob_put(f"qrcodes/qr_{token}.png", data, access="private", content_type="image/png")
+    result = blob_put(f"qrcodes/qr_{token}.png", data, access="private", content_type="image/png", overwrite=True)
     return result.url
 
 

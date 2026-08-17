@@ -691,6 +691,7 @@ def portal():
         sso_prefill=sso_prefill,
         sso_photo=sso_photo,
         edit_record=edit_record,
+        signed_in=bool(session.get("ms_user_id")),
     )
 
 

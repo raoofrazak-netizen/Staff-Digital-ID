@@ -26,6 +26,9 @@
                 <span class="nav__status-dot" id="nav-status-dot"></span>
                 <span id="nav-status-text">Secure Staff Digital ID Portal</span>
             </div>
+            {% if signed_in %}
+            <a href="{{ url_for('sso.microsoft_logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
+            {% endif %}
         </nav>
     </header>
 
