@@ -478,7 +478,7 @@ main, .site-header { position: relative; z-index: 1; }
    wrapping around the card in the reference mockup. */
 .showcase-glow {
   position: absolute; inset: -90px; z-index: -1; pointer-events: none; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,214,130,0.5), rgba(255,179,71,0.3) 42%, rgba(255,140,40,0.14) 64%, transparent 76%);
+  background: radial-gradient(circle, rgba(255,150,170,0.4), rgba(227,6,19,0.22) 45%, rgba(227,6,19,0.1) 65%, transparent 78%);
   filter: blur(14px);
   animation: showcaseGlowPulse 5s ease-in-out infinite;
 }
@@ -506,6 +506,9 @@ main, .site-header { position: relative; z-index: 1; }
 .sparkle--6 { animation-delay: 2s; }
 .sparkle--7 { animation-delay: 2.4s; }
 .sparkle--8 { animation-delay: 2.8s; }
+.sparkle--9 { animation-delay: 1s; }
+.sparkle--10 { animation-delay: 2s; }
+.sparkle--11 { animation-delay: 0.6s; }
 @keyframes sparkleTwinkle {
   0%, 100% { opacity: 0.15; transform: scale(0.7); }
   50% { opacity: 1; transform: scale(1.3); }
