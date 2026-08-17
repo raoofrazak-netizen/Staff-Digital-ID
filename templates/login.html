@@ -24,8 +24,10 @@
         <div class="login-grid">
             <!-- LEFT: brand story -->
             <section class="login-brand-copy">
-                <p class="login-brand__eyebrow rise-in rise-in--2"><span aria-hidden="true"></span>Welcome to MDX Digital ID Service</p>
-                <h2 class="login-brand__headline rise-in rise-in--3">Your Campus. Your Identity.<br>One Digital Experience.</h2>
+                <h2 class="login-brand__headline rise-in rise-in--3" id="hero-headline">
+                    <span class="headline-base">Your Campus. Your Identity.<br>One Digital Experience.</span>
+                    <span class="headline-shine" aria-hidden="true">Your Campus. Your Identity.<br>One Digital Experience.</span>
+                </h2>
                 <p class="login-brand__sub rise-in rise-in--4">The official Middlesex University Dubai Staff Digital ID &mdash; secure, intelligent, and always within reach.</p>
             </section>
 
@@ -167,17 +169,21 @@
                         <ellipse class="orbit orbit--1" cx="230" cy="280" rx="185" ry="230" transform="rotate(-8 230 280)"/>
                         <ellipse class="orbit orbit--2" cx="230" cy="280" rx="150" ry="195" transform="rotate(12 230 280)"/>
                         <g class="sparkles">
-                            <circle class="sparkle sparkle--1" cx="70" cy="120" r="2.6"/>
-                            <circle class="sparkle sparkle--2" cx="400" cy="90" r="2"/>
-                            <circle class="sparkle sparkle--3" cx="420" cy="330" r="2.4"/>
-                            <circle class="sparkle sparkle--4" cx="40" cy="380" r="2"/>
-                            <circle class="sparkle sparkle--5" cx="60" cy="470" r="2.6"/>
-                            <circle class="sparkle sparkle--6" cx="380" cy="480" r="2.2"/>
-                            <circle class="sparkle sparkle--7" cx="230" cy="40" r="2"/>
-                            <circle class="sparkle sparkle--8" cx="230" cy="540" r="2.2"/>
-                            <circle class="sparkle sparkle--9" cx="90" cy="250" r="2.2"/>
-                            <circle class="sparkle sparkle--10" cx="380" cy="210" r="2"/>
-                            <circle class="sparkle sparkle--11" cx="350" cy="410" r="2.4"/>
+                            <circle class="sparkle sparkle--1" cx="70" cy="120" r="3.2"/>
+                            <circle class="sparkle sparkle--2" cx="400" cy="90" r="2.6"/>
+                            <circle class="sparkle sparkle--3" cx="420" cy="330" r="3"/>
+                            <circle class="sparkle sparkle--4" cx="40" cy="380" r="2.6"/>
+                            <circle class="sparkle sparkle--5" cx="60" cy="470" r="3.2"/>
+                            <circle class="sparkle sparkle--6" cx="380" cy="480" r="2.8"/>
+                            <circle class="sparkle sparkle--7" cx="230" cy="40" r="2.6"/>
+                            <circle class="sparkle sparkle--8" cx="230" cy="540" r="2.8"/>
+                            <circle class="sparkle sparkle--9" cx="90" cy="250" r="2.8"/>
+                            <circle class="sparkle sparkle--10" cx="380" cy="210" r="2.6"/>
+                            <circle class="sparkle sparkle--11" cx="350" cy="410" r="3"/>
+                            <circle class="sparkle sparkle--12" cx="150" cy="80" r="2.4"/>
+                            <circle class="sparkle sparkle--13" cx="330" cy="160" r="2.2"/>
+                            <circle class="sparkle sparkle--14" cx="130" cy="460" r="2.4"/>
+                            <circle class="sparkle sparkle--15" cx="300" cy="500" r="2.2"/>
                         </g>
                     </svg>
                 </div>
@@ -293,6 +299,16 @@
                 if (adminSubmit.classList.contains("is-loading")) return;
                 adminSubmit.classList.add("is-loading");
                 adminSubmit.querySelector(".btn-admin-signin__label").textContent = "Signing you in…";
+            });
+        }
+
+        // --- Cursor-tracking red shine on the hero headline ---
+        const heroHeadline = document.getElementById("hero-headline");
+        if (heroHeadline) {
+            heroHeadline.addEventListener("pointermove", (e) => {
+                const rect = heroHeadline.getBoundingClientRect();
+                heroHeadline.style.setProperty("--shine-x", `${e.clientX - rect.left}px`);
+                heroHeadline.style.setProperty("--shine-y", `${e.clientY - rect.top}px`);
             });
         }
     </script>
