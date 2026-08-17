@@ -288,6 +288,20 @@ main, .site-header { position: relative; z-index: 1; }
   flex: none;
 }
 .btn-microsoft:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,0.12); }
+
+/* Same pill/bordered shape as .btn-microsoft (the login page's "Sign in
+   with Microsoft" button) but without its white fill -- used for every
+   "Sign Out" link across the site so they all read as one consistent
+   bubble-style control instead of a plain text link or a fainter pill. */
+.btn-signout {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: var(--radius-pill);
+  border: 1px solid rgba(255,255,255,0.32); background: rgba(255,255,255,0.06);
+  color: var(--text-primary); font-weight: 700; font-size: 0.78rem;
+  text-decoration: none; flex: none;
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+.btn-signout:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5); transform: translateY(-1px); }
 .sso-imported-note {
   margin: -6px 0 18px; padding: 10px 14px; border-radius: 10px;
   background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.16);
