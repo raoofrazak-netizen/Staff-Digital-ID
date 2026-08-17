@@ -286,14 +286,14 @@ def _draw_partner_mark(card, right_x, y):
     since a hand-drawn approximation never quite matched the source. right_x
     is the mark's right edge, right-aligned against the card's margin like
     the address block above it."""
-    logo_path = os.path.join(_ASSETS_DIR, "dkp-logo.jpg")
+    logo_path = os.path.join(_ASSETS_DIR, "dkp-logo.png")
     if not os.path.exists(logo_path):
         return
-    logo = Image.open(logo_path).convert("RGB")
+    logo = Image.open(logo_path).convert("RGBA")
     logo_h = _s(58)
     ratio = logo_h / logo.height
     logo = logo.resize((max(1, int(logo.width * ratio)), logo_h), Image.LANCZOS)
-    card.paste(logo, (right_x - logo.width, y))
+    card.paste(logo, (right_x - logo.width, y), logo)
 
 
 def render_card_back(record):

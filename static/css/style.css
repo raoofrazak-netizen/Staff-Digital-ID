@@ -634,7 +634,7 @@ main, .site-header { position: relative; z-index: 1; }
 .sib-address strong { font-size: 0.46rem; font-weight: 800; color: var(--mdx-red); opacity: 0.85; }
 .sib-address span { font-size: 0.38rem; color: var(--text-secondary); opacity: 0.8; }
 .sib-partner { flex: none; display: inline-flex; align-items: center; }
-.sib-partner__mark { height: 22px; width: auto; }
+.sib-partner__mark { height: 24px; width: auto; max-width: 78px; object-fit: contain; }
 .sib-barcode { padding: 4px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .sib-barcode__svg { width: 82%; height: 26px; opacity: 0.88; }
 .sib-barcode__label { font-size: 0.42rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); }
@@ -1103,6 +1103,8 @@ main, .site-header { position: relative; z-index: 1; }
 .idcard-back__label { display: block; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--mdx-red); }
 .idcard-back__value { display: block; font-size: 0.86rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; word-break: break-word; }
 .idcard-back__secure { margin-top: 18px; }
+.idcard-back__partner { margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(47,37,82,0.14); opacity: 0.85; }
+.idcard-back__partner-mark { height: 20px; width: auto; max-width: 68px; object-fit: contain; }
 
 /* ============ Digital ID result page (premium redesign) ============ */
 .result-shell { max-width: 640px; margin: 0 auto; padding: 40px 20px 90px; text-align: center; position: relative; z-index: 1; }
