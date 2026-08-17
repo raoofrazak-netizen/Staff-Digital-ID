@@ -14,6 +14,7 @@ import theme
 import wallet
 import wallet_apple
 import sso_config
+import sso_photo_cache
 from card_render import render_card_front, render_card_back
 from admin import admin_bp
 from sso_routes import sso_bp
@@ -702,7 +703,7 @@ def portal():
             sso_photo = url_for("serve_photo", token=edit_token)
     else:
         sso_prefill = session.pop("sso_prefill", None)
-        sso_photo = session.pop("sso_photo", None)
+        sso_photo = sso_photo_cache.pop_photo(session.get("ms_user_id"))
 
     return render_template(
         "index.html",
@@ -738,7 +739,7 @@ def account():
         "account.html",
         display_name=display_name or "there",
         profile=profile,
-        photo=session.get("sso_photo"),
+        photo=sso_photo_cache.get_photo(ms_user_id),
         existing=existing if existing and existing.get("Status") == "Active" else None,
     )
 

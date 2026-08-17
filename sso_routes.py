@@ -19,6 +19,7 @@ from flask import Blueprint, redirect, request, session, url_for
 
 import auth_microsoft
 import sso_config
+import sso_photo_cache
 
 sso_bp = Blueprint("sso", __name__)
 
@@ -128,12 +129,13 @@ def microsoft_callback():
     # Every sign-in lands on the welcome hub -- it looks up whether this
     # Microsoft account (or, failing that, matching Staff ID) already has
     # an active Digital ID and adapts what it shows accordingly. The
-    # profile/photo are kept in the session (not the URL) since the photo
-    # may be a data: URL too large for a query string, and /portal reads
-    # them back out if the visitor continues into registration from there.
+    # profile stays in the session, but the photo is stashed server-side
+    # (see sso_photo_cache) rather than in the cookie -- a real Graph photo
+    # is easily tens of KB, which blows past the ~4KB per-cookie limit and
+    # gets silently dropped by the browser, taking ms_user_id down with it.
     session["ms_user_id"] = profile["ms_user_id"]
     session["sso_prefill"] = profile
-    session["sso_photo"] = photo_data_url
+    sso_photo_cache.stash_photo(profile["ms_user_id"], photo_data_url)
     return redirect(url_for("account"))
 
 
