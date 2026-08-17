@@ -20,11 +20,11 @@ import storage
 
 DEFAULT_THEME = {
     "colors": {
-        "canvas": "#2a1330",
-        "canvas_light": "#3a1c40",
+        "canvas": "#000000",
+        "canvas_light": "#2f2552",
         "text_primary": "#ffffff",
-        "mdx_red": "#e30a0a",
-        "mdx_indigo": "#8b89c9",
+        "mdx_red": "#e30613",
+        "mdx_indigo": "#2f2552",
     },
     "font_body": "archivo",
     "density": "comfortable",
