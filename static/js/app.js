@@ -40,6 +40,12 @@
         });
     });
 
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    if (requestedTab && tabPanels[requestedTab]) {
+        const requestedBtn = document.querySelector(`.tab-btn[data-tab="${requestedTab}"]`);
+        if (requestedBtn && !requestedBtn.classList.contains("active")) requestedBtn.click();
+    }
+
     function spawnPhotoBurst(container) {
         if (!container || REDUCE_MOTION) return;
         container.innerHTML = "";

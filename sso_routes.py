@@ -33,6 +33,7 @@ def microsoft_login():
         return _fail("Microsoft Sign-In isn't enabled on this portal yet.")
 
     state = secrets.token_urlsafe(24)
+    session.permanent = True
     session["oauth_state"] = state
     try:
         auth_url = auth_microsoft.build_authorize_url(state)

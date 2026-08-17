@@ -1,7 +1,7 @@
 import io
 import os
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import openpyxl
 import qrcode
@@ -21,6 +21,13 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or "dev-only-change-me"
+# Explicit cookie attributes (rather than Flask's defaults) so the OAuth
+# "state" cookie set by /auth/microsoft/login reliably survives the
+# redirect round-trip to Microsoft and back -- a dropped state cookie is
+# what surfaces as "Sign-in session expired or is invalid".
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = not app.debug
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 app.register_blueprint(admin_bp)
 app.register_blueprint(sso_bp)
 

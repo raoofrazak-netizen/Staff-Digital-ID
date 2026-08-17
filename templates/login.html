@@ -131,6 +131,10 @@
                     <p class="login-card__hint">Microsoft Sign-In isn't set up on this portal yet.</p>
                     {% endif %}
 
+                    <a href="{{ url_for('portal') }}?tab=activate" class="login-manual-link rise-in rise-in--4">
+                        Continue with Staff ID Login <span class="login-manual-link__arrow">→</span>
+                    </a>
+
                     <p class="login-card__trust rise-in rise-in--5">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>
                         Protected Administrative Access
@@ -199,7 +203,6 @@
                                     <div class="sif-fields">
                                         <div class="sif-field"><span class="sif-field__label">ID NUMBER<bdi>&#1585;&#1602;&#1605; &#1605;&#1593;&#1585;&#1601;</bdi></span><span class="sif-field__value sif-field__value--text">MDX00000</span></div>
                                         <div class="sif-field"><span class="sif-field__label">GENDER<bdi>&#1575;&#1604;&#1580;&#1606;&#1587;</bdi></span><span class="sif-field__value sif-field__value--text">&mdash;</span></div>
-                                        <div class="sif-field"><span class="sif-field__label">EXPIRATION<bdi>&#1575;&#1606;&#1602;&#1590;&#1575;&#1569;</bdi></span><span class="sif-field__value sif-field__value--text">&mdash;</span></div>
                                     </div>
                                 </div>
                                 <div class="sif-name-block">
@@ -224,7 +227,7 @@
                                 </div>
                                 <div class="sib-idref">ID Ref# MDX-00000</div>
                                 <div class="sib-it-fields">
-                                    <div class="sib-it-field"><span>UK IT User ID:</span><strong>sample.user</strong></div>
+                                    <div class="sib-it-field"><span>UK IT User ID:</span><strong>sample@mdx.ac.uk</strong></div>
                                     <div class="sib-it-field"><span>MISIS:</span><strong>&mdash;</strong></div>
                                     <div class="sib-it-field"><span>Local Login:</span><strong>sample.user</strong></div>
                                     <div class="sib-it-field"><span>Dubai Email:</span><strong>sample@mdx.ac.ae</strong></div>
