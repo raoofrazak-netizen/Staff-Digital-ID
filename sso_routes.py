@@ -22,7 +22,7 @@ import sso_config
 sso_bp = Blueprint("sso", __name__)
 
 
-def _fail(message):
+def _fail(message, identity=None):
     # Stashed in both the session AND the redirect URL -- some corporate
     # networks/browsers drop the session cookie across the Microsoft
     # redirect round-trip, which previously made failures bounce back to
@@ -30,6 +30,11 @@ def _fail(message):
     # robust fallback that doesn't depend on the cookie surviving.
     session["sso_error"] = message
     session.permanent = True
+    # Logged so failed attempts are visible in Admin > Activity Log --
+    # previously only successful sign-ins were recorded, so a user reporting
+    # "it just doesn't work" left no server-side trace to diagnose from.
+    import app as app_module
+    app_module.log_event("staff_sso_failed", identity or "unknown", message)
     return redirect(url_for("index", sso_error=message))
 
 
@@ -51,6 +56,16 @@ def microsoft_login():
 @sso_bp.route("/api/auth/azure/callback")
 def microsoft_callback():
     import app as app_module  # local import avoids a circular import with app.py
+
+    # Recorded unconditionally, before any check can fail -- if a user's
+    # attempt never shows up here at all, the browser never made it back to
+    # us (blocked/redirected elsewhere by Azure, a network proxy, etc.)
+    # rather than failing one of the checks below.
+    app_module.log_event(
+        "staff_sso_callback_hit",
+        "unknown",
+        f"error={request.args.get('error') or '-'} has_state={'state' in request.args} has_code={'code' in request.args}",
+    )
 
     if request.args.get("error"):
         message = request.args.get("error_description") or request.args.get("error")
@@ -74,13 +89,14 @@ def microsoft_callback():
         return _fail(f"Microsoft sign-in failed: {message}")
 
     id_claims = result.get("id_token_claims") or {}
+    claimed_identity = id_claims.get("preferred_username") or id_claims.get("email") or id_claims.get("upn")
     if not auth_microsoft.verify_tenant(id_claims):
-        return _fail("This Microsoft account doesn't belong to the university's approved organization.")
+        return _fail("This Microsoft account doesn't belong to the university's approved organization.", identity=claimed_identity)
 
     try:
         profile = auth_microsoft.fetch_profile(result["access_token"])
     except Exception:
-        return _fail("Could not retrieve your profile from Microsoft Graph.")
+        return _fail("Could not retrieve your profile from Microsoft Graph.", identity=claimed_identity)
 
     try:
         photo_data_url = auth_microsoft.fetch_profile_photo_data_url(result["access_token"])
