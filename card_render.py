@@ -228,7 +228,7 @@ def render_card_front(record, photo_file, qr_file=None):
     )
 
     field_x = photo_x + photo_w + _s(30)
-    value_font = _dax("Bold", _s(32))
+    value_font = _dax("Bold", _s(24))
     fields = [
         ("ID NUMBER", "رقم معرف", record.get("Staff ID", "")),
         ("GENDER", "الجنس", record.get("Gender") or "—"),
@@ -245,14 +245,14 @@ def render_card_front(record, photo_file, qr_file=None):
         field_y += _s(74)
 
     name_y = photo_y + photo_h + _s(34)
-    name_font = _dax("Bold", _s(36))
-    jobtitle_font = _dax("Bold", _s(31))
+    name_font = _dax("Bold", _s(28))
+    jobtitle_font = _dax("Bold", _s(24))
 
     _draw_bilingual_label(draw, margin, name_y, "NAME", "اسم", size=_s(17))
     full_name = f"{record.get('First Name', '')} {record.get('Last Name', '')}".strip()
     name_max_w = CARD_W - margin * 2
-    name_size = _s(36)
-    while name_size > _s(22) and draw.textlength(full_name, font=name_font) > name_max_w:
+    name_size = _s(28)
+    while name_size > _s(18) and draw.textlength(full_name, font=name_font) > name_max_w:
         name_size -= 1
         name_font = _dax("Bold", name_size)
     draw.text((margin, name_y + _s(26)), full_name, font=name_font, fill=BLACK)
