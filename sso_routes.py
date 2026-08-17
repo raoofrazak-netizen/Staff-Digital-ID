@@ -13,6 +13,7 @@ context (departments/statuses/genders/etc).
 """
 
 import secrets
+from urllib.parse import quote
 
 from flask import Blueprint, redirect, request, session, url_for
 
@@ -142,4 +143,13 @@ def microsoft_logout():
     session.pop("sso_prefill", None)
     session.pop("sso_photo", None)
     session["flash_toast"] = "Signed out successfully"
+
+    # Clearing our own session isn't enough -- the browser still holds an
+    # active Microsoft sign-in session, so "Sign in with Microsoft" would
+    # silently re-authenticate with no credential prompt at all. Routing
+    # through Microsoft's own logout endpoint first ends that session too,
+    # so the next sign-in actually asks for credentials again.
+    if sso_config.is_configured():
+        post_logout = quote(url_for("index", _external=True), safe="")
+        return redirect(f"{sso_config.authority()}/oauth2/v2.0/logout?post_logout_redirect_uri={post_logout}")
     return redirect(url_for("index"))
