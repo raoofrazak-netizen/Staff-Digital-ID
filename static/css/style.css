@@ -28,8 +28,8 @@
   --text-secondary: rgba(255, 255, 255, 0.75);
   --text-muted: rgba(255, 255, 255, 0.5);
 
-  --glass: rgba(47, 37, 82, 0.4);
-  --glass-light: rgba(47, 37, 82, 0.24);
+  --glass: rgba(47, 37, 82, 0.72);
+  --glass-light: rgba(47, 37, 82, 0.45);
   --glass-border: rgba(255, 255, 255, 0.14);
 
   --success: #2e8b57;
@@ -114,8 +114,8 @@ main, .site-header { position: relative; z-index: 1; }
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  backdrop-filter: blur(32px) saturate(100%);
+  -webkit-backdrop-filter: blur(32px) saturate(100%);
   transition: box-shadow var(--dur-med) var(--ease-spring), transform var(--dur-med) var(--ease-spring);
   isolation: isolate;
 }
@@ -181,7 +181,7 @@ main, .site-header { position: relative; z-index: 1; }
   display: flex; align-items: center; gap: 10px;
   padding: 13px 16px; border-radius: var(--radius-md);
   background: var(--glass); border: 1px solid var(--glass-border);
-  backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(100%); -webkit-backdrop-filter: blur(24px) saturate(100%);
   box-shadow: var(--shadow-soft); font-size: 0.85rem; font-weight: 700; color: var(--text-primary);
   animation: toastIn 0.35s var(--ease-spring);
 }
@@ -369,9 +369,9 @@ main, .site-header { position: relative; z-index: 1; }
    so the shared component everywhere else is untouched. */
 .login-card.glass {
   padding: clamp(30px, 5vw, 42px) clamp(24px, 4vw, 34px); border-radius: 24px; text-align: center;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: rgba(47,37,82,0.78);
+  backdrop-filter: blur(40px) saturate(100%);
+  -webkit-backdrop-filter: blur(40px) saturate(100%);
   border: 1px solid rgba(255,255,255,0.18);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.14),
