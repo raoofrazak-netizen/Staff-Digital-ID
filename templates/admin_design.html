@@ -25,7 +25,7 @@
         .color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 22px; }
         .color-field { display: flex; flex-direction: column; gap: 6px; }
         .color-field label { font-size: 0.74rem; font-weight: 700; color: var(--mdx-indigo); text-transform: uppercase; letter-spacing: 0.05em; }
-        .color-field input[type="color"] { width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--glass-border); background: none; cursor: pointer; }
+        .color-field select { width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06); color: var(--text-primary); cursor: pointer; padding: 0 10px; font-size: 0.85rem; }
         .design-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
         .design-actions .btn { width: auto; padding-inline: 22px; }
     </style>
@@ -63,27 +63,24 @@
                 <h2>Colors</h2>
                 <p class="panel-sub">Applied site-wide the moment you publish.</p>
                 <div class="color-grid">
+                    {% for field_id, field_label in [
+                        ('canvas', 'Page background'),
+                        ('canvas_light', 'Background (light variant)'),
+                        ('text_primary', 'Text'),
+                        ('mdx_red', 'Accent (red)'),
+                        ('mdx_indigo', 'Accent (headings)'),
+                    ] %}
                     <div class="color-field">
-                        <label for="canvas">Page background</label>
-                        <input type="color" id="canvas" name="canvas" value="{{ draft.colors.canvas }}">
+                        <label for="{{ field_id }}">{{ field_label }}</label>
+                        <select id="{{ field_id }}" name="{{ field_id }}">
+                            {% for swatch_name, swatch_hex in brand_swatches %}
+                            <option value="{{ swatch_hex }}" style="background-color:{{ swatch_hex }}; color:{{ '#fff' if swatch_name in ['MDX Black','MDX Indigo','MDX Red','MDX Pink'] else '#111' }};" {% if draft.colors[field_id]|lower == swatch_hex %}selected{% endif %}>{{ swatch_name }} ({{ swatch_hex }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="color-field">
-                        <label for="canvas_light">Background (light variant)</label>
-                        <input type="color" id="canvas_light" name="canvas_light" value="{{ draft.colors.canvas_light }}">
-                    </div>
-                    <div class="color-field">
-                        <label for="text_primary">Text</label>
-                        <input type="color" id="text_primary" name="text_primary" value="{{ draft.colors.text_primary }}">
-                    </div>
-                    <div class="color-field">
-                        <label for="mdx_red">Accent (red)</label>
-                        <input type="color" id="mdx_red" name="mdx_red" value="{{ draft.colors.mdx_red }}">
-                    </div>
-                    <div class="color-field">
-                        <label for="mdx_indigo">Accent (headings)</label>
-                        <input type="color" id="mdx_indigo" name="mdx_indigo" value="{{ draft.colors.mdx_indigo }}">
-                    </div>
+                    {% endfor %}
                 </div>
+                <p class="panel-sub" style="margin-top:10px;">Restricted to the 8 official MDX Brand Guidelines colors -- no off-brand hexes can be saved.</p>
             </section>
 
             <section class="admin-panel glass">

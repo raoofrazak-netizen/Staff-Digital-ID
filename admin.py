@@ -281,5 +281,6 @@ def design_settings():
         "admin_design.html",
         draft=draft,
         font_stacks=theme.FONT_STACKS,
+        brand_swatches=theme.BRAND_SWATCHES,
         flash_toast=session.pop("flash_toast", None),
     )

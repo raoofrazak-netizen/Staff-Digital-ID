@@ -45,6 +45,18 @@ DEFAULT_THEME = {
     ],
 }
 
+BRAND_SWATCHES = [
+    ("MDX Red", "#e30613"),
+    ("MDX Black", "#000000"),
+    ("White", "#ffffff"),
+    ("MDX Grey", "#6f6f6f"),
+    ("MDX Indigo", "#2f2552"),
+    ("MDX Orange", "#ff4f00"),
+    ("MDX Tangerine", "#f47d07"),
+    ("MDX Pink", "#e50059"),
+]
+_ALLOWED_HEXES = {hex_code.lower() for _, hex_code in BRAND_SWATCHES}
+
 FONT_STACKS = {
     "archivo": "\"Archivo\", \"Dax\", \"Helvetica Neue\", Arial, sans-serif",
     "system": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
@@ -65,13 +77,28 @@ def _local_path(version):
     return os.path.join(root, f"theme_{version}.json")
 
 
+def _sanitize_colors(colors):
+    """Only the 8 official MDX Brand Guidelines hexes may ever be stored --
+    anything else (a stray off-brand pick, or a color-input malfunction like
+    the near-white Indigo that once got published) falls back to the
+    default for that field instead of persisting. Runs on every load AND
+    every save, so a bad value already sitting in the DB self-heals the
+    moment it's next read, with no manual data fix required."""
+    colors = colors or {}
+    clean = {}
+    for key, default in DEFAULT_THEME["colors"].items():
+        value = colors.get(key)
+        clean[key] = value if isinstance(value, str) and value.lower() in _ALLOWED_HEXES else default
+    return clean
+
+
 def _merge_defaults(data):
     """Fills in any keys missing from an older/partial saved blob so new
     theme fields introduced later don't crash existing installs."""
     merged = copy.deepcopy(DEFAULT_THEME)
     if not isinstance(data, dict):
         return merged
-    merged["colors"].update(data.get("colors") or {})
+    merged["colors"] = _sanitize_colors(data.get("colors"))
     merged["font_body"] = data.get("font_body") or merged["font_body"]
     merged["density"] = data.get("density") or merged["density"]
     for list_key in ("nav_links", "portal_tabs", "dashboard_cards"):
