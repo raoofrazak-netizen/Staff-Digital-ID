@@ -19,10 +19,10 @@
   --mdx-indigo-light: #b0aee0;
   --mdx-indigo-deep: #2f2552;
 
-  --canvas: #17102e;
-  --canvas-light: #1f1740;
-  --canvas-mid: #241b47;
-  --canvas-deep: #100b22;
+  --canvas: #2a1330;
+  --canvas-light: #3a1c40;
+  --canvas-mid: #331630;
+  --canvas-deep: #1c0a1f;
 
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.78);
@@ -520,7 +520,7 @@ main, .site-header { position: relative; z-index: 1; }
 .showcase-trails { position: absolute; inset: -90px -70px; z-index: 0; pointer-events: none; overflow: visible; }
 .showcase-trails__svg { width: 100%; height: 100%; overflow: visible; }
 .orbit {
-  fill: none; stroke-width: 5; stroke-linecap: round; filter: url(#trailBlur); opacity: 0.95;
+  fill: none; stroke-width: 6; stroke-linecap: round; filter: url(#trailBlur); opacity: 1;
   transform-origin: center; transform-box: fill-box;
 }
 .orbit--1 { stroke: url(#trailGold1); stroke-dasharray: 70 16 14 20; animation: orbitSpin1 18s linear infinite; }
@@ -528,7 +528,7 @@ main, .site-header { position: relative; z-index: 1; }
 @keyframes orbitSpin1 { to { stroke-dashoffset: -1400; } }
 @keyframes orbitSpin2 { to { stroke-dashoffset: 1200; } }
 
-.sparkle { fill: #ffe9a8; filter: url(#trailBlur); animation: sparkleTwinkle 3.2s ease-in-out infinite; }
+.sparkle { fill: #fff3c4; filter: url(#trailBlur); animation: sparkleTwinkle 3.2s ease-in-out infinite; }
 .sparkle--1 { animation-delay: 0s; }
 .sparkle--2 { animation-delay: 0.4s; }
 .sparkle--3 { animation-delay: 0.8s; }

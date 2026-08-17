@@ -112,7 +112,7 @@
             x: Math.random() * W,
             y: Math.random() * H,
             speed: 0.28 + Math.random() * 0.5,
-            size: 1.2 + Math.random() * 1.8,
+            size: 1.6 + Math.random() * 2.2,
             colorPhase: Math.random() * Math.PI * 2,
             colorSpeed: 0.1 + Math.random() * 0.15,
             alphaPhase: Math.random() * Math.PI * 2,
@@ -177,7 +177,7 @@
             const idx = colorT * (DUST_COLORS.length - 1);
             const i0 = Math.floor(idx), i1 = Math.min(i0 + 1, DUST_COLORS.length - 1);
             const [r, g, bC] = lerpColor(DUST_COLORS[i0], DUST_COLORS[i1], idx - i0);
-            const alpha = 0.2 + 0.24 * ((Math.sin(t * 0.4 + p.alphaPhase) + 1) / 2);
+            const alpha = 0.32 + 0.34 * ((Math.sin(t * 0.4 + p.alphaPhase) + 1) / 2);
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
