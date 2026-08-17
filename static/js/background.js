@@ -52,17 +52,17 @@
     }
 
     const WARM_BLOB_COLORS = [
-        [255, 177, 153], // soft coral
-        [255, 217, 168], // pale tangerine
-        [247, 198, 217], // warm pink
-        [217, 207, 239], // lavender
-        [227, 6, 19],    // faded MDX red (used at very low alpha)
+        [227, 10, 10],   // MDX red
+        [229, 0, 89],    // MDX pink
+        [112, 113, 169], // indigo-light
+        [54, 124, 126],  // teal
+        [233, 82, 29],   // orange
     ];
     const DUST_COLORS = [
-        [227, 6, 19],    // MDX red
-        [255, 107, 0],   // tangerine
-        [230, 168, 60],  // warm gold
-        [255, 150, 130], // coral
+        [227, 10, 10],   // MDX red
+        [233, 82, 29],   // orange
+        [229, 0, 89],    // pink
+        [112, 113, 169], // indigo-light
     ];
 
     // --- Performance tiers ---
@@ -103,7 +103,7 @@
             phase: i * 2.1,
             driftSpeed: 0.02 + i * 0.006,
             breatheSpeed: 0.15 + i * 0.03,
-            alpha: i === 4 ? 0.10 : 0.22,
+            alpha: i === 4 ? 0.16 : 0.30,
         }));
 
         const counts = reduceMotion ? { dust: 0, nodes: 0 } : tierCounts();
@@ -132,9 +132,9 @@
 
     function drawLightFields(t) {
         const fields = [
-            { x: W * 0.08, y: H * 0.05, r: Math.max(W, H) * 0.55, c: "255,107,0", a: 0.06 },
-            { x: W * 0.95, y: H * 0.15, r: Math.max(W, H) * 0.5, c: "227,6,19", a: 0.05 },
-            { x: W * 0.5, y: H * 1.0, r: Math.max(W, H) * 0.6, c: "47,37,82", a: 0.05 },
+            { x: W * 0.08, y: H * 0.05, r: Math.max(W, H) * 0.55, c: "233,82,29", a: 0.08 },
+            { x: W * 0.95, y: H * 0.15, r: Math.max(W, H) * 0.5, c: "227,10,10", a: 0.07 },
+            { x: W * 0.5, y: H * 1.0, r: Math.max(W, H) * 0.6, c: "112,113,169", a: 0.08 },
         ];
         fields.forEach((f, i) => {
             const dx = Math.sin(t * 0.02 + i) * W * 0.02;
