@@ -478,7 +478,7 @@ main, .site-header { position: relative; z-index: 1; }
    wrapping around the card in the reference mockup. */
 .showcase-glow {
   position: absolute; inset: -90px; z-index: -1; pointer-events: none; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,150,170,0.4), rgba(227,6,19,0.22) 45%, rgba(227,6,19,0.1) 65%, transparent 78%);
+  background: radial-gradient(circle, rgba(255,158,178,0.4), rgba(255,190,150,0.24) 45%, rgba(255,214,130,0.12) 65%, transparent 78%);
   filter: blur(14px);
   animation: showcaseGlowPulse 5s ease-in-out infinite;
 }
