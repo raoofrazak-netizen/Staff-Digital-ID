@@ -667,7 +667,7 @@ def index():
     return render_template(
         "login.html",
         sso_configured=sso_config.is_enabled(),
-        sso_error=session.pop("sso_error", None),
+        sso_error=request.args.get("sso_error") or session.pop("sso_error", None),
         flash_toast=session.pop("flash_toast", None),
     )
 

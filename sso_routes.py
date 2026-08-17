@@ -23,8 +23,14 @@ sso_bp = Blueprint("sso", __name__)
 
 
 def _fail(message):
+    # Stashed in both the session AND the redirect URL -- some corporate
+    # networks/browsers drop the session cookie across the Microsoft
+    # redirect round-trip, which previously made failures bounce back to
+    # the login page with no visible error at all. The query param is a
+    # robust fallback that doesn't depend on the cookie surviving.
     session["sso_error"] = message
-    return redirect(url_for("index"))
+    session.permanent = True
+    return redirect(url_for("index", sso_error=message))
 
 
 @sso_bp.route("/auth/microsoft/login")
