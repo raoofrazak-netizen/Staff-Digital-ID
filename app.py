@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, redirect, url_for, abort, jso
 from PIL import Image, UnidentifiedImageError
 
 import storage
+import theme
 import wallet
 import wallet_apple
 import sso_config
@@ -30,6 +31,19 @@ app.config["SESSION_COOKIE_SECURE"] = not app.debug
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 app.register_blueprint(admin_bp)
 app.register_blueprint(sso_bp)
+
+
+@app.context_processor
+def inject_theme():
+    is_preview = bool(session.get("is_admin")) and request.args.get("preview_theme") == "1"
+    active = theme.active_theme(is_preview)
+    nav_flags = {item["id"]: item.get("enabled", True) for item in active.get("nav_links", [])}
+    return {
+        "site_theme": active,
+        "site_theme_css": theme.css_overrides(active),
+        "site_theme_preview": is_preview,
+        "site_theme_nav": nav_flags,
+    }
 
 PORTAL_BASE_URL = (os.environ.get("PORTAL_BASE_URL") or "http://127.0.0.1:5000").rstrip("/")
 

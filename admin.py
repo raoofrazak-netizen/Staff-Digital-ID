@@ -8,6 +8,7 @@ store). Every route below requires an authenticated admin session.
 """
 
 import hmac
+import json
 import os
 from functools import wraps
 
@@ -15,6 +16,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 
 import sso_config
 import auth_microsoft
+import theme
 import wallet
 import wallet_apple
 
@@ -77,12 +79,41 @@ def logout():
 @admin_bp.route("/")
 @admin_required
 def dashboard():
+    sso_configured = sso_config.is_configured()
+    sso_enabled = sso_config.is_enabled()
+    wallets_configured = wallet.is_configured() or wallet_apple.is_configured()
+    card_meta = {
+        "sso": {
+            "chip_class": "ok" if sso_enabled else ("off" if not sso_configured else "bad"),
+            "chip_text": "Enabled" if sso_enabled else ("Not Configured" if not sso_configured else "Configured, Disabled"),
+            "description": "Tenant ID, Client ID, Client Secret, and Redirect URI for staff Microsoft sign-in.",
+            "href": url_for("admin.sso_settings"), "cta": "Configure SSO",
+        },
+        "wallets": {
+            "chip_class": "ok" if wallets_configured else "off",
+            "chip_text": "Configured" if wallets_configured else "Not Configured",
+            "description": "Apple Wallet and Google Wallet pass-issuing status and connectivity checks.",
+            "href": url_for("admin.wallets"), "cta": "View Wallet Status",
+        },
+        "staff": {
+            "chip_class": "ok", "chip_text": "Management",
+            "description": "Search staff records, activate/deactivate IDs, and regenerate QR codes.",
+            "href": url_for("admin.staff"), "cta": "Manage Staff IDs",
+        },
+        "activity": {
+            "chip_class": "ok", "chip_text": "Audit Trail",
+            "description": "Admin logins, staff Microsoft sign-ins, and Digital ID create/update history.",
+            "href": url_for("admin.activity"), "cta": "View Activity Log",
+        },
+        "design": {
+            "chip_class": "ok", "chip_text": "Customize",
+            "description": "Colors, fonts, spacing, and which tabs/cards/nav links are shown -- no code required.",
+            "href": url_for("admin.design_settings"), "cta": "Open Design Settings",
+        },
+    }
     return render_template(
         "admin_dashboard.html",
-        sso_configured=sso_config.is_configured(),
-        sso_enabled=sso_config.is_enabled(),
-        google_configured=wallet.is_configured(),
-        apple_configured=wallet_apple.is_configured(),
+        card_meta=card_meta,
         flash_toast=session.pop("flash_toast", None),
     )
 
@@ -183,3 +214,72 @@ def regenerate_qr(token):
     )
     session["flash_toast"] = "QR code regenerated"
     return redirect(request.referrer or url_for("admin.staff"))
+
+
+def _parse_reorder_list(raw_json, fallback):
+    """raw_json is a JSON array of {id, label, enabled} built client-side by
+    the drag-reorder widget. Falls back to the existing list if missing/
+    malformed so a broken submit can't wipe the config."""
+    if not raw_json:
+        return fallback
+    try:
+        items = json.loads(raw_json)
+    except ValueError:
+        return fallback
+    if not isinstance(items, list):
+        return fallback
+    cleaned = []
+    for item in items:
+        if not isinstance(item, dict) or not item.get("id"):
+            continue
+        cleaned.append({
+            "id": item["id"],
+            "label": (item.get("label") or "").strip() or item["id"],
+            "enabled": bool(item.get("enabled")),
+        })
+    return cleaned or fallback
+
+
+@admin_bp.route("/design", methods=["GET", "POST"])
+@admin_required
+def design_settings():
+    draft = theme.get_draft()
+
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        if action == "reset":
+            theme.reset_draft_to_default()
+            session["flash_toast"] = "Design draft reset to default"
+            return redirect(url_for("admin.design_settings"))
+
+        if action == "publish":
+            theme.publish()
+            session["flash_toast"] = "Design changes published -- now live for everyone"
+            return redirect(url_for("admin.design_settings"))
+
+        # action == "save" (or anything else) -- persist the draft only.
+        new_draft = {
+            "colors": {
+                "canvas": request.form.get("canvas") or draft["colors"]["canvas"],
+                "canvas_light": request.form.get("canvas_light") or draft["colors"]["canvas_light"],
+                "text_primary": request.form.get("text_primary") or draft["colors"]["text_primary"],
+                "mdx_red": request.form.get("mdx_red") or draft["colors"]["mdx_red"],
+                "mdx_indigo": request.form.get("mdx_indigo") or draft["colors"]["mdx_indigo"],
+            },
+            "font_body": request.form.get("font_body") or draft["font_body"],
+            "density": request.form.get("density") or draft["density"],
+            "nav_links": _parse_reorder_list(request.form.get("nav_links_json"), draft["nav_links"]),
+            "portal_tabs": _parse_reorder_list(request.form.get("portal_tabs_json"), draft["portal_tabs"]),
+            "dashboard_cards": _parse_reorder_list(request.form.get("dashboard_cards_json"), draft["dashboard_cards"]),
+        }
+        theme.save_draft(new_draft)
+        session["flash_toast"] = "Design draft saved"
+        return redirect(url_for("admin.design_settings"))
+
+    return render_template(
+        "admin_design.html",
+        draft=draft,
+        font_stacks=theme.FONT_STACKS,
+        flash_toast=session.pop("flash_toast", None),
+    )

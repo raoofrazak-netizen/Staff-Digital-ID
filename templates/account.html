@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>{{ site_theme_css|safe }}</style>
 </head>
 <body>
     <div class="bg-noscript-fallback"></div>
@@ -23,7 +24,9 @@
                     <em>Staff Digital ID Service</em>
                 </div>
             </div>
+            {% if site_theme_nav.get('sign_out', True) %}
             <a href="{{ url_for('sso.microsoft_logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
+            {% endif %}
         </nav>
     </header>
 

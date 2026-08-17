@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>{{ site_theme_css|safe }}</style>
 </head>
 <body>
     <div class="bg-noscript-fallback"></div>
@@ -26,7 +27,7 @@
                 <span class="nav__status-dot" id="nav-status-dot"></span>
                 <span id="nav-status-text">Secure Staff Digital ID Portal</span>
             </div>
-            {% if signed_in %}
+            {% if signed_in and site_theme_nav.get('sign_out', True) %}
             <a href="{{ url_for('sso.microsoft_logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
             {% endif %}
         </nav>
@@ -86,9 +87,12 @@
 
     <main class="bento">
         <section class="bento-form glass panel rise-in rise-in--3" data-tilt>
+            {% set enabled_tabs = site_theme.portal_tabs | selectattr('enabled') | list %}
+            {% set enabled_tab_ids = enabled_tabs | map(attribute='id') | list %}
             <div class="tabs">
-                <button type="button" class="tab-btn active" data-tab="register">New Staff Registration</button>
-                <button type="button" class="tab-btn" data-tab="activate">Track ID Lookup</button>
+                {% for tab in enabled_tabs %}
+                <button type="button" class="tab-btn {{ 'active' if loop.first else '' }}" data-tab="{{ tab.id }}">{{ tab.label }}</button>
+                {% endfor %}
             </div>
 
             {% if error %}
@@ -96,7 +100,8 @@
             {% endif %}
 
             <!-- New Registration -->
-            <div class="tab-panel active" id="tab-register">
+            {% if 'register' in enabled_tab_ids %}
+            <div class="tab-panel {{ 'active' if enabled_tabs[0].id == 'register' else '' }}" id="tab-register">
                 <h2>{{ 'Update Your Digital ID' if edit_record else 'Create Your Digital ID' }}</h2>
                 <p class="panel-sub">Fill in your details — the card (and QR) on the right update as you type.</p>
                 {% if sso_prefill and not edit_record %}
@@ -294,9 +299,11 @@
                     <button type="submit" class="btn btn-primary"><span>{{ 'Save Changes' if edit_record else 'Create Digital ID' }}</span></button>
                 </form>
             </div>
+            {% endif %}
 
             <!-- Track ID Lookup -->
-            <div class="tab-panel" id="tab-activate">
+            {% if 'activate' in enabled_tab_ids %}
+            <div class="tab-panel {{ 'active' if enabled_tabs[0].id == 'activate' else '' }}" id="tab-activate">
                 <h2>Track Your Digital ID</h2>
                 <p class="panel-sub">Already have a Digital ID? Enter your Track ID to pull it up instantly — or your Staff ID if you haven't created one yet.</p>
 
@@ -384,6 +391,7 @@
                     <button type="submit" class="btn btn-primary"><span>Create / Activate Digital ID</span></button>
                 </form>
             </div>
+            {% endif %}
         </section>
 
         <div class="bento-side">

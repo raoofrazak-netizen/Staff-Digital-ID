@@ -102,6 +102,12 @@ def init_db(sample_directory_rows):
                     event_type TEXT NOT NULL, actor TEXT, detail TEXT, created_at TEXT
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS site_settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
+                )
+            """)
             cur.execute("SELECT COUNT(*) FROM staff_directory")
             if cur.fetchone()[0] == 0:
                 for row in sample_directory_rows:
@@ -204,6 +210,31 @@ def update_digital_id_fields(token, fields):
         with conn.cursor() as cur:
             set_clause = ", ".join(f"{col} = %s" for col in fields)
             cur.execute(f"UPDATE digital_ids SET {set_clause} WHERE token = %s", (*fields.values(), token))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_setting(key):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT value FROM site_settings WHERE key = %s", (key,))
+            row = cur.fetchone()
+            return row[0] if row else None
+    finally:
+        conn.close()
+
+
+def set_setting(key, value):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO site_settings (key, value) VALUES (%s, %s) "
+                "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+                (key, value),
+            )
         conn.commit()
     finally:
         conn.close()

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Settings — Middlesex University Dubai</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/mdx-shield.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>{{ site_theme_css|safe }}</style>
+    <style>
+        .reorder-list { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+        .reorder-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border);
+            cursor: grab;
+        }
+        .reorder-item.dragging { opacity: 0.4; }
+        .reorder-item__handle { color: var(--text-muted); font-size: 1rem; flex: none; user-select: none; }
+        .reorder-item input[type="text"] {
+            flex: 1; min-height: 36px; padding: 6px 10px; border-radius: 8px;
+            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06); color: var(--text-primary); font-size: 0.85rem;
+        }
+        .reorder-item label.switch { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--text-secondary); flex: none; }
+        .color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 22px; }
+        .color-field { display: flex; flex-direction: column; gap: 6px; }
+        .color-field label { font-size: 0.74rem; font-weight: 700; color: var(--mdx-indigo); text-transform: uppercase; letter-spacing: 0.05em; }
+        .color-field input[type="color"] { width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--glass-border); background: none; cursor: pointer; }
+        .design-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+        .design-actions .btn { width: auto; padding-inline: 22px; }
+    </style>
+</head>
+<body>
+    <div class="bg-noscript-fallback"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    {% if flash_toast %}<div id="flash-toast-data" data-message="{{ flash_toast }}" data-type="success" hidden></div>{% endif %}
+
+    <header class="site-header">
+        <nav class="nav glass rise-in rise-in--1">
+            <div class="nav__brand">
+                <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="Middlesex University Dubai crest">
+                <div class="nav__brandtext">
+                    <strong>Middlesex University Dubai</strong>
+                    <em>Admin Portal</em>
+                </div>
+            </div>
+            <a href="{{ url_for('admin.logout') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">Sign Out</a>
+        </nav>
+    </header>
+
+    <div class="admin-shell rise-in rise-in--2">
+        <div class="admin-topbar">
+            <div>
+                <h1>Design Settings</h1>
+                <p class="panel-sub" style="margin:0;">Colors, fonts, spacing, and which tabs/cards/links are shown -- edits here are a draft until you publish.</p>
+            </div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn-secondary" style="padding:9px 16px; border-radius:999px; font-size:0.78rem; font-weight:700;">← Dashboard</a>
+        </div>
+
+        <form method="POST" id="design-form">
+            <section class="admin-panel glass">
+                <h2>Colors</h2>
+                <p class="panel-sub">Applied site-wide the moment you publish.</p>
+                <div class="color-grid">
+                    <div class="color-field">
+                        <label for="canvas">Page background</label>
+                        <input type="color" id="canvas" name="canvas" value="{{ draft.colors.canvas }}">
+                    </div>
+                    <div class="color-field">
+                        <label for="canvas_light">Background (light variant)</label>
+                        <input type="color" id="canvas_light" name="canvas_light" value="{{ draft.colors.canvas_light }}">
+                    </div>
+                    <div class="color-field">
+                        <label for="text_primary">Text</label>
+                        <input type="color" id="text_primary" name="text_primary" value="{{ draft.colors.text_primary }}">
+                    </div>
+                    <div class="color-field">
+                        <label for="mdx_red">Accent (red)</label>
+                        <input type="color" id="mdx_red" name="mdx_red" value="{{ draft.colors.mdx_red }}">
+                    </div>
+                    <div class="color-field">
+                        <label for="mdx_indigo">Accent (headings)</label>
+                        <input type="color" id="mdx_indigo" name="mdx_indigo" value="{{ draft.colors.mdx_indigo }}">
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-panel glass">
+                <h2>Typography &amp; spacing</h2>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="font_body">Body font</label>
+                        <div class="field-input-wrap">
+                            <select id="font_body" name="font_body">
+                                {% for key in font_stacks %}
+                                <option value="{{ key }}" {% if draft.font_body == key %}selected{% endif %}>{{ key|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="density">Spacing density</label>
+                        <div class="field-input-wrap">
+                            <select id="density" name="density">
+                                {% for key, name in [('compact', 'Compact'), ('comfortable', 'Comfortable'), ('spacious', 'Spacious')] %}
+                                <option value="{{ key }}" {% if draft.density == key %}selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-panel glass">
+                <h2>Portal tabs</h2>
+                <p class="panel-sub">Drag to reorder, toggle to show/hide, edit the label staff sees.</p>
+                <ul class="reorder-list" id="list-portal_tabs">
+                    {% for item in draft.portal_tabs %}
+                    <li class="reorder-item" draggable="true" data-id="{{ item.id }}">
+                        <span class="reorder-item__handle">⠿</span>
+                        <input type="text" value="{{ item.label }}">
+                        <label class="switch"><input type="checkbox" {% if item.enabled %}checked{% endif %}> Shown</label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="admin-panel glass">
+                <h2>Admin dashboard cards</h2>
+                <p class="panel-sub">Drag to reorder, toggle to show/hide, rename the card title.</p>
+                <ul class="reorder-list" id="list-dashboard_cards">
+                    {% for item in draft.dashboard_cards %}
+                    <li class="reorder-item" draggable="true" data-id="{{ item.id }}">
+                        <span class="reorder-item__handle">⠿</span>
+                        <input type="text" value="{{ item.label }}">
+                        <label class="switch"><input type="checkbox" {% if item.enabled %}checked{% endif %}> Shown</label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="admin-panel glass">
+                <h2>Navigation links</h2>
+                <p class="panel-sub">Drag to reorder, toggle to show/hide.</p>
+                <ul class="reorder-list" id="list-nav_links">
+                    {% for item in draft.nav_links %}
+                    <li class="reorder-item" draggable="true" data-id="{{ item.id }}">
+                        <span class="reorder-item__handle">⠿</span>
+                        <input type="text" value="{{ item.label }}">
+                        <label class="switch"><input type="checkbox" {% if item.enabled %}checked{% endif %}> Shown</label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <input type="hidden" name="portal_tabs_json" id="portal_tabs_json">
+            <input type="hidden" name="dashboard_cards_json" id="dashboard_cards_json">
+            <input type="hidden" name="nav_links_json" id="nav_links_json">
+            <input type="hidden" name="action" id="design-action" value="save">
+
+            <div class="design-actions">
+                <button type="submit" class="btn btn-secondary" onclick="document.getElementById('design-action').value='save'">Save Draft</button>
+                <a href="{{ url_for('portal') }}?preview_theme=1" target="_blank" class="btn btn-secondary">Preview Draft ↗</a>
+                <button type="submit" class="btn btn-primary" onclick="document.getElementById('design-action').value='publish'; return confirm('Publish these changes live for all staff now?');">Publish Live</button>
+                <button type="submit" class="btn btn-secondary" onclick="document.getElementById('design-action').value='reset'; return confirm('Reset the draft back to the default design? This does not affect what is currently published.');">Reset Draft to Default</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/background.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+    <script>
+        function enableReorder(listEl) {
+            let dragging = null;
+            listEl.querySelectorAll(".reorder-item").forEach((item) => {
+                item.addEventListener("dragstart", () => {
+                    dragging = item;
+                    item.classList.add("dragging");
+                });
+                item.addEventListener("dragend", () => {
+                    dragging = null;
+                    item.classList.remove("dragging");
+                });
+            });
+            listEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                if (!dragging) return;
+                const after = [...listEl.querySelectorAll(".reorder-item:not(.dragging)")].find((sibling) => {
+                    const rect = sibling.getBoundingClientRect();
+                    return e.clientY < rect.top + rect.height / 2;
+                });
+                if (after) listEl.insertBefore(dragging, after);
+                else listEl.appendChild(dragging);
+            });
+        }
+
+        function serializeList(listId) {
+            const listEl = document.getElementById("list-" + listId);
+            const items = [...listEl.querySelectorAll(".reorder-item")].map((item) => ({
+                id: item.dataset.id,
+                label: item.querySelector("input[type=text]").value,
+                enabled: item.querySelector("input[type=checkbox]").checked,
+            }));
+            document.getElementById(listId + "_json").value = JSON.stringify(items);
+        }
+
+        ["portal_tabs", "dashboard_cards", "nav_links"].forEach((key) => {
+            enableReorder(document.getElementById("list-" + key));
+        });
+
+        document.getElementById("design-form").addEventListener("submit", () => {
+            ["portal_tabs", "dashboard_cards", "nav_links"].forEach(serializeList);
+        });
+    </script>
+</body>
+</html>
