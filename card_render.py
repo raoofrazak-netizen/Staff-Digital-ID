@@ -151,7 +151,9 @@ def _draw_logo(card, draw, top, left_x):
     rather than as a separate centered banner."""
     wordmark_font = _arabic_font(_s(15))
     wordmark = _ar("جامعة ميدلسكس دبي")
-    draw.text((left_x, top), wordmark, font=wordmark_font, fill=TEXT_SECONDARY)
+    # No bold weight of the Arabic font is bundled -- stroke_width fakes a
+    # bold look by thickening the same glyph outlines instead.
+    draw.text((left_x, top), wordmark, font=wordmark_font, fill=TEXT_SECONDARY, stroke_width=_s(0.6))
     top += _s(22)
 
     logo_path = os.path.join(_ASSETS_DIR, "mdx-logo.jpg")
@@ -166,26 +168,42 @@ def _draw_logo(card, draw, top, left_x):
 
 
 def _draw_category_bar(card, draw, text):
-    bar_h = _s(66)
-    top = CARD_H - bar_h
-    draw.rectangle([0, top, CARD_W, CARD_H], fill=MDX_RED)
-
-    max_w = CARD_W - _s(40)
-    size = _s(26)
-    min_size = _s(14)
+    # Try one line as large as fits; long department names that still
+    # don't fit at the floor size wrap onto a second line instead of
+    # shrinking further or truncating, so they stay legible rather than
+    # tiny -- the bar grows a little taller to fit whichever it needed.
+    max_w = CARD_W - _s(28)
+    size = _s(30)
+    min_size = _s(20)
     font = _monument(size)
     while size > min_size and draw.textlength(text, font=font) > max_w:
         size -= 1
         font = _monument(size)
-    if draw.textlength(text, font=font) > max_w:
-        truncated = text
-        while truncated and draw.textlength(truncated + "…", font=font) > max_w:
-            truncated = truncated[:-1].rstrip()
-        text = (truncated + "…") if truncated else text
 
-    w = draw.textlength(text, font=font)
-    text_h = font.getbbox(text)[3] - font.getbbox(text)[1]
-    draw.text(((CARD_W - w) / 2, top + (bar_h - text_h) / 2), text, font=font, fill=(255, 255, 255))
+    if draw.textlength(text, font=font) <= max_w:
+        lines = [text]
+    else:
+        size = _s(26)
+        font = _monument(size)
+        lines = _wrap_text(draw, text, font, max_w)
+        while size > _s(16) and (len(lines) > 2 or any(draw.textlength(l, font=font) > max_w for l in lines)):
+            size -= 1
+            font = _monument(size)
+            lines = _wrap_text(draw, text, font, max_w)
+        lines = lines[:2]
+
+    line_h = font.getbbox("Agy")[3] - font.getbbox("Agy")[1]
+    line_gap = _s(6)
+    block_h = line_h * len(lines) + line_gap * (len(lines) - 1)
+    bar_h = max(_s(66), block_h + _s(30))
+    top = CARD_H - bar_h
+    draw.rectangle([0, top, CARD_W, CARD_H], fill=MDX_RED)
+
+    y = top + (bar_h - block_h) / 2
+    for line in lines:
+        w = draw.textlength(line, font=font)
+        draw.text(((CARD_W - w) / 2, y), line, font=font, fill=(255, 255, 255))
+        y += line_h + line_gap
 
 
 def render_card_front(record, photo_file, qr_file=None):
