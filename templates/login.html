@@ -25,8 +25,8 @@
             <!-- LEFT: brand story -->
             <section class="login-brand-copy">
                 <p class="login-brand__eyebrow rise-in rise-in--2"><span aria-hidden="true"></span>Welcome to MDX Digital ID Service</p>
-                <h2 class="login-brand__headline rise-in rise-in--3">Your Staff Identity.<br>Now Digital.</h2>
-                <p class="login-brand__sub rise-in rise-in--4">The official Middlesex University Dubai Staff Digital ID &mdash; verified, secure, and always within reach.</p>
+                <h2 class="login-brand__headline rise-in rise-in--3">Your Campus. Your Identity.<br>One Digital Experience.</h2>
+                <p class="login-brand__sub rise-in rise-in--4">The official Middlesex University Dubai Staff Digital ID &mdash; secure, intelligent, and always within reach.</p>
             </section>
 
             <section class="login-features">
@@ -106,7 +106,7 @@
                         </button>
                     </form>
 
-                    <div class="login-divider rise-in rise-in--4"><span>or continue with</span></div>
+                    <div class="login-divider rise-in rise-in--4"><a href="{{ url_for('portal') }}?tab=activate">or Continue with Staff ID Login</a></div>
 
                     {% if sso_error %}
                     <div class="auth-alert" role="alert">
@@ -130,10 +130,6 @@
                     </button>
                     <p class="login-card__hint">Microsoft Sign-In isn't set up on this portal yet.</p>
                     {% endif %}
-
-                    <a href="{{ url_for('portal') }}?tab=activate" class="login-manual-link rise-in rise-in--4">
-                        Continue with Staff ID Login <span class="login-manual-link__arrow">→</span>
-                    </a>
 
                     <p class="login-card__trust rise-in rise-in--5">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>
