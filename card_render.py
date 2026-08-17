@@ -166,13 +166,13 @@ def _draw_logo(card, draw, top, left_x):
 
 
 def _draw_category_bar(card, draw, text):
-    bar_h = _s(56)
+    bar_h = _s(66)
     top = CARD_H - bar_h
     draw.rectangle([0, top, CARD_W, CARD_H], fill=MDX_RED)
 
     max_w = CARD_W - _s(40)
-    size = _s(24)
-    min_size = _s(13)
+    size = _s(26)
+    min_size = _s(14)
     font = _monument(size)
     while size > min_size and draw.textlength(text, font=font) > max_w:
         size -= 1
@@ -210,7 +210,7 @@ def render_card_front(record, photo_file, qr_file=None):
     )
 
     field_x = photo_x + photo_w + _s(30)
-    value_font = _dax("Bold", _s(30))
+    value_font = _dax("Bold", _s(32))
     fields = [
         ("ID NUMBER", "رقم معرف", record.get("Staff ID", "")),
         ("GENDER", "الجنس", record.get("Gender") or "—"),
@@ -224,17 +224,17 @@ def render_card_front(record, photo_file, qr_file=None):
     for label, ar_label, value in fields:
         _draw_bilingual_label(draw, field_x, field_y, label, ar_label, size=_s(15))
         draw.text((field_x, field_y + _s(22)), value, font=value_font, fill=BLACK)
-        field_y += _s(72)
+        field_y += _s(74)
 
     name_y = photo_y + photo_h + _s(34)
-    name_font = _dax("Bold", _s(34))
-    jobtitle_font = _dax("Bold", _s(29))
+    name_font = _dax("Bold", _s(36))
+    jobtitle_font = _dax("Bold", _s(31))
 
     _draw_bilingual_label(draw, margin, name_y, "NAME", "اسم", size=_s(17))
     full_name = f"{record.get('First Name', '')} {record.get('Last Name', '')}".strip()
     name_max_w = CARD_W - margin * 2
-    name_size = _s(34)
-    while name_size > _s(20) and draw.textlength(full_name, font=name_font) > name_max_w:
+    name_size = _s(36)
+    while name_size > _s(22) and draw.textlength(full_name, font=name_font) > name_max_w:
         name_size -= 1
         name_font = _dax("Bold", name_size)
     draw.text((margin, name_y + _s(26)), full_name, font=name_font, fill=BLACK)
@@ -245,7 +245,7 @@ def render_card_front(record, photo_file, qr_file=None):
     max_w = CARD_W - margin * 2
     for line in _wrap_text(draw, job_title, jobtitle_font, max_w)[:2]:
         draw.text((margin, title_y + _s(26)), line, font=jobtitle_font, fill=BLACK)
-        title_y += _s(36)
+        title_y += _s(38)
 
     # The gap between Job Title and the bottom category bar is otherwise
     # empty on the official layout -- the vCard QR fills it naturally
@@ -309,19 +309,19 @@ def render_card_back(record):
     barcode_img = _generate_barcode_image(barcode_value, CARD_W - margin * 2)
     card.paste(barcode_img, (margin, y))
     y += barcode_img.height + _s(6)
-    id_font = _dax("Bold", _s(17))
+    id_font = _dax("Bold", _s(18))
     id_w = draw.textlength(barcode_value, font=id_font)
     draw.text(((CARD_W - id_w) / 2, y), barcode_value, font=id_font, fill=BLACK)
     y += _s(26)
 
-    idref_font = _dax("Medium", _s(14))
+    idref_font = _dax("Medium", _s(15))
     idref_text = f"ID Ref# {record.get('Staff ID', '')}"
     idref_w = draw.textlength(idref_text, font=idref_font)
     draw.text((CARD_W - margin - idref_w, y), idref_text, font=idref_font, fill=TEXT_SECONDARY)
     y += _s(30)
 
-    it_label_font = _dax("Bold", _s(16))
-    it_value_font = _dax("Regular", _s(19))
+    it_label_font = _dax("Bold", _s(17))
+    it_value_font = _dax("Regular", _s(20))
     it_fields = [
         ("UK IT User ID:", record.get("UK IT User ID") or "—"),
         ("MISIS:", record.get("MISIS") or "—"),
@@ -331,14 +331,14 @@ def render_card_back(record):
     for label, value in it_fields:
         draw.text((margin, y), label, font=it_label_font, fill=MDX_RED)
         draw.text((margin, y + _s(20)), value, font=it_value_font, fill=BLACK)
-        y += _s(50)
+        y += _s(52)
 
     y += _s(14)
-    terms_font = _dax("Regular", _s(17))
+    terms_font = _dax("Regular", _s(18))
     for term in CARD_TERMS:
         for line in _wrap_text(draw, f"• {term}", terms_font, CARD_W - margin * 2):
             draw.text((margin, y), line, font=terms_font, fill=TEXT_SECONDARY)
-            y += _s(24)
+            y += _s(25)
         y += _s(4)
 
     y += _s(14)
@@ -346,13 +346,13 @@ def render_card_back(record):
     y += _s(20)
 
     address_top = y
-    address_name_font = _dax("Bold", _s(21))
-    address_font = _dax("Regular", _s(18))
+    address_name_font = _dax("Bold", _s(22))
+    address_font = _dax("Regular", _s(19))
     draw.text((margin, y), "Middlesex University Dubai", font=address_name_font, fill=MDX_RED)
-    y += _s(32)
+    y += _s(33)
     for line in UNIVERSITY_ADDRESS_LINES:
         draw.text((margin, y), line, font=address_font, fill=BLACK)
-        y += _s(24)
+        y += _s(25)
 
     _draw_partner_mark(card, CARD_W - margin, address_top + _s(4))
 

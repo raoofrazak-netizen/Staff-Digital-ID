@@ -371,12 +371,25 @@ main, .site-header { position: relative; z-index: 1; }
 }
 .login-card__head { margin-bottom: 22px; }
 .login-card__emblem {
+  position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
   width: 84px; height: 84px; border-radius: 50%;
   background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.8);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 10px 24px rgba(47,37,82,0.14);
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast) var(--ease-spring);
 }
-.login-card__emblem img { width: 52px; height: 52px; }
+.login-card__emblem::before {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.85) 50%, transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 0.75s var(--ease-spring);
+}
+.login-card__emblem:hover::before { transform: translateX(110%); }
+.login-card__emblem:hover {
+  transform: scale(1.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 14px 32px rgba(47,37,82,0.22);
+}
+.login-card__emblem img { position: relative; z-index: 2; width: 52px; height: 52px; }
 .login-card h1 {
   font-family: var(--font-display); font-weight: 400; letter-spacing: 0.01em;
   font-size: clamp(1.3rem, 2.6vw, 1.55rem); margin: 0 0 8px; color: var(--mdx-indigo);

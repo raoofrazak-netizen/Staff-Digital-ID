@@ -40,6 +40,16 @@
         });
     });
 
+    // --- Local Login -> UK IT User ID auto-fill (appends @mdx.ac.uk) ---
+    const localLoginInput = document.getElementById("r-local-login");
+    const ukItUserIdInput = document.getElementById("r-uk-it-user-id");
+    if (localLoginInput && ukItUserIdInput) {
+        localLoginInput.addEventListener("input", () => {
+            const value = localLoginInput.value.trim();
+            ukItUserIdInput.value = value ? `${value}@mdx.ac.uk` : "";
+        });
+    }
+
     const requestedTab = new URLSearchParams(window.location.search).get("tab");
     if (requestedTab && tabPanels[requestedTab]) {
         const requestedBtn = document.querySelector(`.tab-btn[data-tab="${requestedTab}"]`);

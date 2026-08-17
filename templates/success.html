@@ -98,16 +98,11 @@
 
         <!-- 7. Quick actions -->
         <section class="result-actions scroll-reveal">
-            <a href="{{ url_for('download', token=token) }}" class="result-action" data-toast-message="Digital ID downloaded" data-toast-type="success">
+            <a href="{{ url_for('download_pdf', token=token) }}" class="result-action" data-toast-message="Digital ID downloaded (PDF)" data-toast-type="success">
                 <span class="result-action__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span>
-                <span class="result-action__title">Download</span>
-                <span class="result-action__sub">Save as PNG or <a href="{{ url_for('download_pdf', token=token) }}" onclick="event.stopPropagation()" data-toast-message="Digital ID downloaded (PDF)" data-toast-type="success">PDF</a></span>
+                <span class="result-action__title">Download PDF</span>
+                <span class="result-action__sub">Save your Digital ID as a PDF</span>
             </a>
-            <button type="button" class="result-action" id="print-action">
-                <span class="result-action__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a1 1 0 01-1-1v-4a1 1 0 011-1h16a1 1 0 011 1v4a1 1 0 01-1 1h-2"/></svg></span>
-                <span class="result-action__title">Print</span>
-                <span class="result-action__sub">Open a print-friendly version</span>
-            </button>
             {% if can_edit %}
             <a href="{{ url_for('portal', edit=token) }}" class="result-action">
                 <span class="result-action__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></span>
@@ -190,9 +185,6 @@
             if (isIOS && appleBtn) walletRow.insertBefore(appleBtn, walletRow.firstChild);
             else if (isAndroid && googleBtn) walletRow.insertBefore(googleBtn, walletRow.firstChild);
         }
-
-        const printAction = document.getElementById("print-action");
-        if (printAction) printAction.addEventListener("click", () => window.print());
 
         // --- Scroll-reveal for sections below the fold ---
         const revealEls = document.querySelectorAll(".scroll-reveal");
