@@ -83,6 +83,14 @@ def microsoft_callback():
         result = auth_microsoft.acquire_token_by_auth_code(code)
     except auth_microsoft.SSONotConfigured as exc:
         return _fail(str(exc))
+    except Exception as exc:
+        # acquire_token_by_auth_code is documented to return error info in
+        # the result dict rather than raise -- but MSAL can still throw for
+        # things outside that contract (a malformed/expired code, a token
+        # signature/claims validation failure, a transient network error).
+        # Previously unhandled, this crashed with a bare 500 and no log
+        # entry at all, which read as the sign-in silently doing nothing.
+        return _fail(f"Microsoft sign-in failed unexpectedly during token exchange: {exc}")
 
     if "error" in result:
         message = result.get("error_description") or result.get("error")
@@ -90,13 +98,20 @@ def microsoft_callback():
 
     id_claims = result.get("id_token_claims") or {}
     claimed_identity = id_claims.get("preferred_username") or id_claims.get("email") or id_claims.get("upn")
-    if not auth_microsoft.verify_tenant(id_claims):
-        return _fail("This Microsoft account doesn't belong to the university's approved organization.", identity=claimed_identity)
+    try:
+        tenant_ok = auth_microsoft.verify_tenant(id_claims)
+    except Exception as exc:
+        return _fail(f"Could not verify sign-in tenant: {exc}", identity=claimed_identity)
+    if not tenant_ok:
+        return _fail(
+            f"This Microsoft account doesn't belong to the university's approved organization (tid={id_claims.get('tid') or '-'}).",
+            identity=claimed_identity,
+        )
 
     try:
         profile = auth_microsoft.fetch_profile(result["access_token"])
-    except Exception:
-        return _fail("Could not retrieve your profile from Microsoft Graph.", identity=claimed_identity)
+    except Exception as exc:
+        return _fail(f"Could not retrieve your profile from Microsoft Graph: {exc}", identity=claimed_identity)
 
     try:
         photo_data_url = auth_microsoft.fetch_profile_photo_data_url(result["access_token"])
