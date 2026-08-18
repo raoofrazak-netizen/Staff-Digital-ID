@@ -28,6 +28,11 @@
         .color-field select { width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06); color: var(--text-primary); cursor: pointer; padding: 0 10px; font-size: 0.85rem; }
         .design-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
         .design-actions .btn { width: auto; padding-inline: 22px; }
+        #list-registration_fields .reorder-item { cursor: default; }
+        .field-required-badge {
+            flex: none; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+            color: var(--mdx-red); background: rgba(227,6,19,0.12); padding: 3px 9px; border-radius: 999px;
+        }
     </style>
 </head>
 <body>
@@ -151,9 +156,31 @@
                 </ul>
             </section>
 
+            <section class="admin-panel glass">
+                <h2>New Staff Registration fields</h2>
+                <p class="panel-sub">
+                    Show, hide, or freeze each field on the registration form. A frozen field still
+                    shows and still submits its value, but staff can't edit it -- useful once it's
+                    been correctly filled by Microsoft Sign-In. Fields marked <strong>Required</strong>
+                    must have a value from somewhere (SSO, an existing record, or manual entry) --
+                    hiding one without another source will block registration.
+                </p>
+                <ul class="reorder-list" id="list-registration_fields">
+                    {% for item in draft.registration_fields %}
+                    <li class="reorder-item" data-id="{{ item.id }}">
+                        <input type="text" value="{{ item.label }}">
+                        {% if item.required %}<span class="field-required-badge">Required</span>{% endif %}
+                        <label class="switch"><input type="checkbox" class="js-enabled" {% if item.enabled %}checked{% endif %}> Shown</label>
+                        <label class="switch"><input type="checkbox" class="js-frozen" {% if item.frozen %}checked{% endif %}> Frozen</label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
             <input type="hidden" name="portal_tabs_json" id="portal_tabs_json">
             <input type="hidden" name="dashboard_cards_json" id="dashboard_cards_json">
             <input type="hidden" name="nav_links_json" id="nav_links_json">
+            <input type="hidden" name="registration_fields_json" id="registration_fields_json">
             <input type="hidden" name="action" id="design-action" value="save">
 
             <div class="design-actions">
@@ -202,12 +229,24 @@
             document.getElementById(listId + "_json").value = JSON.stringify(items);
         }
 
+        function serializeRegistrationFields() {
+            const listEl = document.getElementById("list-registration_fields");
+            const items = [...listEl.querySelectorAll(".reorder-item")].map((item) => ({
+                id: item.dataset.id,
+                label: item.querySelector("input[type=text]").value,
+                enabled: item.querySelector(".js-enabled").checked,
+                frozen: item.querySelector(".js-frozen").checked,
+            }));
+            document.getElementById("registration_fields_json").value = JSON.stringify(items);
+        }
+
         ["portal_tabs", "dashboard_cards", "nav_links"].forEach((key) => {
             enableReorder(document.getElementById("list-" + key));
         });
 
         document.getElementById("design-form").addEventListener("submit", () => {
             ["portal_tabs", "dashboard_cards", "nav_links"].forEach(serializeList);
+            serializeRegistrationFields();
         });
     </script>
 </body>

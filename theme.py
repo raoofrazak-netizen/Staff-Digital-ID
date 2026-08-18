@@ -43,6 +43,27 @@ DEFAULT_THEME = {
         {"id": "activity", "label": "Activity Log", "enabled": True},
         {"id": "design", "label": "Design Settings", "enabled": True},
     ],
+    # "frozen" means shown and still submitted with the form, but locked
+    # against staff editing -- e.g. an admin trusts the SSO-prefilled
+    # Department and doesn't want it hand-edited. Fields marked required
+    # here are also required server-side (app.py's REQUIRED_FIELDS) --
+    # hiding one without another way to supply a value (SSO prefill, an
+    # edit's existing record) will make registration fail that validation.
+    "registration_fields": [
+        {"id": "first_name", "label": "First Name", "enabled": True, "frozen": False, "required": True},
+        {"id": "last_name", "label": "Last Name", "enabled": True, "frozen": False, "required": True},
+        {"id": "staff_id", "label": "Staff ID", "enabled": True, "frozen": False, "required": True},
+        {"id": "email", "label": "Email", "enabled": True, "frozen": False, "required": True},
+        {"id": "mobile_number", "label": "Mobile Number", "enabled": True, "frozen": False, "required": False},
+        {"id": "department", "label": "Department", "enabled": True, "frozen": False, "required": True},
+        {"id": "job_title", "label": "Job Title", "enabled": True, "frozen": False, "required": True},
+        {"id": "employment_status", "label": "Employment Status", "enabled": True, "frozen": False, "required": True},
+        {"id": "gender", "label": "Gender", "enabled": True, "frozen": False, "required": True},
+        {"id": "category", "label": "Category", "enabled": True, "frozen": False, "required": False},
+        {"id": "uk_it_user_id", "label": "UK IT User ID", "enabled": True, "frozen": False, "required": False},
+        {"id": "local_login", "label": "Local Login", "enabled": True, "frozen": False, "required": False},
+        {"id": "misis", "label": "MISIS", "enabled": True, "frozen": False, "required": False},
+    ],
 }
 
 BRAND_SWATCHES = [
@@ -101,7 +122,7 @@ def _merge_defaults(data):
     merged["colors"] = _sanitize_colors(data.get("colors"))
     merged["font_body"] = data.get("font_body") or merged["font_body"]
     merged["density"] = data.get("density") or merged["density"]
-    for list_key in ("nav_links", "portal_tabs", "dashboard_cards"):
+    for list_key in ("nav_links", "portal_tabs", "dashboard_cards", "registration_fields"):
         items = data.get(list_key)
         if items:
             merged[list_key] = items

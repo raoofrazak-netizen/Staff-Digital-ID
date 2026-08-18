@@ -39,11 +39,13 @@ def inject_theme():
     is_preview = bool(session.get("is_admin")) and request.args.get("preview_theme") == "1"
     active = theme.active_theme(is_preview)
     nav_flags = {item["id"]: item.get("enabled", True) for item in active.get("nav_links", [])}
+    reg_fields = {item["id"]: item for item in active.get("registration_fields", [])}
     return {
         "site_theme": active,
         "site_theme_css": theme.css_overrides(active),
         "site_theme_preview": is_preview,
         "site_theme_nav": nav_flags,
+        "site_theme_reg_fields": reg_fields,
     }
 
 PORTAL_BASE_URL = (os.environ.get("PORTAL_BASE_URL") or "http://127.0.0.1:5000").rstrip("/")

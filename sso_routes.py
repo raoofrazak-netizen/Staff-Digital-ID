@@ -120,6 +120,24 @@ def microsoft_callback():
     except Exception:
         photo_data_url = None
 
+    # Microsoft Graph has no concept of Department/Gender/Employment Status
+    # -- those are HR-system fields, not Azure AD ones -- so the profile
+    # above never carries them, and the registration form was left with
+    # those fields blank. If this person is already known to the HR-
+    # imported staff directory (matched by Staff ID/employeeId), merge its
+    # fields in now so the form arrives prefilled instead. Category, MISIS,
+    # and UK IT User ID/Local Login still can't come from here -- neither
+    # Microsoft nor the HR import tracks them; UK IT User ID/Local Login
+    # are separately derived from the Graph username above, and Category/
+    # MISIS have no source at all until the staff member fills them in
+    # themselves (or already has an existing Digital ID to edit).
+    if profile.get("staff_id"):
+        directory_record = app_module.find_directory_record_by_staff_id(profile["staff_id"])
+        if directory_record:
+            profile["department"] = profile.get("department") or directory_record.get("Department") or ""
+            profile["gender"] = directory_record.get("Gender") or ""
+            profile["employment_status"] = directory_record.get("Employment Status") or ""
+
     app_module.log_event(
         "staff_sso_login",
         profile.get("email") or profile.get("username") or profile.get("ms_user_id"),

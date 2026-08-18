@@ -111,61 +111,79 @@
                 {% endif %}
 
                 <form id="reg-form" action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data">
+                    {% set rf = site_theme_reg_fields %}
                     <input type="hidden" name="edit_token" value="{{ edit_record['Token'] if edit_record else '' }}">
                     <p class="form-section__title">Personal Information</p>
                     <div class="field-row">
+                        {% if rf.get('first_name', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-first-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>First Name</label>
                             <div class="field-input-wrap">
                                 <input type="text" id="r-first-name" name="first_name" data-live="first_name"
-                                       value="{{ form.get('first_name', '') if form else '' }}" required>
+                                       value="{{ form.get('first_name', '') if form else '' }}" required
+                                       {% if rf.get('first_name', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if rf.get('last_name', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-last-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>Last Name</label>
                             <div class="field-input-wrap">
                                 <input type="text" id="r-last-name" name="last_name" data-live="last_name"
-                                       value="{{ form.get('last_name', '') if form else '' }}" required>
+                                       value="{{ form.get('last_name', '') if form else '' }}" required
+                                       {% if rf.get('last_name', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
 
                     <div class="field-row">
+                        {% if rf.get('staff_id', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-staff-id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="12" r="1.8"/><path d="M13 10h5M13 14h3"/></svg>Staff ID</label>
                             <div class="field-input-wrap">
                                 <input type="text" id="r-staff-id" name="staff_id" data-live="staff_id"
                                        placeholder="MDX00125"
                                        value="{{ form.get('staff_id', '') if form else '' }}" required
-                                       {% if edit_record %}readonly title="Staff ID can't be changed here"{% endif %}>
+                                       {% if edit_record %}readonly title="Staff ID can't be changed here"
+                                       {% elif rf.get('staff_id', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if rf.get('mobile_number', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Mobile Number <span style="text-transform:none; font-weight:600; opacity:0.65;">(optional)</span></label>
                             <div class="field-input-wrap">
                                 <input type="tel" id="r-mobile" name="mobile_number" data-live="mobile_number"
                                        placeholder="+971 5X XXX XXXX"
-                                       value="{{ form.get('mobile_number', '') if form else '' }}">
+                                       value="{{ form.get('mobile_number', '') if form else '' }}"
+                                       {% if rf.get('mobile_number', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
 
+                    {% if rf.get('email', {}).get('enabled', True) %}
                     <div class="field">
                         <label for="r-email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>University Email</label>
                         <div class="field-input-wrap">
                             <input type="email" id="r-email" name="email" data-live="email" placeholder="staff@mdx.ac.ae"
                                    value="{{ form.get('email', '') if form else '' }}" required
-                                   {% if sso_prefill %}readonly title="Linked to your signed-in Microsoft account"{% endif %}>
+                                   {% if sso_prefill %}readonly title="Linked to your signed-in Microsoft account"
+                                   {% elif rf.get('email', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                         </div>
                         <p class="field-hint" id="r-email-hint">Heads up — this doesn't look like an @mdx.ac.ae address.</p>
                     </div>
+                    {% endif %}
 
                     <p class="form-section__title">Role Information</p>
                     <div class="field-row">
+                        {% if rf.get('department', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-department"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h1M8 11h1M8 15h1M15 7h1M15 11h1M15 15h1"/></svg>Department</label>
                             <div class="field-input-wrap">
-                                <select id="r-department" name="department" data-live="department" required>
+                                <select id="r-department" name="department" data-live="department" required
+                                        {% if rf.get('department', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                                     <option value="">Select…</option>
                                     {% for d in departments %}
                                     <option value="{{ d }}" {% if form and form.get('department') == d %}selected{% endif %}>{{ d }}</option>
@@ -173,21 +191,27 @@
                                 </select>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if rf.get('job_title', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-job-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Job Title</label>
                             <div class="field-input-wrap">
                                 <input type="text" id="r-job-title" name="job_title" data-live="job_title"
                                        placeholder="IT Support Engineer"
-                                       value="{{ form.get('job_title', '') if form else '' }}" required>
+                                       value="{{ form.get('job_title', '') if form else '' }}" required
+                                       {% if rf.get('job_title', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
 
                     <div class="field-row">
+                        {% if rf.get('employment_status', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-employment-status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.2 4.6 5 .7-3.6 3.6.9 5.1-4.5-2.4L7.5 16l.9-5.1L4.8 7.3l5-.7z"/></svg>Employment Status</label>
                             <div class="field-input-wrap">
-                                <select id="r-employment-status" name="employment_status" data-live="employment_status" required>
+                                <select id="r-employment-status" name="employment_status" data-live="employment_status" required
+                                        {% if rf.get('employment_status', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                                     <option value="">Select…</option>
                                     {% for s in employment_statuses %}
                                     <option value="{{ s }}" {% if form and form.get('employment_status') == s %}selected{% endif %}>{{ s }}</option>
@@ -195,10 +219,13 @@
                                 </select>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if rf.get('gender', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-gender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="15" r="4.2"/><path d="M15 5l4 4M19 5v4h-4"/><path d="M12 12l4.2-4.2"/></svg>Gender</label>
                             <div class="field-input-wrap">
-                                <select id="r-gender" name="gender" data-live="gender" required>
+                                <select id="r-gender" name="gender" data-live="gender" required
+                                        {% if rf.get('gender', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                                     <option value="">Select…</option>
                                     {% for g in genders %}
                                     <option value="{{ g }}" {% if form and form.get('gender') == g %}selected{% endif %}>{{ g }}</option>
@@ -206,12 +233,15 @@
                                 </select>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
 
+                    {% if rf.get('category', {}).get('enabled', True) %}
                     <div class="field">
                         <label for="r-category"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>Category</label>
                         <div class="field-input-wrap">
-                            <select id="r-category" name="category" data-live="category" required>
+                            <select id="r-category" name="category" data-live="category" required
+                                    {% if rf.get('category', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                                 <option value="">Select…</option>
                                 {% for c in categories %}
                                 <option value="{{ c }}" {% if form and form.get('category') == c %}selected{% endif %}>{{ c }}</option>
@@ -219,33 +249,43 @@
                             </select>
                         </div>
                     </div>
+                    {% endif %}
 
                     <p class="form-section__title">IT &amp; Access Information <span style="text-transform:none; font-weight:600; opacity:0.65;">(optional — shown on the back of your Digital ID)</span></p>
                     <div class="field-row">
+                        {% if rf.get('uk_it_user_id', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-uk-it-user-id"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>UK IT User ID</label>
                             <div class="field-input-wrap">
                                 <input type="text" id="r-uk-it-user-id" name="uk_it_user_id" data-live="uk_it_user_id"
                                        placeholder="firstname.lastname"
-                                       value="{{ form.get('uk_it_user_id', '') if form else '' }}">
+                                       value="{{ form.get('uk_it_user_id', '') if form else '' }}"
+                                       {% if rf.get('uk_it_user_id', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if rf.get('local_login', {}).get('enabled', True) %}
                         <div class="field">
                             <label for="r-local-login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Local Login</label>
                             <div class="field-input-wrap">
                                 <input type="text" id="r-local-login" name="local_login" data-live="local_login"
                                        placeholder="firstname.lastname"
-                                       value="{{ form.get('local_login', '') if form else '' }}">
+                                       value="{{ form.get('local_login', '') if form else '' }}"
+                                       {% if rf.get('local_login', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
+                    {% if rf.get('misis', {}).get('enabled', True) %}
                     <div class="field">
                         <label for="r-misis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>MISIS</label>
                         <div class="field-input-wrap">
                             <input type="text" id="r-misis" name="misis" data-live="misis"
-                                   value="{{ form.get('misis', '') if form else '' }}">
+                                   value="{{ form.get('misis', '') if form else '' }}"
+                                   {% if rf.get('misis', {}).get('frozen') %}class="is-frozen" tabindex="-1"{% endif %}>
                         </div>
                     </div>
+                    {% endif %}
 
                     <p class="form-section__title">Digital Identity</p>
                     <div class="field">

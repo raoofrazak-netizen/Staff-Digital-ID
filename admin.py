@@ -240,6 +240,35 @@ def _parse_reorder_list(raw_json, fallback):
     return cleaned or fallback
 
 
+def _parse_registration_fields(raw_json, fallback):
+    """Same shape as _parse_reorder_list, plus "frozen" (locked against
+    staff editing) -- and "required" is never sent by the client widget
+    (it's a fixed schema property, not admin-editable), so it's always
+    carried over from the matching fallback item by id."""
+    fallback_by_id = {item["id"]: item for item in fallback}
+    if not raw_json:
+        return fallback
+    try:
+        items = json.loads(raw_json)
+    except ValueError:
+        return fallback
+    if not isinstance(items, list):
+        return fallback
+    cleaned = []
+    for item in items:
+        if not isinstance(item, dict) or not item.get("id"):
+            continue
+        existing = fallback_by_id.get(item["id"], {})
+        cleaned.append({
+            "id": item["id"],
+            "label": (item.get("label") or "").strip() or item["id"],
+            "enabled": bool(item.get("enabled")),
+            "frozen": bool(item.get("frozen")),
+            "required": bool(existing.get("required")),
+        })
+    return cleaned or fallback
+
+
 @admin_bp.route("/design", methods=["GET", "POST"])
 @admin_required
 def design_settings():
@@ -272,6 +301,7 @@ def design_settings():
             "nav_links": _parse_reorder_list(request.form.get("nav_links_json"), draft["nav_links"]),
             "portal_tabs": _parse_reorder_list(request.form.get("portal_tabs_json"), draft["portal_tabs"]),
             "dashboard_cards": _parse_reorder_list(request.form.get("dashboard_cards_json"), draft["dashboard_cards"]),
+            "registration_fields": _parse_registration_fields(request.form.get("registration_fields_json"), draft["registration_fields"]),
         }
         theme.save_draft(new_draft)
         session["flash_toast"] = "Design draft saved"

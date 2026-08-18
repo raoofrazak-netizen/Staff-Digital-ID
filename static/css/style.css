@@ -843,6 +843,14 @@ main, .site-header { position: relative; z-index: 1; }
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
   transition: box-shadow var(--dur-fast) ease, transform var(--dur-fast) var(--ease-spring), background var(--dur-fast) ease;
 }
+/* Admin "Frozen" fields (Design Settings) -- visible and still submitted
+   with the form, just locked against interaction so staff can't edit an
+   SSO-trusted value. tabindex="-1" (set in the template) keeps it out of
+   the Tab order; pointer-events blocks mouse interaction too. */
+.field input.is-frozen, .field select.is-frozen {
+  pointer-events: none; cursor: not-allowed; opacity: 0.65;
+  background: rgba(255,255,255,0.03);
+}
 .field select {
   -webkit-appearance: none; appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.5l4.5 4.5 4.5-4.5' stroke='%232f2552' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
