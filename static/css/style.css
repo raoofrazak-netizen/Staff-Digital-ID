@@ -1101,7 +1101,7 @@ main, .site-header { position: relative; z-index: 1; }
 }
 .idcard-tilt-wrap:hover .idcard-flip { transform: rotateY(180deg); }
 .idcard-face {
-  border-radius: var(--radius-lg); padding: 10px 12px 0;
+  border-radius: var(--radius-lg); padding: 20px 20px 0;
   display: flex; flex-direction: column; align-items: stretch; text-align: left;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
   background: #fdfdfd;
@@ -1114,15 +1114,47 @@ main, .site-header { position: relative; z-index: 1; }
    it can keep updating instantly as the visitor types. */
 .idcard-face--front { position: absolute; inset: 0; overflow: hidden; }
 .idcard-face--back { position: absolute; inset: 0; overflow: hidden; transform: rotateY(180deg); }
-.idcard-back__qr-row { display: flex; align-items: center; gap: 10px; padding: 6px 0 8px; }
-.idcard-back__qr-caption { display: flex; flex-direction: column; gap: 6px; }
-/* The QR feature (scan to save contact) isn't part of the official
-   template, so it's tucked into a small row at the top of the back
-   instead of competing with the front's business-card layout -- sized
-   down to fit that row rather than the ~168px used everywhere else. */
-.idcard-back__qr-row .qr-panel { width: 56px; height: 56px; padding: 4px; border-radius: 6px; box-shadow: none; border: 1px solid rgba(0,0,0,0.08); }
-.idcard-back__qr-row .qr-badge { display: none !important; }
-.idcard-back__qr-row .qr-placeholder { font-size: 0.3rem; padding: 2px; line-height: 1.15; }
+
+.sif-qr-row { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 14px 0 12px; }
+.sif-qr-row .qr-panel { width: 104px; height: 104px; padding: 6px; border-radius: 8px; box-shadow: none; border: 1px solid rgba(0,0,0,0.08); }
+.sif-qr-row .qr-badge { display: none !important; }
+.sif-qr-row .qr-placeholder { font-size: 0.36rem; padding: 4px; line-height: 1.2; }
+
+/* ---- Live-preview-only sizing: the .sif-*/.sib-* base rules above are
+   tuned for the small (210px) decorative sample card on the login page;
+   this card is bigger and needs to read as clearly as the actual
+   rendered card (card_render.py) and the success page's real image, so
+   every size/gap here is that same card's own font sizes converted to
+   this card's proportions (320px / 957px render width ≈ 0.334), not
+   just an eyeballed guess. */
+.idcard-face--front .sif-logo-row { gap: 5px; padding: 4px 0 12px; }
+.idcard-face--front .sif-logo { height: 38px; }
+.idcard-face--front .sif-arabic-wordmark, .idcard-face--back .sif-arabic-wordmark {
+  font-size: 0.52rem; font-weight: 800; opacity: 1;
+}
+.idcard-face--front .sif-top-row { gap: 14px; }
+.idcard-face--front .sif-photo { width: 84px; height: 100px; border-radius: 6px; }
+.idcard-face--front .sif-fields { gap: 10px; }
+.idcard-face--front .sif-field__label { font-size: 0.5rem; }
+.idcard-face--front .sif-field__value { font-size: 0.78rem; opacity: 0.85; }
+.idcard-face--front .sif-name-block { margin-top: 14px; gap: 3px; }
+.idcard-face--front .sif-name { font-size: 0.94rem; opacity: 0.85; filter: none; }
+.idcard-face--front .sif-jobtitle { font-size: 0.78rem; opacity: 0.8; }
+.idcard-face--front .sif-band-grey, .idcard-face--back .sif-band-grey { font-size: 0.85rem; padding: 10px 8px; margin-inline: -20px; }
+
+.idcard-face--back .sib-barcode { padding: 8px 0 10px; }
+.idcard-face--back .sib-barcode__label { font-size: 0.56rem; }
+.idcard-face--back .sib-idref { font-size: 0.47rem; margin-bottom: 6px; }
+.idcard-face--back .sib-it-fields { gap: 8px; }
+.idcard-face--back .sib-it-field { gap: 2px; }
+.idcard-face--back .sib-it-field span { font-size: 0.53rem; }
+.idcard-face--back .sib-it-field strong { font-size: 0.63rem; }
+.idcard-face--back .sib-terms { margin-top: 10px; padding-top: 8px; gap: 4px; }
+.idcard-face--back .sib-terms li { font-size: 0.56rem; }
+.idcard-face--back .sib-address { margin-top: 10px; padding-top: 8px; }
+.idcard-face--back .sib-address strong { font-size: 0.69rem; }
+.idcard-face--back .sib-address span { font-size: 0.6rem; }
+.idcard-face--back .sib-partner__mark { height: 28px; }
 
 /* ============ Digital ID result page (premium redesign) ============ */
 .result-shell { max-width: 640px; margin: 0 auto; padding: 40px 20px 90px; text-align: center; position: relative; z-index: 1; }
@@ -1304,9 +1336,7 @@ main, .site-header { position: relative; z-index: 1; }
 }
 .idcard__pill--accent { background: linear-gradient(145deg, var(--mdx-red), var(--mdx-red)); color: #fff; }
 
-.idcard__scan-label { font-size: 0.5rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-primary); opacity: 0.7; }
-.idcard__secure { display: flex; align-items: center; gap: 5px; font-size: 0.56rem; font-weight: 700; color: var(--success); }
-.idcard__secure .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex: none; }
+.idcard__scan-label { font-size: 0.44rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); opacity: 0.75; }
 
 /* The QR itself must stay free of any overlay, gradient, or reflection —
    scan reliability comes first. Regenerate feedback is a glow around the
