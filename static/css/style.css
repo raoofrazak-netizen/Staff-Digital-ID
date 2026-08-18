@@ -1127,6 +1127,14 @@ main, .site-header { position: relative; z-index: 1; }
 .sif-qr-row .qr-panel { width: 104px; height: 104px; padding: 6px; border-radius: 8px; box-shadow: none; border: 1px solid rgba(0,0,0,0.08); }
 .sif-qr-row .qr-badge { display: none !important; }
 .sif-qr-row .qr-placeholder { font-size: 0.36rem; padding: 4px; line-height: 1.2; }
+/* Decorative QR on the login page's tiny (210px) sample card -- same
+   blank-space slot the live card's real QR sits in, just a small static
+   image since this card never carries real data. */
+.sample-idcard-face--front .sif-qr-row { margin: auto 0 4px; }
+.sif-qr-row__img {
+  width: 38px; height: 38px; border-radius: 4px; object-fit: contain;
+  background: #fff; border: 1px solid rgba(0,0,0,0.08); padding: 2px;
+}
 
 /* ---- Live-preview-only sizing: the .sif-*/.sib-* base rules above are
    tuned for the small (210px) decorative sample card on the login page;
