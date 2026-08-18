@@ -1128,32 +1128,46 @@ main, .site-header { position: relative; z-index: 1; }
    this card's proportions (320px / 957px render width ≈ 0.334), not
    just an eyeballed guess. */
 .idcard-face--front .sif-logo-row { gap: 5px; padding: 4px 0 12px; }
-.idcard-face--front .sif-logo { height: 38px; }
+.idcard-face--front .sif-logo { height: 38px; opacity: 1; }
+/* The base .sif-arabic-wordmark/.sif-name/.sib-* rules bake in low
+   opacity (and, for the name, a blur filter) on purpose -- they're
+   meant to read as faded/fictional placeholder data on the login
+   page's decorative sample card. This card shows a real person's real
+   data, so every one of those gets overridden back to fully opaque,
+   crisp, and (where the real rendered card uses a bold weight) bold --
+   text-stroke on the Arabic line is a deliberate "faux bold" since
+   plain font-weight alone reads thin on Arabic script at this size in
+   most browsers. */
 .idcard-face--front .sif-arabic-wordmark, .idcard-face--back .sif-arabic-wordmark {
-  font-size: 0.52rem; font-weight: 800; opacity: 1;
+  font-size: 0.52rem; font-weight: 900; opacity: 1; color: var(--text-primary);
+  -webkit-text-stroke: 0.35px currentColor;
 }
 .idcard-face--front .sif-top-row { gap: 14px; }
 .idcard-face--front .sif-photo { width: 84px; height: 100px; border-radius: 6px; }
 .idcard-face--front .sif-fields { gap: 10px; }
 .idcard-face--front .sif-field__label { font-size: 0.5rem; }
-.idcard-face--front .sif-field__value { font-size: 0.78rem; opacity: 0.85; }
+.idcard-face--front .sif-field__label bdi { opacity: 1; }
+.idcard-face--front .sif-field__value { font-size: 0.78rem; font-weight: 700; opacity: 1; }
 .idcard-face--front .sif-name-block { margin-top: 14px; gap: 3px; }
-.idcard-face--front .sif-name { font-size: 0.94rem; opacity: 0.85; filter: none; }
-.idcard-face--front .sif-jobtitle { font-size: 0.78rem; opacity: 0.8; }
+.idcard-face--front .sif-name {
+  font-family: var(--font-body); font-size: 0.94rem; font-weight: 800; opacity: 1; filter: none;
+}
+.idcard-face--front .sif-jobtitle { font-size: 0.78rem; font-weight: 700; opacity: 1; }
 .idcard-face--front .sif-band-grey, .idcard-face--back .sif-band-grey { font-size: 0.85rem; padding: 10px 8px; margin-inline: -20px; }
 
 .idcard-face--back .sib-barcode { padding: 8px 0 10px; }
-.idcard-face--back .sib-barcode__label { font-size: 0.56rem; }
-.idcard-face--back .sib-idref { font-size: 0.47rem; margin-bottom: 6px; }
+.idcard-face--back .sib-barcode__svg { opacity: 1; }
+.idcard-face--back .sib-barcode__label { font-size: 0.56rem; font-weight: 800; color: var(--text-primary); opacity: 1; }
+.idcard-face--back .sib-idref { font-size: 0.47rem; margin-bottom: 6px; opacity: 1; }
 .idcard-face--back .sib-it-fields { gap: 8px; }
 .idcard-face--back .sib-it-field { gap: 2px; }
-.idcard-face--back .sib-it-field span { font-size: 0.53rem; }
-.idcard-face--back .sib-it-field strong { font-size: 0.63rem; }
+.idcard-face--back .sib-it-field span { font-size: 0.53rem; opacity: 1; }
+.idcard-face--back .sib-it-field strong { font-size: 0.63rem; font-weight: 800; opacity: 1; }
 .idcard-face--back .sib-terms { margin-top: 10px; padding-top: 8px; gap: 4px; }
-.idcard-face--back .sib-terms li { font-size: 0.56rem; }
+.idcard-face--back .sib-terms li { font-size: 0.56rem; opacity: 1; }
 .idcard-face--back .sib-address { margin-top: 10px; padding-top: 8px; }
-.idcard-face--back .sib-address strong { font-size: 0.69rem; }
-.idcard-face--back .sib-address span { font-size: 0.6rem; }
+.idcard-face--back .sib-address strong { font-size: 0.69rem; opacity: 1; }
+.idcard-face--back .sib-address span { font-size: 0.6rem; opacity: 1; }
 .idcard-face--back .sib-partner__mark { height: 28px; }
 
 /* ============ Digital ID result page (premium redesign) ============ */

@@ -106,6 +106,7 @@
     const livePhoto = document.getElementById("live-photo");
     const livePhotoBox = document.getElementById("live-photo-box");
     const liveEmail = document.getElementById("live-email");
+    const liveBarcodeLabel = document.getElementById("live-barcode-label");
     const liveUkItUserId = document.getElementById("live-uk-it-user-id");
     const liveMisis = document.getElementById("live-misis");
     const liveLocalLogin = document.getElementById("live-local-login");
@@ -152,6 +153,10 @@
             liveExpirationField.style.display = (employmentStatus && employmentStatus !== "Full-Time") ? "" : "none";
         }
         if (liveEmail) setTextIfChanged(liveEmail, email || "—");
+        // The barcode's number is the MISIS value on the real card (falling
+        // back to Staff ID), never a placeholder -- matches card_render.py's
+        // render_card_back exactly.
+        if (liveBarcodeLabel) setTextIfChanged(liveBarcodeLabel, misis || staffId || "000000");
         if (liveUkItUserId) setTextIfChanged(liveUkItUserId, ukItUserId || "—");
         if (liveMisis) setTextIfChanged(liveMisis, misis || "—");
         if (liveLocalLogin) setTextIfChanged(liveLocalLogin, localLogin || "—");
