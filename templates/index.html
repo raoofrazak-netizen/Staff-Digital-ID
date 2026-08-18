@@ -402,64 +402,84 @@
                     <div class="idcard" id="idcard">
                         <div class="idcard__sheen" id="idcard-sheen"></div>
                         <div class="idcard-flip" id="idcard-flip">
+                            <!-- Front/back mirror the same official MDX Staff ID badge
+                                 layout as the real rendered card (card_render.py) and the
+                                 sample card on the login page -- built live in HTML/CSS
+                                 (not a server-rendered image) so it can keep updating
+                                 instantly as the visitor types. -->
                             <div class="idcard-face idcard-face--front">
-                                <div class="idcard__top">
-                                    <img class="nav__mark" src="{{ url_for('static', filename='images/mdx-shield.svg') }}" alt="">
-                                    <span class="idcard__uni">Middlesex University Dubai</span>
+                                <div class="sif-logo-row">
+                                    <bdi class="sif-arabic-wordmark">&#1580;&#1575;&#1605;&#1593;&#1577; &#1605;&#1610;&#1583;&#1604;&#1587;&#1603;&#1587; &#1583;&#1576;&#1610;</bdi>
+                                    <img class="sif-logo" src="{{ url_for('static', filename='images/mdx-logo.jpg') }}" alt="Middlesex University Dubai">
                                 </div>
-                                <div class="idcard__subtitle">Staff Digital ID</div>
-
-                                <div class="idcard__photo" id="live-photo-box">
-                                    <img id="live-photo" alt="">
+                                <div class="sif-top-row">
+                                    <div class="sif-photo" id="live-photo-box">
+                                        <img id="live-photo" alt="">
+                                    </div>
+                                    <div class="sif-fields">
+                                        <div class="sif-field"><span class="sif-field__label">ID NUMBER<bdi>&#1585;&#1602;&#1605; &#1605;&#1593;&#1585;&#1601;</bdi></span><span class="sif-field__value sif-field__value--text" id="live-staff-id">&mdash;</span></div>
+                                        <div class="sif-field"><span class="sif-field__label">GENDER<bdi>&#1575;&#1604;&#1580;&#1606;&#1587;</bdi></span><span class="sif-field__value sif-field__value--text" id="live-gender">&mdash;</span></div>
+                                        <div class="sif-field" id="live-expiration-field" style="display:none;"><span class="sif-field__label">EXPIRATION<bdi>&#1575;&#1606;&#1602;&#1590;&#1575;&#1569;</bdi></span><span class="sif-field__value sif-field__value--text">&mdash;</span></div>
+                                    </div>
                                 </div>
-
-                                <div class="idcard__name" id="live-name">Your Name</div>
-                                <div class="idcard__title" id="live-title">Job title</div>
-
-                                <div class="idcard__pills">
-                                    <span class="idcard__pill idcard__pill--accent" id="live-staff-id">Staff ID —</span>
-                                    <span class="idcard__pill" id="live-dept">Department</span>
-                                    <span class="idcard__pill" id="live-status">Employment Status</span>
-                                    <span class="idcard__pill" id="live-gender">—</span>
-                                    <span class="idcard__pill" id="live-mobile" style="display:none;"></span>
+                                <div class="sif-name-block">
+                                    <span class="sif-field__label">NAME<bdi>&#1575;&#1587;&#1605;</bdi></span>
+                                    <span class="sif-name" id="live-name">Your Name</span>
                                 </div>
-
-                                <div class="idcard__footer">
-                                    <div class="idcard__scan-label">Scan to Save Staff Contact</div>
+                                <div class="sif-name-block">
+                                    <span class="sif-field__label">JOB TITLE<bdi>&#1575;&#1604;&#1608;&#1592;&#1610;&#1601;&#1577;</bdi></span>
+                                    <span class="sif-jobtitle" id="live-title">Job title</span>
+                                </div>
+                                <div class="sif-band-grey" id="live-dept">Department</div>
+                            </div>
+                            <div class="idcard-face idcard-face--back">
+                                <div class="idcard-back__qr-row">
                                     <div class="qr-panel" id="qr-panel">
                                         <span class="qr-badge">Preview</span>
                                         <div class="qr-placeholder" id="qr-placeholder">Fill in your name &amp; ID</div>
                                         <img class="qr-live-img" id="qr-live-img" alt="Staff contact QR code" style="display:none;">
                                     </div>
-                                    <div class="idcard__secure"><span class="dot"></span>Secure Digital Identity</div>
+                                    <div class="idcard-back__qr-caption">
+                                        <span class="idcard__scan-label">Scan to Save Contact</span>
+                                        <span class="idcard__secure"><span class="dot"></span>Secure Digital Identity</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="idcard-face idcard-face--back">
-                                <p class="idcard-back__title">Registration Details</p>
-                                <div class="idcard-back__row">
-                                    <span class="idcard-back__label">Email</span>
-                                    <span class="idcard-back__value" id="live-email">—</span>
+                                <div class="sib-barcode" aria-hidden="true">
+                                    <svg viewBox="0 0 160 40" preserveAspectRatio="none" class="sib-barcode__svg">
+                                        <rect width="160" height="40" fill="#fff"/>
+                                        <g fill="#1a1822">
+                                            <rect x="2" y="4" width="2" height="32"/><rect x="6" y="4" width="1" height="32"/><rect x="9" y="4" width="3" height="32"/><rect x="14" y="4" width="1" height="32"/><rect x="17" y="4" width="2" height="32"/><rect x="21" y="4" width="1" height="32"/><rect x="24" y="4" width="3" height="32"/><rect x="29" y="4" width="2" height="32"/><rect x="33" y="4" width="1" height="32"/><rect x="36" y="4" width="2" height="32"/><rect x="40" y="4" width="1" height="32"/><rect x="43" y="4" width="3" height="32"/><rect x="48" y="4" width="1" height="32"/><rect x="51" y="4" width="2" height="32"/><rect x="55" y="4" width="3" height="32"/><rect x="60" y="4" width="1" height="32"/><rect x="63" y="4" width="1" height="32"/><rect x="66" y="4" width="2" height="32"/><rect x="70" y="4" width="3" height="32"/><rect x="75" y="4" width="1" height="32"/><rect x="78" y="4" width="2" height="32"/><rect x="82" y="4" width="1" height="32"/><rect x="85" y="4" width="3" height="32"/><rect x="90" y="4" width="2" height="32"/><rect x="94" y="4" width="1" height="32"/><rect x="97" y="4" width="2" height="32"/><rect x="101" y="4" width="3" height="32"/><rect x="106" y="4" width="1" height="32"/><rect x="109" y="4" width="2" height="32"/><rect x="113" y="4" width="1" height="32"/><rect x="116" y="4" width="3" height="32"/><rect x="121" y="4" width="2" height="32"/><rect x="125" y="4" width="1" height="32"/><rect x="128" y="4" width="2" height="32"/><rect x="132" y="4" width="3" height="32"/><rect x="137" y="4" width="1" height="32"/><rect x="140" y="4" width="2" height="32"/><rect x="144" y="4" width="1" height="32"/><rect x="147" y="4" width="3" height="32"/><rect x="152" y="4" width="2" height="32"/><rect x="156" y="4" width="2" height="32"/>
+                                        </g>
+                                    </svg>
+                                    <span class="sib-barcode__label">000000</span>
                                 </div>
-                                <div class="idcard-back__row">
-                                    <span class="idcard-back__label">Mobile Number</span>
-                                    <span class="idcard-back__value" id="live-mobile-back">—</span>
+                                <div class="sib-idref">ID Ref# MDX-<span id="live-staff-id-back">00000</span></div>
+                                <div class="sib-it-fields">
+                                    <div class="sib-it-field"><span>UK IT User ID:</span><strong id="live-uk-it-user-id">&mdash;</strong></div>
+                                    <div class="sib-it-field"><span>MISIS:</span><strong id="live-misis">&mdash;</strong></div>
+                                    <div class="sib-it-field"><span>Local Login:</span><strong id="live-local-login">&mdash;</strong></div>
+                                    <div class="sib-it-field"><span>Dubai Email:</span><strong id="live-email">&mdash;</strong></div>
                                 </div>
-                                <div class="idcard-back__row">
-                                    <span class="idcard-back__label">Department</span>
-                                    <span class="idcard-back__value" id="live-dept-back">—</span>
+                                <ul class="sib-terms">
+                                    <li>This card is non-transferable.</li>
+                                    <li>It serves as the bearer's proof of employment in the university.</li>
+                                    <li>It must be surrendered to the I.T. Office upon leaving the university.</li>
+                                    <li>If found, please contact and return to the address below.</li>
+                                </ul>
+                                <div class="sib-address">
+                                    <div class="sib-address__row">
+                                        <div class="sib-address__text">
+                                            <strong>Middlesex University Dubai</strong>
+                                            <span>Dubai Knowledge Park Block 16</span>
+                                            <span>PO Box 500697, Dubai, UAE</span>
+                                            <span>Tel. No. 04 367 8100</span>
+                                        </div>
+                                        <div class="sib-partner" aria-hidden="true">
+                                            <img class="sib-partner__mark" src="{{ url_for('static', filename='images/dkp-logo.png') }}" alt="">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="idcard-back__row">
-                                    <span class="idcard-back__label">Employment Status</span>
-                                    <span class="idcard-back__value" id="live-status-back">—</span>
-                                </div>
-                                <div class="idcard-back__row">
-                                    <span class="idcard-back__label">Gender</span>
-                                    <span class="idcard-back__value" id="live-gender-back">—</span>
-                                </div>
-                                <div class="idcard__secure idcard-back__secure"><span class="dot"></span>Secure Digital Identity</div>
-                                <div class="idcard-back__partner" aria-hidden="true">
-                                    <img class="idcard-back__partner-mark" src="{{ url_for('static', filename='images/dkp-logo.png') }}" alt="">
-                                </div>
+                                <div class="sif-band-grey">www.mdx.ac.ae</div>
                             </div>
                         </div>
                     </div>

@@ -623,7 +623,7 @@ main, .site-header { position: relative; z-index: 1; }
 .sif-jobtitle { font-size: 0.56rem; font-weight: 700; color: var(--text-primary); opacity: 0.65; }
 .sif-band-grey {
   margin-top: auto; flex: none; background: linear-gradient(120deg, var(--mdx-red), var(--mdx-red)); color: #fff;
-  font-size: 0.5rem; font-weight: 800; letter-spacing: 0.05em; text-align: center;
+  font-size: 0.5rem; font-weight: 800; letter-spacing: 0.05em; text-align: center; text-transform: uppercase;
   padding: 7px 8px; margin-inline: -12px;
 }
 
@@ -1072,7 +1072,7 @@ main, .site-header { position: relative; z-index: 1; }
 
 .idcard-tilt-wrap { perspective: 1000px; }
 .idcard {
-  width: 100%; margin: 0 auto; max-width: 320px;
+  width: 100%; margin: 0 auto; max-width: 320px; aspect-ratio: 638 / 1013;
   border-radius: var(--radius-lg);
   position: relative;
   --text-primary: #1a1822; --text-secondary: #625f6b; --text-muted: #8b8792;
@@ -1096,29 +1096,33 @@ main, .site-header { position: relative; z-index: 1; }
 @keyframes cardPulse { 0% { transform: scale(1); } 40% { transform: scale(1.015); } 100% { transform: scale(1); } }
 
 .idcard-flip {
-  position: relative; width: 100%;
+  position: relative; width: 100%; height: 100%;
   transform-style: preserve-3d; transition: transform 0.9s var(--ease-spring);
 }
 .idcard-tilt-wrap:hover .idcard-flip { transform: rotateY(180deg); }
 .idcard-face {
-  border-radius: inherit; padding: 28px 26px;
-  display: flex; flex-direction: column; align-items: center; text-align: center;
+  border-radius: var(--radius-lg); padding: 10px 12px 0;
+  display: flex; flex-direction: column; align-items: stretch; text-align: left;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: #fdfdfd;
 }
-.idcard-face--front { position: relative; overflow: hidden; }
-.idcard-face--back {
-  position: absolute; inset: 0; overflow: hidden; transform: rotateY(180deg);
-  background: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0.55));
-  justify-content: center;
-}
-.idcard-back__title { font-family: var(--font-display); font-weight: 400; font-size: 1rem; color: var(--text-primary); margin: 0 0 18px; }
-.idcard-back__row { width: 100%; padding: 9px 0; border-bottom: 1px dashed rgba(47,37,82,0.14); }
-.idcard-back__row:last-of-type { border-bottom: none; }
-.idcard-back__label { display: block; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--mdx-red); }
-.idcard-back__value { display: block; font-size: 0.86rem; font-weight: 700; color: var(--text-primary); margin-top: 2px; word-break: break-word; }
-.idcard-back__secure { margin-top: 18px; }
-.idcard-back__partner { margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(47,37,82,0.14); opacity: 0.85; }
-.idcard-back__partner-mark { height: 20px; width: auto; max-width: 68px; object-fit: contain; }
+/* Both faces are absolutely positioned overlays of the same box (the
+   aspect-ratio on .idcard above sets the real height) -- same pattern
+   as .result-card__img on the success page, which shows the actual
+   rendered card image at this same 638:1013 ratio. This live preview
+   mirrors that exact layout in HTML/CSS instead of a static image, so
+   it can keep updating instantly as the visitor types. */
+.idcard-face--front { position: absolute; inset: 0; overflow: hidden; }
+.idcard-face--back { position: absolute; inset: 0; overflow: hidden; transform: rotateY(180deg); }
+.idcard-back__qr-row { display: flex; align-items: center; gap: 10px; padding: 6px 0 8px; }
+.idcard-back__qr-caption { display: flex; flex-direction: column; gap: 6px; }
+/* The QR feature (scan to save contact) isn't part of the official
+   template, so it's tucked into a small row at the top of the back
+   instead of competing with the front's business-card layout -- sized
+   down to fit that row rather than the ~168px used everywhere else. */
+.idcard-back__qr-row .qr-panel { width: 56px; height: 56px; padding: 4px; border-radius: 6px; box-shadow: none; border: 1px solid rgba(0,0,0,0.08); }
+.idcard-back__qr-row .qr-badge { display: none !important; }
+.idcard-back__qr-row .qr-placeholder { font-size: 0.3rem; padding: 2px; line-height: 1.15; }
 
 /* ============ Digital ID result page (premium redesign) ============ */
 .result-shell { max-width: 640px; margin: 0 auto; padding: 40px 20px 90px; text-align: center; position: relative; z-index: 1; }
@@ -1283,45 +1287,26 @@ main, .site-header { position: relative; z-index: 1; }
 .text-pop { display: inline-block; animation: textPop 0.18s var(--ease-spring); }
 @keyframes textPop { 0% { transform: translateY(-2px); opacity: 0.7; } 100% { transform: translateY(0); opacity: 1; } }
 
-.idcard__top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.idcard__top .nav__mark { height: 26px; }
-.idcard__uni { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.1em; color: var(--text-primary); }
-.idcard__subtitle {
-  font-family: var(--font-display); font-weight: 400; font-size: 0.9rem;
-  letter-spacing: 0.06em; color: var(--mdx-red); margin-bottom: 16px;
-}
+/* Live preview's photo box reuses .sif-photo (the sample card's exact
+   silhouette-placeholder look) and just adds the live <img> on top,
+   toggled the same has-photo way the old circular preview worked. */
+.sif-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: none; }
+.sif-photo.has-photo img { display: block; }
+.sif-photo.has-photo { background: none; }
 
-.idcard__photo {
-  width: 96px; height: 96px; border-radius: 50%; overflow: hidden; margin-bottom: 16px;
-  background: rgba(47,37,82,0.06); border: 3px solid #fff;
-  box-shadow: var(--shadow-soft);
-}
-.idcard__photo img { width: 100%; height: 100%; object-fit: cover; display: none; }
-.idcard__photo.has-photo img { display: block; }
-.idcard__photo:not(.has-photo) {
-  background:
-    radial-gradient(circle at 50% 32%, rgba(47,37,82,0.16) 17px, transparent 18px),
-    radial-gradient(ellipse 34px 22px at 50% 80%, rgba(47,37,82,0.16) 99%, transparent 100%),
-    rgba(47,37,82,0.05);
-}
-.idcard__name { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-bottom: 2px; }
-.idcard__title { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px; }
-
-.idcard__pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 18px; }
+/* Reused on the post-login welcome hub (account.html) for the Staff
+   ID/Department badges next to "Welcome, Name" -- independent of the
+   idcard-face redesign above, not just leftover unused CSS. */
 .idcard__pill {
   font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em;
   padding: 5px 13px; border-radius: var(--radius-pill);
-  background: rgba(47,37,82,0.07); color: var(--text-primary);
+  background: rgba(255,255,255,0.08); color: var(--text-primary);
 }
 .idcard__pill--accent { background: linear-gradient(145deg, var(--mdx-red), var(--mdx-red)); color: #fff; }
 
-.idcard__footer {
-  width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding-top: 18px; border-top: 1px dashed rgba(47,37,82,0.15);
-}
-.idcard__scan-label { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-primary); }
-.idcard__secure { display: flex; align-items: center; gap: 5px; font-size: 0.66rem; font-weight: 700; color: var(--success); }
-.idcard__secure .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+.idcard__scan-label { font-size: 0.5rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-primary); opacity: 0.7; }
+.idcard__secure { display: flex; align-items: center; gap: 5px; font-size: 0.56rem; font-weight: 700; color: var(--success); }
+.idcard__secure .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex: none; }
 
 /* The QR itself must stay free of any overlay, gradient, or reflection —
    scan reliability comes first. Regenerate feedback is a glow around the

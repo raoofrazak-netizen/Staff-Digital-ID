@@ -100,16 +100,15 @@
     const liveTitle = document.getElementById("live-title");
     const liveDept = document.getElementById("live-dept");
     const liveStaffId = document.getElementById("live-staff-id");
-    const liveStatus = document.getElementById("live-status");
+    const liveStaffIdBack = document.getElementById("live-staff-id-back");
     const liveGender = document.getElementById("live-gender");
-    const liveMobile = document.getElementById("live-mobile");
+    const liveExpirationField = document.getElementById("live-expiration-field");
     const livePhoto = document.getElementById("live-photo");
     const livePhotoBox = document.getElementById("live-photo-box");
     const liveEmail = document.getElementById("live-email");
-    const liveMobileBack = document.getElementById("live-mobile-back");
-    const liveDeptBack = document.getElementById("live-dept-back");
-    const liveStatusBack = document.getElementById("live-status-back");
-    const liveGenderBack = document.getElementById("live-gender-back");
+    const liveUkItUserId = document.getElementById("live-uk-it-user-id");
+    const liveMisis = document.getElementById("live-misis");
+    const liveLocalLogin = document.getElementById("live-local-login");
 
     function fieldValue(name) {
         const panel = document.querySelector(".tab-panel.active");
@@ -138,23 +137,24 @@
         el.classList.add("text-pop");
     }
 
-    function syncCard(firstName, lastName, staffId, gender, department, jobTitle, employmentStatus, email, mobile) {
+    function syncCard(firstName, lastName, staffId, gender, department, jobTitle, employmentStatus, email, mobile, ukItUserId, localLogin, misis) {
         const fullName = (firstName + " " + lastName).trim();
         setTextIfChanged(liveName, fullName || "Your Name");
         setTextIfChanged(liveTitle, jobTitle || "Job title");
         setTextIfChanged(liveDept, department || "Department");
-        setTextIfChanged(liveStaffId, staffId ? "Staff ID " + staffId : "Staff ID —");
-        setTextIfChanged(liveStatus, employmentStatus || "Employment Status");
+        setTextIfChanged(liveStaffId, staffId || "—");
+        if (liveStaffIdBack) setTextIfChanged(liveStaffIdBack, staffId || "00000");
         setTextIfChanged(liveGender, gender || "—");
-        if (liveMobile) {
-            liveMobile.style.display = mobile ? "" : "none";
-            if (mobile) setTextIfChanged(liveMobile, mobile);
+        // Full-time staff get a permanent card with no expiration field --
+        // everyone else (contract/part-time/visiting) shows one, matching
+        // the real printed card's own logic (card_render.py's front face).
+        if (liveExpirationField) {
+            liveExpirationField.style.display = (employmentStatus && employmentStatus !== "Full-Time") ? "" : "none";
         }
         if (liveEmail) setTextIfChanged(liveEmail, email || "—");
-        if (liveMobileBack) setTextIfChanged(liveMobileBack, mobile || "—");
-        if (liveDeptBack) setTextIfChanged(liveDeptBack, department || "—");
-        if (liveStatusBack) setTextIfChanged(liveStatusBack, employmentStatus || "—");
-        if (liveGenderBack) setTextIfChanged(liveGenderBack, gender || "—");
+        if (liveUkItUserId) setTextIfChanged(liveUkItUserId, ukItUserId || "—");
+        if (liveMisis) setTextIfChanged(liveMisis, misis || "—");
+        if (liveLocalLogin) setTextIfChanged(liveLocalLogin, localLogin || "—");
         bumpCard();
         updateLivePreviewQR(firstName, lastName, staffId, jobTitle, department, email || "", mobile || "");
         updateStepper();
@@ -318,7 +318,8 @@
         syncCard(
             fieldValue("first_name"), fieldValue("last_name"), fieldValue("staff_id"),
             fieldValue("gender"), fieldValue("department"), fieldValue("job_title"),
-            fieldValue("employment_status"), fieldValue("email"), fieldValue("mobile_number")
+            fieldValue("employment_status"), fieldValue("email"), fieldValue("mobile_number"),
+            fieldValue("uk_it_user_id"), fieldValue("local_login"), fieldValue("misis")
         );
     }
 
@@ -667,7 +668,7 @@
 
                 if (data.type === "digital_id") {
                     setBadge("success", "Digital ID found for " + r["First Name"] + " " + r["Last Name"] + ".");
-                    syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"], r["Mobile Number"]);
+                    syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"], r["Mobile Number"], r["UK IT User ID"], r["Local Login"], r["MISIS"]);
                     if (data.photo_url) {
                         livePhoto.src = data.photo_url;
                         livePhotoBox.classList.add("has-photo");
@@ -692,7 +693,7 @@
                 document.getElementById("act-gender").value = r["Gender"];
                 document.getElementById("act-employment-status").value = r["Employment Status"];
 
-                syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"]);
+                syncCard(r["First Name"], r["Last Name"], r["Staff ID"], r["Gender"], r["Department"], r["Job Title"], r["Employment Status"], r["Email"], undefined, r["UK IT User ID"], r["Local Login"], r["MISIS"]);
 
                 actForm.style.display = "block";
             } catch (err) {
