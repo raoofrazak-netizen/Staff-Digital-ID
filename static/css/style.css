@@ -653,6 +653,31 @@ main, .site-header { position: relative; z-index: 1; }
 .sib-barcode__svg { width: 82%; height: 26px; opacity: 0.88; }
 .sib-barcode__label { font-size: 0.42rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); }
 
+/* ---- Login page sample card: crisp, not faded ----
+   The .sif-*/.sib-* base rules above bake in low opacity (and, on the
+   name, a blur filter) on purpose -- meant to read as fictional
+   placeholder data. That made the sample card's back face in particular
+   look washed out on flip. Overridden here to full opacity/no blur (and
+   bold where the real card is bold) while keeping this card's own
+   smaller font sizes -- this is about clarity, not the bigger resize
+   already done for the live portal card. */
+.sample-idcard-face--front .sif-logo,
+.sample-idcard-face--back .sif-logo { opacity: 1; }
+.sample-idcard-face--front .sif-arabic-wordmark,
+.sample-idcard-face--back .sif-arabic-wordmark { opacity: 1; font-weight: 800; }
+.sample-idcard-face--front .sif-field__label bdi { opacity: 1; }
+.sample-idcard-face--front .sif-field__value { opacity: 1; font-weight: 700; }
+.sample-idcard-face--front .sif-name { opacity: 1; filter: none; font-family: var(--font-body); font-weight: 800; }
+.sample-idcard-face--front .sif-jobtitle { opacity: 1; }
+.sample-idcard-face--back .sib-barcode__svg { opacity: 1; }
+.sample-idcard-face--back .sib-idref { opacity: 1; }
+.sample-idcard-face--back .sib-it-field span { opacity: 1; }
+.sample-idcard-face--back .sib-it-field strong { opacity: 1; font-weight: 800; }
+.sample-idcard-face--back .sib-terms li { opacity: 1; }
+.sample-idcard-face--back .sib-terms li::before { opacity: 1; }
+.sample-idcard-face--back .sib-address strong { opacity: 1; }
+.sample-idcard-face--back .sib-address span { opacity: 1; }
+
 /* ---- Responsive: single centered column, spec-defined mobile order ---- */
 @media (max-width: 1100px) {
   .login-grid {
